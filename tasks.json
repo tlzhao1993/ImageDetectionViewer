@@ -1,15 +1,5 @@
 [
   {
-    "category": "functional",
-    "description": "Implement dataset load modal with path input field and load button",
-    "steps": [
-      "Step 1: Click 'Load Dataset' button",
-      "Step 2: Verify modal opens with input field for dataset path",
-      "Step 3: Enter valid path and click load, verify dataset loads successfully"
-    ],
-    "passes": false
-  },
-  {
     "category": "style",
     "description": "Modal styling with centered positioning, backdrop, and proper input/button styling",
     "steps": [
@@ -520,6 +510,16 @@
       "Step 1: Navigate to Statistics Dashboard and take screenshot",
       "Step 2: Navigate to Image Comparison View and take screenshot",
       "Step 3: Compare screenshots and verify consistent color palette, typography, and spacing"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement dataset load modal with path input field and load button",
+    "steps": [
+      "Step 1: Click 'Load Dataset' button",
+      "Step 2: Verify modal opens with input field for dataset path",
+      "Step 3: Enter valid path and click load, verify dataset loads successfully"
     ],
     "passes": true
   }
