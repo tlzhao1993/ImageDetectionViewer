@@ -1,16 +1,6 @@
 [
   {
     "category": "functional",
-    "description": "Implement bounding box classification (TP/FP/FN) based on IoU threshold",
-    "steps": [
-      "Step 1: Provide ground truth and prediction boxes with IoU >= threshold (should be classified as TP)",
-      "Step 2: Provide prediction without matching GT (should be classified as FP)",
-      "Step 3: Provide GT without matching prediction (should be classified as FN)"
-    ],
-    "passes": false
-  },
-  {
-    "category": "functional",
     "description": "Implement metric calculation functions (recall, precision, FPR, F1 Score) per class",
     "steps": [
       "Step 1: Calculate recall for a class with known TP and FN values, verify formula TP/(TP+FN)",
@@ -520,6 +510,16 @@
       "Step 1: Test with two perfectly overlapping boxes (IoU should be 1.0)",
       "Step 2: Test with two non-overlapping boxes (IoU should be 0.0)",
       "Step 3: Test with partially overlapping boxes and verify IoU value between 0.0 and 1.0"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement bounding box classification (TP/FP/FN) based on IoU threshold",
+    "steps": [
+      "Step 1: Provide ground truth and prediction boxes with IoU >= threshold (should be classified as TP)",
+      "Step 2: Provide prediction without matching GT (should be classified as FP)",
+      "Step 3: Provide GT without matching prediction (should be classified as FN)"
     ],
     "passes": true
   }
