@@ -1,0 +1,59 @@
+[     277ms] [ERROR] Error: Parse error on line 11:
+...                  }classDiagram    cla
+----------------------^
+Expecting 'EOF', 'acc_title', 'acc_descr', 'acc_descr_multiline_value', 'NAMESPACE', 'CLASS', 'ANNOTATION_START', 'MEMBER', 'SEPARATOR', 'NOTE_FOR', 'NOTE', 'CLASSDEF', 'ALPHA', 'direction_tb', 'direction_bt', 'direction_rl', 'direction_lr', 'CALLBACK', 'LINK', 'CLICK', 'STYLE', 'CSSCLASS', 'NUM', 'MINUS', 'UNICODE_TEXT', 'BQUOTE_STR', got 'CLASS_DIAGRAM'
+    at ce.parseError (https://mermaid.live/_app/immutable/chunks/BG8kkg1k.js:1:12567)
+    at ce.parse (https://mermaid.live/_app/immutable/chunks/BG8kkg1k.js:3:174)
+    at Diagram.fromText (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:588:347)
+    at async Object.parse (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:589:1971) @ https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:612
+[     286ms] [ERROR] Error: Parse error on line 11:
+...                  }classDiagram    cla
+----------------------^
+Expecting 'EOF', 'acc_title', 'acc_descr', 'acc_descr_multiline_value', 'NAMESPACE', 'CLASS', 'ANNOTATION_START', 'MEMBER', 'SEPARATOR', 'NOTE_FOR', 'NOTE', 'CLASSDEF', 'ALPHA', 'direction_tb', 'direction_bt', 'direction_rl', 'direction_lr', 'CALLBACK', 'LINK', 'CLICK', 'STYLE', 'CSSCLASS', 'NUM', 'MINUS', 'UNICODE_TEXT', 'BQUOTE_STR', got 'CLASS_DIAGRAM'
+    at ce.parseError (https://mermaid.live/_app/immutable/chunks/BG8kkg1k.js:1:12567)
+    at ce.parse (https://mermaid.live/_app/immutable/chunks/BG8kkg1k.js:3:174)
+    at Diagram.fromText (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:588:347)
+    at getDiagramFromText (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:595:3472)
+    at Object.parse (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:589:1977)
+    at https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:595:6992
+    at new Promise (<anonymous>)
+    at performCall (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:595:6959)
+    at executeQueue (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:595:6792) @ https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:612
+[     291ms] [ERROR] Error: Parse error on line 11:
+...                  }classDiagram    cla
+----------------------^
+Expecting 'EOF', 'acc_title', 'acc_descr', 'acc_descr_multiline_value', 'NAMESPACE', 'CLASS', 'ANNOTATION_START', 'MEMBER', 'SEPARATOR', 'NOTE_FOR', 'NOTE', 'CLASSDEF', 'ALPHA', 'direction_tb', 'direction_bt', 'direction_rl', 'direction_lr', 'CALLBACK', 'LINK', 'CLICK', 'STYLE', 'CSSCLASS', 'NUM', 'MINUS', 'UNICODE_TEXT', 'BQUOTE_STR', got 'CLASS_DIAGRAM'
+    at ce.parseError (https://mermaid.live/_app/immutable/chunks/BG8kkg1k.js:1:12567)
+    at ce.parse (https://mermaid.live/_app/immutable/chunks/BG8kkg1k.js:3:174)
+    at Diagram.fromText (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:588:347)
+    at getDiagramFromText (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:595:3472)
+    at Object.parse (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:589:1977)
+    at https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:595:6992
+    at new Promise (<anonymous>)
+    at performCall (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:595:6959)
+    at executeQueue (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:595:6792) @ https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:612
+[     296ms] [ERROR] Error: Parse error on line 11:
+...                  }classDiagram    cla
+----------------------^
+Expecting 'EOF', 'acc_title', 'acc_descr', 'acc_descr_multiline_value', 'NAMESPACE', 'CLASS', 'ANNOTATION_START', 'MEMBER', 'SEPARATOR', 'NOTE_FOR', 'NOTE', 'CLASSDEF', 'ALPHA', 'direction_tb', 'direction_bt', 'direction_rl', 'direction_lr', 'CALLBACK', 'LINK', 'CLICK', 'STYLE', 'CSSCLASS', 'NUM', 'MINUS', 'UNICODE_TEXT', 'BQUOTE_STR', got 'CLASS_DIAGRAM'
+    at ce.parseError (https://mermaid.live/_app/immutable/chunks/BG8kkg1k.js:1:12567)
+    at ce.parse (https://mermaid.live/_app/immutable/chunks/BG8kkg1k.js:3:174)
+    at Diagram.fromText (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:588:347)
+    at getDiagramFromText (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:595:3472)
+    at Object.parse (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:589:1977)
+    at https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:595:6992
+    at new Promise (<anonymous>)
+    at performCall (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:595:6959)
+    at executeQueue (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:595:6792) @ https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:612
+[     300ms] [ERROR] view fail Error: Parse error on line 11:
+...                  }classDiagram    cla
+----------------------^
+Expecting 'EOF', 'acc_title', 'acc_descr', 'acc_descr_multiline_value', 'NAMESPACE', 'CLASS', 'ANNOTATION_START', 'MEMBER', 'SEPARATOR', 'NOTE_FOR', 'NOTE', 'CLASSDEF', 'ALPHA', 'direction_tb', 'direction_bt', 'direction_rl', 'direction_lr', 'CALLBACK', 'LINK', 'CLICK', 'STYLE', 'CSSCLASS', 'NUM', 'MINUS', 'UNICODE_TEXT', 'BQUOTE_STR', got 'CLASS_DIAGRAM'
+    at ce.parseError (https://mermaid.live/_app/immutable/chunks/BG8kkg1k.js:1:12567)
+    at ce.parse (https://mermaid.live/_app/immutable/chunks/BG8kkg1k.js:3:174)
+    at Diagram.fromText (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:588:347)
+    at Object.render (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:595:1632)
+    at https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:595:7285
+    at new Promise (<anonymous>)
+    at performCall (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:595:7252)
+    at executeQueue (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:595:6792) @ https://mermaid.live/_app/immutable/chunks/q8pfxbtw.js:21

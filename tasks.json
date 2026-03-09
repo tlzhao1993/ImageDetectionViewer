@@ -1,0 +1,526 @@
+[
+  {
+    "category": "functional",
+    "description": "Initialize Flask project structure with proper directory layout (app/, app/static/, app/templates/)",
+    "steps": [
+      "Step 1: Check that app.py exists in the project root",
+      "Step 2: Verify static directory exists with subdirectories (css/, js/)",
+      "Step 3: Verify templates directory exists with base.html",
+      "Step 4: Verify requirements.txt includes all required dependencies (flask>=2.0.0, flask-cors>=3.0.10, pillow>=9.0.0, numpy>=1.21.0)"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Configure Flask application with CORS support and static file serving",
+    "steps": [
+      "Step 1: Start the Flask server with python app.py",
+      "Step 2: Access /api/health endpoint and verify JSON response with status: 'healthy'",
+      "Step 3: Verify static files are served correctly by accessing /static path"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Create SQLite database schema with all required tables (dataset_metadata, image_metadata, classes, bounding_boxes)",
+    "steps": [
+      "Step 1: Initialize the application and trigger database creation",
+      "Step 2: Check that dataset_analysis.db file exists",
+      "Step 3: Verify all four tables exist with correct columns (use SQLite browser or sqlite3 command)"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement dataset validation function to check for required directories (images/, gt/, predictions/)",
+    "steps": [
+      "Step 1: Provide a valid dataset path to the validation function",
+      "Step 2: Verify function returns success if all directories exist",
+      "Step 3: Provide an invalid path and verify appropriate error message is returned"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement JSON parsing for ground truth annotation files with bbox coordinates",
+    "steps": [
+      "Step 1: Create a sample ground truth JSON file with valid format",
+      "Step 2: Parse the file and verify bbox coordinates are extracted correctly (x1, y1, x2, y2)",
+      "Step 3: Parse file with multiple annotations and verify all classes and boxes are captured"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement JSON parsing for prediction files with confidence scores",
+    "steps": [
+      "Step 1: Create a sample prediction JSON file with valid format including confidence scores",
+      "Step 2: Parse the file and verify bbox coordinates and confidence scores are extracted correctly",
+      "Step 3: Parse file with multiple predictions and verify all data is captured"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement thumbnail generation using Pillow for all images (150x150px)",
+    "steps": [
+      "Step 1: Load a sample image through the thumbnail generation function",
+      "Step 2: Verify thumbnail file is created in the thumbnails directory",
+      "Step 3: Verify thumbnail dimensions are 150x150px with aspect ratio preserved"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement IoU calculation function for bounding box matching",
+    "steps": [
+      "Step 1: Test with two perfectly overlapping boxes (IoU should be 1.0)",
+      "Step 2: Test with two non-overlapping boxes (IoU should be 0.0)",
+      "Step 3: Test with partially overlapping boxes and verify IoU value between 0.0 and 1.0"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement bounding box classification (TP/FP/FN) based on IoU threshold",
+    "steps": [
+      "Step 1: Provide ground truth and prediction boxes with IoU >= threshold (should be classified as TP)",
+      "Step 2: Provide prediction without matching GT (should be classified as FP)",
+      "Step 3: Provide GT without matching prediction (should be classified as FN)"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement metric calculation functions (recall, precision, FPR, F1 Score) per class",
+    "steps": [
+      "Step 1: Calculate recall for a class with known TP and FN values, verify formula TP/(TP+FN)",
+      "Step 2: Calculate precision for a class with known TP and FP values, verify formula TP/(TP+FP)",
+      "Step 3: Calculate F1 Score using precision and recall, verify formula 2*(P*R)/(P+R)"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement API endpoint POST /api/dataset/load for dataset loading and parsing",
+    "steps": [
+      "Step 1: Send POST request with valid dataset_path and iou_threshold",
+      "Step 2: Verify response includes success: true, dataset_id, total_images, total_classes",
+      "Step 3: Verify database contains entries for all loaded images and classes"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement API endpoint GET /api/statistics/:dataset_id for retrieving per-class statistics",
+    "steps": [
+      "Step 1: Load a dataset and get the dataset_id",
+      "Step 2: Call GET /api/statistics/:dataset_id endpoint",
+      "Step 3: Verify response contains classes array with all metrics (recall, precision, fpr, f1_score)"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement API endpoint POST /api/statistics/recalculate for threshold adjustment",
+    "steps": [
+      "Step 1: Send POST request with new iou_threshold and confidence_threshold",
+      "Step 2: Verify response success: true and statistics are updated",
+      "Step 3: Verify database entries reflect the new threshold values"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement API endpoint GET /api/images/:dataset_id for paginated image list",
+    "steps": [
+      "Step 1: Call GET /api/images/:dataset_id with pagination parameters",
+      "Step 2: Verify response returns correct number of images based on page and per_page",
+      "Step 3: Verify each image entry contains filename, thumbnail_path, and basic stats"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement API endpoint GET /api/images/:dataset_id/:image_id for detailed image data",
+    "steps": [
+      "Step 1: Call GET /api/images/:dataset_id/:image_id for a specific image",
+      "Step 2: Verify response contains filename, dimensions, ground_truth_boxes, prediction_boxes",
+      "Step 3: Verify per_class_stats includes counts and metrics for each class"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement API endpoint GET /api/statistics/export/:dataset_id for CSV/JSON export",
+    "steps": [
+      "Step 1: Call export endpoint with format='csv' parameter",
+      "Step 2: Verify response is valid CSV with header row containing metric columns",
+      "Step 3: Call export endpoint with format='json' and verify valid JSON structure"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Create base HTML template with navigation bar and client-side routing structure",
+    "steps": [
+      "Step 1: Access the application in browser and verify navigation bar is visible at top",
+      "Step 2: Click navigation links and verify page transitions work via hash routing",
+      "Step 3: Verify active page indicator shows correct page in navigation bar"
+    ],
+    "passes": false
+  },
+  {
+    "category": "style",
+    "description": "Navigation bar styling with primary color (#2c5282) and responsive design",
+    "steps": [
+      "Step 1: Navigate to application home page",
+      "Step 2: Take screenshot and verify navigation bar has primary color background",
+      "Step 3: Resize browser to mobile width (<768px) and verify collapsible menu works"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement Statistics Dashboard HTML structure with summary cards, charts section, and metrics table",
+    "steps": [
+      "Step 1: Navigate to Statistics Dashboard page",
+      "Step 2: Verify summary cards section exists with placeholders for metrics",
+      "Step 3: Verify charts section containers and metrics table structure are present"
+    ],
+    "passes": false
+  },
+  {
+    "category": "style",
+    "description": "Statistics Dashboard styling with proper layout hierarchy and card components",
+    "steps": [
+      "Step 1: Navigate to Statistics Dashboard",
+      "Step 2: Take screenshot and verify cards have 8px rounded corners and subtle shadow",
+      "Step 3: Verify proper spacing between sections and visual hierarchy (headings, body text)"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Integrate Chart.js for per-class metrics visualization (recall, precision, FPR bar charts)",
+    "steps": [
+      "Step 1: Load a dataset with multiple classes",
+      "Step 2: Navigate to Statistics Dashboard",
+      "Step 3: Verify bar charts render for recall, precision, and FPR with correct data"
+    ],
+    "passes": false
+  },
+  {
+    "category": "style",
+    "description": "Chart styling with distinct colors for each class and interactive tooltips",
+    "steps": [
+      "Step 1: Navigate to Statistics Dashboard with loaded data",
+      "Step 2: Take screenshot and verify charts have distinct colors for each class bar",
+      "Step 3: Hover over chart bars and verify tooltips display exact metric values"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement interactive sliders for IoU threshold (0.3-0.9) and confidence threshold (0.0-1.0) with real-time updates",
+    "steps": [
+      "Step 1: Navigate to Statistics Dashboard",
+      "Step 2: Move IoU slider to different value and verify charts update",
+      "Step 3: Move confidence slider and verify prediction data is filtered correctly"
+    ],
+    "passes": false
+  },
+  {
+    "category": "style",
+    "description": "Slider styling with primary color track and custom thumb design",
+    "steps": [
+      "Step 1: Navigate to Statistics Dashboard",
+      "Step 2: Take screenshot of sliders in default state",
+      "Step 3: Take screenshot while dragging slider and verify visual feedback (thumb color, track fill)"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement sortable metrics table with Class, GT Count, Pred Count, TP, FP, FN, Recall, Precision, FPR, F1 Score columns",
+    "steps": [
+      "Step 1: Navigate to Statistics Dashboard",
+      "Step 2: Click table header to sort and verify rows reorder correctly",
+      "Step 3: Use search box and verify table filters by class name"
+    ],
+    "passes": false
+  },
+  {
+    "category": "style",
+    "description": "Metrics table styling with zebra striping, hover states, and sortable indicators",
+    "steps": [
+      "Step 1: Navigate to Statistics Dashboard",
+      "Step 2: Take screenshot and verify alternating row background colors",
+      "Step 3: Hover over rows and verify highlight effect appears"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement Image Comparison View two-column layout (25% left panel for list, 75% right panel for detail view)",
+    "steps": [
+      "Step 1: Navigate to Image Comparison View",
+      "Step 2: Verify left panel contains image list with thumbnails",
+      "Step 3: Verify right panel contains image display and per-image statistics"
+    ],
+    "passes": false
+  },
+  {
+    "category": "style",
+    "description": "Responsive layout for Image Comparison View (single column on mobile, 30/70 on tablet, 25/75 on desktop)",
+    "steps": [
+      "Step 1: Navigate to Image Comparison View at desktop width (>1024px)",
+      "Step 2: Take screenshot and verify 25/75 column layout",
+      "Step 3: Resize to mobile (<768px) and take screenshot verifying single column layout"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement image list with thumbnails, search, and class/status filters",
+    "steps": [
+      "Step 1: Navigate to Image Comparison View",
+      "Step 2: Use search box and verify list filters by filename",
+      "Step 3: Apply class filter and verify only images with specified class are shown"
+    ],
+    "passes": false
+  },
+  {
+    "category": "style",
+    "description": "Image list item styling with thumbnails, status indicators (color dots), and hover/active states",
+    "steps": [
+      "Step 1: Navigate to Image Comparison View",
+      "Step 2: Take screenshot and verify each item has thumbnail, filename, and status color dot",
+      "Step 3: Click an item and verify active state styling (bold text, colored border)"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement canvas overlay for bounding box rendering with TP (green), FP (red), FN (red) styling and icons",
+    "steps": [
+      "Step 1: Select an image with ground truth and prediction boxes",
+      "Step 2: Verify TP boxes have green border and checkmark (✓) indicator",
+      "Step 3: Verify FP boxes have red border and cross (✗) indicator",
+      "Step 4: Verify FN boxes have red border and dash (—) indicator"
+    ],
+    "passes": false
+  },
+  {
+    "category": "style",
+    "description": "Bounding box visual design with 2px borders, 24x24px corner indicators, and semi-transparent labels",
+    "steps": [
+      "Step 1: Select an image with multiple box types",
+      "Step 2: Take screenshot and verify all boxes have 2px border width",
+      "Step 3: Verify corner indicators are 24x24px squares with appropriate icons",
+      "Step 4: Verify labels have semi-transparent background with contrasting text"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement toggle buttons for showing/hiding GT boxes, prediction boxes, and labels",
+    "steps": [
+      "Step 1: Click 'Hide GT Boxes' toggle and verify ground truth boxes disappear",
+      "Step 2: Click 'Hide Prediction Boxes' toggle and verify prediction boxes disappear",
+      "Step 3: Click 'Hide Labels' toggle and verify labels disappear while boxes remain"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement zoom/pan functionality for detailed image inspection",
+    "steps": [
+      "Step 1: Click zoom (+) button and verify image scales up",
+      "Step 2: Click zoom (-) button and verify image scales down",
+      "Step 3: Click reset zoom button and verify image returns to default scale",
+      "Step 4: Drag zoomed image and verify panning works"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement per-image statistics table showing Class, GT, Pred, TP, FP, FN breakdown",
+    "steps": [
+      "Step 1: Select an image with detections",
+      "Step 2: Scroll to per-image statistics section",
+      "Step 3: Verify table shows correct counts for each class present in the image"
+    ],
+    "passes": false
+  },
+  {
+    "category": "style",
+    "description": "Per-image statistics section styling with summary card and breakdown table",
+    "steps": [
+      "Step 1: Select an image",
+      "Step 2: Take screenshot and verify summary card with filename and dimensions",
+      "Step 3: Verify breakdown table has proper column alignment (center for numbers, left for text)"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement previous/next navigation buttons for sequential image viewing",
+    "steps": [
+      "Step 1: Select the first image in the list",
+      "Step 2: Click 'Next' button and verify second image is loaded",
+      "Step 3: Click 'Previous' button and verify first image is loaded again"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement loading overlay with spinner during data processing",
+    "Steps": [
+      "Step 1: Trigger dataset loading by providing a dataset path",
+      "Step 2: Verify semi-transparent overlay appears with rotating spinner",
+      "Step 3: Verify overlay disappears after data processing completes"
+    ],
+    "passes": false
+  },
+  {
+    "category": "style",
+    "description": "Loading overlay styling with gradient border spinner and backdrop blur",
+    "steps": [
+      "Step 1: Trigger dataset loading",
+      "Step 2: Take screenshot and verify overlay is semi-transparent with backdrop blur",
+      "Step 3: Verify spinner has gradient border and smooth rotation animation"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement error modal with user-friendly messages for invalid dataset paths",
+    "steps": [
+      "Step 1: Provide an invalid dataset path",
+      "Step 2: Verify error modal appears with descriptive message",
+      "Step 3: Click close button and verify modal dismisses"
+    ],
+    "passes": false
+  },
+  {
+    "category": "style",
+    "description": "Error modal styling with clear title, descriptive message, and close button",
+    "steps": [
+      "Step 1: Trigger an error condition",
+      "Step 2: Take screenshot and verify modal has clear error title and message",
+      "Step 3: Verify close button is prominently styled and easily clickable"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement empty state handling when no dataset is loaded",
+    "steps": [
+      "Step 1: Navigate to Statistics Dashboard without loading dataset",
+      "Step 2: Verify empty state message is displayed",
+      "Step 3: Verify 'Load Dataset' button is available and functional"
+    ],
+    "passes": false
+  },
+  {
+    "category": "style",
+    "description": "Empty state design with helpful illustration and clear call-to-action",
+    "steps": [
+      "Step 1: Navigate to pages without loaded dataset",
+      "Step 2: Take screenshot and verify empty state has helpful message and icon/illustration",
+      "Step 3: Verify call-to-action button is prominently displayed with primary styling"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement keyboard navigation (Tab, Enter for list selection, arrow keys for image navigation)",
+    "steps": [
+      "Step 1: Navigate to Image Comparison View",
+      "Step 2: Use Tab key to focus on image list items and press Enter to select",
+      "Step 3: Use arrow keys to navigate between images when image view is focused"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement accessibility features (alt text for images, screen reader labels)",
+    "steps": [
+      "Step 1: Inspect HTML and verify all images have alt attributes",
+      "Step 2: Verify all interactive elements have ARIA labels where appropriate",
+      "Step 3: Test with screen reader to verify proper navigation and announcements"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Integrate Font Awesome icons for visual indicators (check, cross, dash)",
+    "steps": [
+      "Step 1: Select an image with TP boxes and verify check icon renders",
+      "Step 2: Verify FP boxes show cross icon and FN boxes show dash icon",
+      "Step 3: Verify icons are properly sized and positioned"
+    ],
+    "passes": false
+  },
+  {
+    "category": "style",
+    "description": "Icon styling with correct colors (green for TP, red for FP/FN) and positioning",
+    "steps": [
+      "Step 1: Select image with multiple box types",
+      "Step 2: Take screenshot and verify TP icons are green (#22c55e)",
+      "Step 3: Verify FP/FN icons are red (#ef4444) and positioned at top-left of boxes"
+    ],
+    "passes": false
+  },
+  {
+    "category": "style",
+    "description": "Overall design system consistency (color palette, typography, spacing) across all pages",
+    "steps": [
+      "Step 1: Navigate to Statistics Dashboard and take screenshot",
+      "Step 2: Navigate to Image Comparison View and take screenshot",
+      "Step 3: Compare screenshots and verify consistent color palette, typography, and spacing"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement dataset load modal with path input field and load button",
+    "steps": [
+      "Step 1: Click 'Load Dataset' button",
+      "Step 2: Verify modal opens with input field for dataset path",
+      "Step 3: Enter valid path and click load, verify dataset loads successfully"
+    ],
+    "passes": false
+  },
+  {
+    "category": "style",
+    "description": "Modal styling with centered positioning, backdrop, and proper input/button styling",
+    "steps": [
+      "Step 1: Open dataset load modal",
+      "Step 2: Take screenshot and verify modal is centered with backdrop blur",
+      "Step 3: Verify input field and load button follow design system (rounded corners, proper padding)"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement confidence score distribution visualization for current image predictions",
+    "steps": [
+      "Step 1: Select an image with multiple predictions at different confidence levels",
+      "Step 2: Scroll to per-image statistics section",
+      "Step 3: Verify confidence histogram or distribution visualization is displayed"
+    ],
+    "passes": false
+  },
+  {
+    "category": "style",
+    "description": "Confidence distribution chart styling with appropriate bins and color gradient",
+    "steps": [
+      "Step 1: Select image with varied confidence predictions",
+      "Step 2: Take screenshot of confidence distribution chart",
+      "Step 3: Verify chart has proper bin distribution and color gradient from low to high confidence"
+    ],
+    "passes": false
+  }
+]

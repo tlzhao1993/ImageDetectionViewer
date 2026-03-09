@@ -1,0 +1,14 @@
+[   25075ms] [ERROR] Error: Parse error on line 7:
+...                    flowchart TD    A[C
+-----------------------^
+Expecting 'SEMI', 'NEWLINE', 'SPACE', 'EOF', 'subgraph', 'end', 'acc_title', 'acc_descr', 'acc_descr_multiline_value', 'AMP', 'COLON', 'STYLE', 'LINKSTYLE', 'CLASSDEF', 'CLASS', 'CLICK', 'DOWN', 'DEFAULT', 'NUM', 'COMMA', 'NODE_STRING', 'BRKT', 'MINUS', 'MULT', 'UNICODE_TEXT', 'direction_tb', 'direction_bt', 'direction_rl', 'direction_lr', got 'GRAPH'
+    at q1.parseError (https://mermaid.live/_app/immutable/chunks/D7w0v4E7.js:9:33172)
+    at q1.parse (https://mermaid.live/_app/immutable/chunks/D7w0v4E7.js:11:173)
+    at Ut.parse (https://mermaid.live/_app/immutable/chunks/D7w0v4E7.js:15:14)
+    at Diagram.fromText (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:588:347)
+    at getDiagramFromText (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:595:3472)
+    at Object.parse (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:589:1977)
+    at https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:595:6992
+    at new Promise (<anonymous>)
+    at performCall (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:595:6959)
+    at executeQueue (https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:595:6792) @ https://mermaid.live/_app/immutable/chunks/BEWyFNjL.js:612
