@@ -321,8 +321,7 @@ def store_dataset_in_database(
                             UPDATE bounding_boxes SET classification = 'tp'
                             WHERE image_id = ? AND class_id = ? AND type = 'ground_truth'
                             AND x1 = ? AND y1 = ?
-                            ORDER BY id LIMIT 1 OFFSET ?
-                        ''', (image_id, class_id, gt_boxes[gt_idx][0], gt_boxes[gt_idx][1], gt_idx))
+                        ''', (image_id, class_id, gt_boxes[gt_idx][0], gt_boxes[gt_idx][1]))
 
                         # Get the prediction box IoU
                         iou = calculate_iou(gt_boxes[gt_idx], pred_boxes[pred_idx])
@@ -332,8 +331,7 @@ def store_dataset_in_database(
                             UPDATE bounding_boxes SET classification = 'tp', iou = ?
                             WHERE image_id = ? AND class_id = ? AND type = 'prediction'
                             AND x1 = ? AND y1 = ?
-                            ORDER BY id LIMIT 1 OFFSET ?
-                        ''', (iou, image_id, class_id, pred_boxes[pred_idx][0], pred_boxes[pred_idx][1], pred_idx))
+                        ''', (iou, image_id, class_id, pred_boxes[pred_idx][0], pred_boxes[pred_idx][1]))
 
                 if classification['fp']:
                     for pred_idx in classification['fp']:
@@ -342,8 +340,7 @@ def store_dataset_in_database(
                             UPDATE bounding_boxes SET classification = 'fp'
                             WHERE image_id = ? AND class_id = ? AND type = 'prediction'
                             AND x1 = ? AND y1 = ?
-                            ORDER BY id LIMIT 1 OFFSET ?
-                        ''', (image_id, class_id, pred_boxes[pred_idx][0], pred_boxes[pred_idx][1], pred_idx))
+                        ''', (image_id, class_id, pred_boxes[pred_idx][0], pred_boxes[pred_idx][1]))
 
                 if classification['fn']:
                     for gt_idx in classification['fn']:
@@ -352,8 +349,7 @@ def store_dataset_in_database(
                             UPDATE bounding_boxes SET classification = 'fn'
                             WHERE image_id = ? AND class_id = ? AND type = 'ground_truth'
                             AND x1 = ? AND y1 = ?
-                            ORDER BY id LIMIT 1 OFFSET ?
-                        ''', (image_id, class_id, gt_boxes[gt_idx][0], gt_boxes[gt_idx][1], gt_idx))
+                        ''', (image_id, class_id, gt_boxes[gt_idx][0], gt_boxes[gt_idx][1]))
 
             # Update image metadata with FP/FN flags
             is_perfect = not (image_has_fp or image_has_fn)

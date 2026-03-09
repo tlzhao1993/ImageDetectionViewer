@@ -1,15 +1,5 @@
 [
   {
-    "category": "functional",
-    "description": "Integrate Font Awesome icons for visual indicators (check, cross, dash)",
-    "steps": [
-      "Step 1: Select an image with TP boxes and verify check icon renders",
-      "Step 2: Verify FP boxes show cross icon and FN boxes show dash icon",
-      "Step 3: Verify icons are properly sized and positioned"
-    ],
-    "passes": false
-  },
-  {
     "category": "style",
     "description": "Icon styling with correct colors (green for TP, red for FP/FN) and positioning",
     "steps": [
@@ -520,6 +510,16 @@
       "Step 1: Inspect HTML and verify all images have alt attributes",
       "Step 2: Verify all interactive elements have ARIA labels where appropriate",
       "Step 3: Test with screen reader to verify proper navigation and announcements"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Integrate Font Awesome icons for visual indicators (check, cross, dash)",
+    "steps": [
+      "Step 1: Select an image with TP boxes and verify check icon renders",
+      "Step 2: Verify FP boxes show cross icon and FN boxes show dash icon",
+      "Step 3: Verify icons are properly sized and positioned"
     ],
     "passes": true
   }
