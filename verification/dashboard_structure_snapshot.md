@@ -1,0 +1,36 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link " Detection Result Analyzer" [ref=e4] [cursor=pointer]:
+        - /url: "#dashboard"
+        - generic [ref=e5]: 
+        - text: Detection Result Analyzer
+      - list [ref=e7]:
+        - listitem [ref=e8]:
+          - link " Statistics Dashboard" [ref=e9] [cursor=pointer]:
+            - /url: "#dashboard"
+            - generic [ref=e10]: 
+            - text: Statistics Dashboard
+        - listitem [ref=e11]:
+          - link " Image Comparison" [ref=e12] [cursor=pointer]:
+            - /url: "#comparison"
+            - generic [ref=e13]: 
+            - text: Image Comparison
+        - listitem [ref=e14]:
+          - button " Load Dataset" [ref=e15] [cursor=pointer]:
+            - generic [ref=e16]: 
+            - text: Load Dataset
+  - main [ref=e17]:
+    - text:      
+    - generic [ref=e21]:
+      - generic [ref=e22]: 
+      - heading "No Dataset Loaded" [level=3] [ref=e23]
+      - paragraph [ref=e24]: Load a dataset to view detection statistics and metrics
+      - button " Load Dataset" [ref=e25] [cursor=pointer]:
+        - generic [ref=e26]: 
+        - text: Load Dataset
+  - contentinfo [ref=e27]:
+    - generic [ref=e29]:
+      - text: Image Detection Result Analyzer v1.0.0 |
+      - link "Help" [ref=e30] [cursor=pointer]:
+        - /url: "#"
