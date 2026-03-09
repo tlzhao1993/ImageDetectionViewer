@@ -650,3 +650,36 @@ table.table tbody tr:hover,
 }
 
 /* Desktop layout (>1024px): 25% left panel, 75% right panel - Bootstrap default works */
+
+/* Toggle Buttons */
+.toggle-btn {
+    background-color: white;
+    border: 1px solid var(--border-light);
+    color: var(--text-light);
+    font-weight: 500;
+    transition: all 0.2s;
+    padding: 6px 12px;
+    border-radius: 6px;
+}
+
+.toggle-btn:hover {
+    background-color: var(--bg-light);
+    border-color: var(--border-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-btn.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.toggle-btn.active:hover {
+    background-color: #1a365d;
+    border-color: #1a365d;
+}
+
+.toggle-btn i {
+    margin-right: 6px;
+}

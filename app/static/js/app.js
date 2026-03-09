@@ -13,6 +13,12 @@ class DetectionAnalyzer {
         };
         this.allClasses = [];
 
+        // Box visibility toggles
+        this.showGTBoxes = true;
+        this.showPredBoxes = true;
+        this.showLabels = true;
+        this.currentImageData = null; // Store current image data for re-rendering
+
         this.init();
     }
 
@@ -358,6 +364,19 @@ class DetectionAnalyzer {
                     <span class="badge bg-primary">GT: ${totalGT}</span>
                     <span class="badge bg-info">Pred: ${totalPred}</span>
                 </div>
+
+                <!-- Box Visibility Toggles -->
+                <div class="d-flex gap-2 mb-3 mt-3">
+                    <button class="btn btn-sm toggle-btn active" id="toggle-gt-boxes" title="Show/Hide Ground Truth Boxes">
+                        <i class="fas fa-check-square me-1"></i> GT Boxes
+                    </button>
+                    <button class="btn btn-sm toggle-btn active" id="toggle-pred-boxes" title="Show/Hide Prediction Boxes">
+                        <i class="fas fa-crosshairs me-1"></i> Pred Boxes
+                    </button>
+                    <button class="btn btn-sm toggle-btn active" id="toggle-labels" title="Show/Hide Labels">
+                        <i class="fas fa-tag me-1"></i> Labels
+                    </button>
+                </div>
             </div>
 
             <div class="image-display-section">
@@ -408,8 +427,14 @@ class DetectionAnalyzer {
             nextBtn.addEventListener('click', () => this.navigateImage(1));
         }
 
+        // Store current image data for re-rendering
+        this.currentImageData = data;
+
         // Render image with bounding boxes
         this.renderImageWithBoundingBoxes(data);
+
+        // Add event listeners for toggle buttons
+        this.setupToggleButtons();
     }
 
     renderImageWithBoundingBoxes(data) {
@@ -439,10 +464,16 @@ class DetectionAnalyzer {
         // TP boxes are matched predictions (classification is 'tp')
         const tpBoxes = predBoxes.filter(box => box.classification === 'tp');
 
-        // Draw all bounding boxes
-        fnBoxes.forEach(box => this.drawBoundingBox(ctx, box, 'fn'));
-        fpBoxes.forEach(box => this.drawBoundingBox(ctx, box, 'fp'));
-        tpBoxes.forEach(box => this.drawBoundingBox(ctx, box, 'tp'));
+        // Draw GT boxes (FN only, since TP are predictions that match GT)
+        if (this.showGTBoxes) {
+            fnBoxes.forEach(box => this.drawBoundingBox(ctx, box, 'fn'));
+        }
+
+        // Draw prediction boxes (FP and TP)
+        if (this.showPredBoxes) {
+            fpBoxes.forEach(box => this.drawBoundingBox(ctx, box, 'fp'));
+            tpBoxes.forEach(box => this.drawBoundingBox(ctx, box, 'tp'));
+        }
     }
 
     drawPlaceholderImage(ctx, width, height) {
@@ -560,29 +591,70 @@ class DetectionAnalyzer {
         }
 
         // Draw label (class name and confidence for predictions)
-        let labelText = '';
-        if (box.class_name) {
-            labelText = box.class_name;
+        if (this.showLabels) {
+            let labelText = '';
+            if (box.class_name) {
+                labelText = box.class_name;
+            }
+            if (box.confidence !== undefined && box.confidence !== null) {
+                labelText += ` (${box.confidence.toFixed(2)})`;
+            }
+
+            if (labelText) {
+                ctx.font = '11px Inter, sans-serif';
+                const textMetrics = ctx.measureText(labelText);
+                const labelWidth = textMetrics.width + 12;
+                const labelHeight = 20;
+
+                // Draw label background (semi-transparent)
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(x1, y1 + 12, labelWidth, labelHeight);
+
+                // Draw label text
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(labelText, x1 + 6, y1 + 22);
+            }
         }
-        if (box.confidence !== undefined && box.confidence !== null) {
-            labelText += ` (${box.confidence.toFixed(2)})`;
+    }
+
+    setupToggleButtons() {
+        // GT Boxes toggle
+        const gtToggle = document.getElementById('toggle-gt-boxes');
+        if (gtToggle) {
+            gtToggle.addEventListener('click', () => {
+                this.showGTBoxes = !this.showGTBoxes;
+                gtToggle.classList.toggle('active');
+                this.reRenderCurrentImage();
+            });
         }
 
-        if (labelText) {
-            ctx.font = '11px Inter, sans-serif';
-            const textMetrics = ctx.measureText(labelText);
-            const labelWidth = textMetrics.width + 12;
-            const labelHeight = 20;
+        // Prediction Boxes toggle
+        const predToggle = document.getElementById('toggle-pred-boxes');
+        if (predToggle) {
+            predToggle.addEventListener('click', () => {
+                this.showPredBoxes = !this.showPredBoxes;
+                predToggle.classList.toggle('active');
+                this.reRenderCurrentImage();
+            });
+        }
 
-            // Draw label background (semi-transparent)
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.fillRect(x1, y1 + 12, labelWidth, labelHeight);
+        // Labels toggle
+        const labelsToggle = document.getElementById('toggle-labels');
+        if (labelsToggle) {
+            labelsToggle.addEventListener('click', () => {
+                this.showLabels = !this.showLabels;
+                labelsToggle.classList.toggle('active');
+                this.reRenderCurrentImage();
+            });
+        }
+    }
 
-            // Draw label text
-            ctx.fillStyle = 'white';
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(labelText, x1 + 6, y1 + 22);
+    reRenderCurrentImage() {
+        // Re-render the current image with updated visibility settings
+        if (this.currentImageData) {
+            this.renderImageWithBoundingBoxes(this.currentImageData);
         }
     }
 

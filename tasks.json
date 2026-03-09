@@ -1,16 +1,6 @@
 [
   {
     "category": "functional",
-    "description": "Implement toggle buttons for showing/hiding GT boxes, prediction boxes, and labels",
-    "steps": [
-      "Step 1: Click 'Hide GT Boxes' toggle and verify ground truth boxes disappear",
-      "Step 2: Click 'Hide Prediction Boxes' toggle and verify prediction boxes disappear",
-      "Step 3: Click 'Hide Labels' toggle and verify labels disappear while boxes remain"
-    ],
-    "passes": false
-  },
-  {
-    "category": "functional",
     "description": "Implement zoom/pan functionality for detailed image inspection",
     "steps": [
       "Step 1: Click zoom (+) button and verify image scales up",
@@ -224,7 +214,7 @@
     "category": "functional",
     "description": "Initialize Flask project structure with proper directory layout (app/, app/static/, app/templates/)",
     "steps": [
-      "Step1: Check that app.py exists in project root",
+      "Step 1: Check that app.py exists in project root",
       "Step 2: Verify static directory exists with subdirectories (css/, js/)",
       "Step 3: Verify templates directory exists with base.html",
       "Step 4: Verify requirements.txt includes all required dependencies (flask>=2.0.0, flask-cors>=3.0.10, pillow>=9.0.0, numpy>=1.21.0)"
@@ -520,6 +510,16 @@
       "Step 2: Take screenshot and verify all boxes have 2px border width",
       "Step 3: Verify corner indicators are 24x24px squares with appropriate icons",
       "Step 4: Verify labels have semi-transparent background with contrasting text"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement toggle buttons for showing/hiding GT boxes, prediction boxes, and labels",
+    "steps": [
+      "Step 1: Click 'Hide GT Boxes' toggle and verify ground truth boxes disappear",
+      "Step 2: Click 'Hide Prediction Boxes' toggle and verify prediction boxes disappear",
+      "Step 3: Click 'Hide Labels' toggle and verify labels disappear while boxes remain"
     ],
     "passes": true
   }
