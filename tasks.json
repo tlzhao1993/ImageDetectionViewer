@@ -1,15 +1,5 @@
 [
   {
-    "category": "style",
-    "description": "Image list item styling with thumbnails, status indicators (color dots), and hover/active states",
-    "steps": [
-      "Step 1: Navigate to Image Comparison View",
-      "Step 2: Take screenshot and verify each item has thumbnail, filename, and status color dot",
-      "Step 3: Click an item and verify active state styling (bold text, colored border)"
-    ],
-    "passes": false
-  },
-  {
     "category": "functional",
     "description": "Implement canvas overlay for bounding box rendering with TP (green), FP (red), FN (red) styling and icons",
     "steps": [
@@ -520,6 +510,16 @@
       "Step 1: Navigate to Image Comparison View",
       "Step 2: Use search box and verify list filters by filename",
       "Step 3: Apply class filter and verify only images with specified class are shown"
+    ],
+    "passes": true
+  },
+  {
+    "category": "style",
+    "description": "Image list item styling with thumbnails, status indicators (color dots), and hover/active states",
+    "steps": [
+      "Step 1: Navigate to Image Comparison View",
+      "Step 2: Take screenshot and verify each item has thumbnail, filename, and status color dot",
+      "Step 3: Click an item and verify active state styling (bold text, colored border)"
     ],
     "passes": true
   }
