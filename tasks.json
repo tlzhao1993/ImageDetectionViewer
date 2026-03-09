@@ -1,15 +1,5 @@
 [
   {
-    "category": "functional",
-    "description": "Create base HTML template with navigation bar and client-side routing structure",
-    "steps": [
-      "Step 1: Access application in browser and verify navigation bar is visible at top",
-      "Step 2: Click navigation links and verify page transitions work via hash routing",
-      "Step 3: Verify active page indicator shows correct page in navigation bar"
-    ],
-    "passes": false
-  },
-  {
     "category": "style",
     "description": "Navigation bar styling with primary color (#2c5282) and responsive design",
     "steps": [
@@ -520,6 +510,16 @@
       "Step 1: Call export endpoint with format='csv' parameter",
       "Step 2: Verify response is valid CSV with header row containing metric columns",
       "Step 3: Call export endpoint with format='json' and verify valid JSON structure"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Create base HTML template with navigation bar and client-side routing structure",
+    "steps": [
+      "Step 1: Access application in browser and verify navigation bar is visible at top",
+      "Step 2: Click navigation links and verify page transitions work via hash routing",
+      "Step 3: Verify active page indicator shows correct page in navigation bar"
     ],
     "passes": true
   }

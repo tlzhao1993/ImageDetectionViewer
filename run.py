@@ -887,7 +887,7 @@ def get_image_detail_endpoint(dataset_id, image_id):
 @app.route('/')
 def index():
     """Serve the main HTML page"""
-    return "Image Detection Result Analyzer - Backend Running"
+    return app.jinja_env.get_or_select_template('base.html').render()
 
 if __name__ == '__main__':
     # Create data directory if it doesn't exist
