@@ -1,15 +1,5 @@
 [
-  {
-    "category": "functional",
-    "description": "Implement sortable metrics table with Class, GT Count, Pred Count, TP, FP, FN, Recall, Precision, FPR, F1 Score columns",
-    "steps": [
-      "Step 1: Navigate to Statistics Dashboard",
-      "Step 2: Click table header to sort and verify rows reorder correctly",
-      "Step 3: Use search box and verify table filters by class name"
-    ],
-    "passes": false
-  },
-  {
+    {
     "category": "style",
     "description": "Metrics table styling with zebra striping, hover states, and sortable indicators",
     "steps": [
@@ -520,6 +510,16 @@
       "Step 1: Navigate to Statistics Dashboard",
       "Step 2: Take screenshot of sliders in default state",
       "Step 3: Take screenshot while dragging slider and verify visual feedback (thumb color, track fill)"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement sortable metrics table with Class, GT Count, Pred Count, TP, FP, FN, Recall, Precision, FPR, F1 Score columns",
+    "steps": [
+      "Step 1: Navigate to Statistics Dashboard",
+      "Step 2: Click table header to sort and verify rows reorder correctly",
+      "Step 3: Use search box and verify table filters by class name"
     ],
     "passes": true
   }

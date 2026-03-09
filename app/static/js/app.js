@@ -129,6 +129,9 @@ class DetectionAnalyzer {
             });
         }
 
+        // Setup sortable table headers
+        this.setupSortableTableHeaders();
+
         // Export buttons
         const exportCsvBtn = document.getElementById('export-csv');
         if (exportCsvBtn) {
@@ -150,6 +153,105 @@ class DetectionAnalyzer {
         sliders.forEach(slider => {
             this.updateSliderTrackFill(slider);
         });
+    }
+
+    setupSortableTableHeaders() {
+        // Store current sort state
+        this.currentSort = {
+            column: null,
+            direction: 'asc'
+        };
+
+        // Get all sortable headers
+        const sortableHeaders = document.querySelectorAll('th.sortable');
+        sortableHeaders.forEach(header => {
+            header.addEventListener('click', () => {
+                const sortColumn = header.getAttribute('data-sort');
+                const sortType = header.getAttribute('data-type');
+
+                // Toggle sort direction if clicking same column
+                if (this.currentSort.column === sortColumn) {
+                    this.currentSort.direction = this.currentSort.direction === 'asc' ? 'desc' : 'asc';
+                } else {
+                    this.currentSort.column = sortColumn;
+                    this.currentSort.direction = 'asc';
+                }
+
+                // Update sort icons
+                this.updateSortIcons();
+
+                // Sort the table
+                this.sortMetricsTable(sortColumn, sortType, this.currentSort.direction);
+            });
+        });
+    }
+
+    updateSortIcons() {
+        // Clear all sort icons
+        const allIcons = document.querySelectorAll('.sort-icon');
+        allIcons.forEach(icon => {
+            icon.innerHTML = '';
+        });
+
+        // Set icon for current sort column
+        if (this.currentSort.column) {
+            const header = document.querySelector(`th[data-sort="${this.currentSort.column}"]`);
+            if (header) {
+                const icon = header.querySelector('.sort-icon');
+                if (icon) {
+                    icon.innerHTML = this.currentSort.direction === 'asc' ? '&#9650;' : '&#9660;'; // Up or down arrow
+                }
+            }
+        }
+    }
+
+    sortMetricsTable(column, type, direction) {
+        const tableBody = document.getElementById('metrics-table-body');
+        if (!tableBody) return;
+
+        const rows = Array.from(tableBody.querySelectorAll('tr'));
+
+        // Get column index
+        const headerIndex = this.getColumnIndex(column);
+        if (headerIndex === -1) return;
+
+        // Sort rows
+        rows.sort((rowA, rowB) => {
+            const cellA = rowA.cells[headerIndex];
+            const cellB = rowB.cells[headerIndex];
+
+            if (!cellA || !cellB) return 0;
+
+            let valueA, valueB;
+
+            if (type === 'string') {
+                valueA = cellA.textContent.trim().toLowerCase();
+                valueB = cellB.textContent.trim().toLowerCase();
+            } else {
+                // For numeric values, remove formatting and parse
+                valueA = parseFloat(cellA.textContent.replace(/[^\d.-]/g, '')) || 0;
+                valueB = parseFloat(cellB.textContent.replace(/[^\d.-]/g, '')) || 0;
+            }
+
+            if (valueA < valueB) return direction === 'asc' ? -1 : 1;
+            if (valueA > valueB) return direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        // Reorder rows in the table
+        rows.forEach(row => {
+            tableBody.appendChild(row);
+        });
+    }
+
+    getColumnIndex(columnName) {
+        const headers = document.querySelectorAll('th[data-sort]');
+        for (let i = 0; i < headers.length; i++) {
+            if (headers[i].getAttribute('data-sort') === columnName) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     updateSliderTrackFill(slider) {
