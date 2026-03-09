@@ -362,10 +362,9 @@ class DetectionAnalyzer {
 
             <div class="image-display-section">
                 <div class="card">
-                    <div class="card-body text-center">
-                        <div class="text-muted">
-                            <i class="fas fa-image fa-3x mb-3"></i>
-                            <p class="mb-0">Image display functionality will be implemented in next task</p>
+                    <div class="card-body p-0">
+                        <div class="canvas-container" id="canvas-container">
+                            <canvas id="image-canvas"></canvas>
                         </div>
                     </div>
                 </div>
@@ -407,6 +406,183 @@ class DetectionAnalyzer {
         }
         if (nextBtn) {
             nextBtn.addEventListener('click', () => this.navigateImage(1));
+        }
+
+        // Render image with bounding boxes
+        this.renderImageWithBoundingBoxes(data);
+    }
+
+    renderImageWithBoundingBoxes(data) {
+        const canvas = document.getElementById('image-canvas');
+        const ctx = canvas.getContext('2d');
+        if (!canvas || !ctx) return;
+
+        // Set canvas dimensions
+        const width = data.dimensions?.width || 800;
+        const height = data.dimensions?.height || 600;
+        canvas.width = width;
+        canvas.height = height;
+
+        // Create a placeholder image (since we don't have actual image files)
+        // In a real implementation, you would load the actual image file
+        this.drawPlaceholderImage(ctx, width, height);
+
+        // Draw bounding boxes
+        const gtBoxes = data.ground_truth_boxes || [];
+        const predBoxes = data.prediction_boxes || [];
+
+        // Combine all boxes for rendering
+        // FN boxes are GT boxes without matching prediction (classification is null)
+        const fnBoxes = gtBoxes.filter(box => box.classification === null);
+        // FP boxes are prediction boxes without matching GT
+        const fpBoxes = predBoxes.filter(box => box.classification === 'fp');
+        // TP boxes are matched predictions (classification is 'tp')
+        const tpBoxes = predBoxes.filter(box => box.classification === 'tp');
+
+        // Draw all bounding boxes
+        fnBoxes.forEach(box => this.drawBoundingBox(ctx, box, 'fn'));
+        fpBoxes.forEach(box => this.drawBoundingBox(ctx, box, 'fp'));
+        tpBoxes.forEach(box => this.drawBoundingBox(ctx, box, 'tp'));
+    }
+
+    drawPlaceholderImage(ctx, width, height) {
+        // Draw a gradient background
+        const gradient = ctx.createLinearGradient(0, 0, width, height);
+        gradient.addColorStop(0, '#f0f9ff');
+        gradient.addColorStop(1, '#e0f2fe');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
+
+        // Draw some placeholder shapes to simulate an image
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 1;
+
+        // Draw a grid
+        for (let x = 0; x < width; x += 50) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, height);
+            ctx.stroke();
+        }
+        for (let y = 0; y < height; y += 50) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(width, y);
+            ctx.stroke();
+        }
+
+        // Draw placeholder text
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '24px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Image Placeholder', width / 2, height / 2);
+        ctx.font = '14px Inter, sans-serif';
+        ctx.fillText(`${width} x ${height}`, width / 2, height / 2 + 30);
+    }
+
+    drawBoundingBox(ctx, box, type) {
+        const bbox = box.bbox;
+        if (!bbox || bbox.length !== 4) return;
+
+        const [x1, y1, x2, y2] = bbox;
+        const width = x2 - x1;
+        const height = y2 - y1;
+
+        // Set style based on type
+        let color, lineWidth;
+        switch (type) {
+            case 'tp':
+                color = '#22c55e'; // green
+                lineWidth = 2;
+                break;
+            case 'fp':
+                color = '#ef4444'; // red
+                lineWidth = 2;
+                break;
+            case 'fn':
+                color = '#ef4444'; // red
+                lineWidth = 2;
+                break;
+            default:
+                return;
+        }
+
+        // Draw bounding box
+        ctx.strokeStyle = color;
+        ctx.lineWidth = lineWidth;
+
+        if (type === 'fn') {
+            ctx.setLineDash([5, 3]); // Dashed line for FN
+        } else {
+            ctx.setLineDash([]);
+        }
+
+        ctx.strokeRect(x1, y1, width, height);
+        ctx.setLineDash([]); // Reset dash
+
+        // Draw corner indicator (24x24px square at top-left)
+        const indicatorSize = 24;
+        const indicatorX = x1 - 2;
+        const indicatorY = y1 - 12;
+        const centerX = indicatorX + indicatorSize / 2;
+        const centerY = indicatorY + indicatorSize / 2;
+
+        ctx.fillStyle = color;
+        ctx.fillRect(indicatorX, indicatorY, indicatorSize, indicatorSize);
+
+        // Draw icon in the corner indicator using canvas paths instead of text
+        ctx.fillStyle = 'white';
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 2;
+
+        if (type === 'tp') {
+            // Draw checkmark (✓)
+            ctx.beginPath();
+            ctx.moveTo(centerX - 4, centerY);
+            ctx.lineTo(centerX, centerY + 4);
+            ctx.lineTo(centerX + 6, centerY - 6);
+            ctx.stroke();
+        } else if (type === 'fp') {
+            // Draw cross (✗)
+            ctx.beginPath();
+            ctx.moveTo(centerX - 4, centerY - 4);
+            ctx.lineTo(centerX + 4, centerY + 4);
+            ctx.moveTo(centerX + 4, centerY - 4);
+            ctx.lineTo(centerX - 4, centerY + 4);
+            ctx.stroke();
+        } else if (type === 'fn') {
+            // Draw dash (—)
+            ctx.beginPath();
+            ctx.moveTo(centerX - 6, centerY);
+            ctx.lineTo(centerX + 6, centerY);
+            ctx.stroke();
+        }
+
+        // Draw label (class name and confidence for predictions)
+        let labelText = '';
+        if (box.class_name) {
+            labelText = box.class_name;
+        }
+        if (box.confidence !== undefined && box.confidence !== null) {
+            labelText += ` (${box.confidence.toFixed(2)})`;
+        }
+
+        if (labelText) {
+            ctx.font = '11px Inter, sans-serif';
+            const textMetrics = ctx.measureText(labelText);
+            const labelWidth = textMetrics.width + 12;
+            const labelHeight = 20;
+
+            // Draw label background (semi-transparent)
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(x1, y1 + 12, labelWidth, labelHeight);
+
+            // Draw label text
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(labelText, x1 + 6, y1 + 22);
         }
     }
 

@@ -1,16 +1,5 @@
 [
   {
-    "category": "functional",
-    "description": "Implement canvas overlay for bounding box rendering with TP (green), FP (red), FN (red) styling and icons",
-    "steps": [
-      "Step 1: Select an image with ground truth and prediction boxes",
-      "Step 2: Verify TP boxes have green border and checkmark (\u2713) indicator",
-      "Step 3: Verify FP boxes have red border and cross (\u2717) indicator",
-      "Step 4: Verify FN boxes have red border and dash (\u2014) indicator"
-    ],
-    "passes": false
-  },
-  {
     "category": "style",
     "description": "Bounding box visual design with 2px borders, 24x24px corner indicators, and semi-transparent labels",
     "steps": [
@@ -520,6 +509,17 @@
       "Step 1: Navigate to Image Comparison View",
       "Step 2: Take screenshot and verify each item has thumbnail, filename, and status color dot",
       "Step 3: Click an item and verify active state styling (bold text, colored border)"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement canvas overlay for bounding box rendering with TP (green), FP (red), FN (red) styling and icons",
+    "steps": [
+      "Step 1: Select an image with ground truth and prediction boxes",
+      "Step 2: Verify TP boxes have green border and checkmark (✓) indicator",
+      "Step 3: Verify FP boxes have red border and cross (✗) indicator",
+      "Step 4: Verify FN boxes have red border and dash (—) indicator"
     ],
     "passes": true
   }
