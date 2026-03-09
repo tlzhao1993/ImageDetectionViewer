@@ -1,6 +1,8 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 import os
+import sys
+import flask
 
 app = Flask(__name__)
 CORS(app)
@@ -18,7 +20,7 @@ def health_check():
         'status': 'healthy',
         'version': '1.0.0',
         'python_version': f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
-        'flask_version': Flask.__version__
+        'flask_version': flask.__version__
     })
 
 @app.route('/')
@@ -35,8 +37,8 @@ if __name__ == '__main__':
     print("Image Detection Result Analyzer")
     print("Flask Server Starting...")
     print("==========================================")
-    print(f"Python Version: {app.config['python_version']}")
-    print(f"Flask Version: {Flask.__version__}")
+    print(f"Python Version: {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
+    print(f"Flask Version: {flask.__version__}")
     print(f"Dataset Path: {app.config['DATASET_PATH']}")
     print(f"Database Path: {app.config['DATABASE_PATH']}")
     print("==========================================")

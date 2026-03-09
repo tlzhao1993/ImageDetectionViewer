@@ -1,17 +1,6 @@
 [
   {
     "category": "functional",
-    "description": "Initialize Flask project structure with proper directory layout (app/, app/static/, app/templates/)",
-    "steps": [
-      "Step 1: Check that app.py exists in the project root",
-      "Step 2: Verify static directory exists with subdirectories (css/, js/)",
-      "Step 3: Verify templates directory exists with base.html",
-      "Step 4: Verify requirements.txt includes all required dependencies (flask>=2.0.0, flask-cors>=3.0.10, pillow>=9.0.0, numpy>=1.21.0)"
-    ],
-    "passes": false
-  },
-  {
-    "category": "functional",
     "description": "Configure Flask application with CORS support and static file serving",
     "steps": [
       "Step 1: Start the Flask server with python app.py",
@@ -376,7 +365,7 @@
   {
     "category": "functional",
     "description": "Implement loading overlay with spinner during data processing",
-    "Steps": [
+    "steps": [
       "Step 1: Trigger dataset loading by providing a dataset path",
       "Step 2: Verify semi-transparent overlay appears with rotating spinner",
       "Step 3: Verify overlay disappears after data processing completes"
@@ -522,5 +511,16 @@
       "Step 3: Verify chart has proper bin distribution and color gradient from low to high confidence"
     ],
     "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Initialize Flask project structure with proper directory layout (app/, app/static/, app/templates/)",
+    "steps": [
+      "Step 1: Check that app.py exists in the project root",
+      "Step 2: Verify static directory exists with subdirectories (css/, js/)",
+      "Step 3: Verify templates directory exists with base.html",
+      "Step 4: Verify requirements.txt includes all required dependencies (flask>=2.0.0, flask-cors>=3.0.10, pillow>=9.0.0, numpy>=1.21.0)"
+    ],
+    "passes": true
   }
 ]
