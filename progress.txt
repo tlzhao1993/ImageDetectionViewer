@@ -1,3 +1,40 @@
+[2026-03-09] 完成了任务: Implement API endpoint POST /api/statistics/recalculate for threshold adjustment
+
+完成的任务描述: 实现API端点POST /api/statistics/recalculate用于使用新阈值重新计算统计信息
+
+测试结果:
+- Step 1: Send POST request with new iou_threshold and confidence_threshold - 通过
+  验证内容: 使用curl发送POST请求到http://localhost:5000/api/statistics/recalculate，包含dataset_id=1, iou_threshold=0.3, confidence_threshold=0.5，请求成功处理并返回响应
+- Step 2: Verify response success: true and statistics are updated - 通过
+  验证内容: API返回success: true，classes数组包含更新后的统计信息，overall_metrics包含更新后的整体指标
+- Step 3: Verify database entries reflect of new threshold values - 通过
+  验证内容: 数据库中dataset_metadata表的iou_threshold已更新为0.3，classes表中的指标已根据新阈值重新计算并更新
+
+额外测试通过:
+- 只提供iou_threshold时，保留当前confidence_threshold
+- 只提供confidence_threshold时，保留当前iou_threshold
+- 两个阈值都不提供时，保留当前的两个阈值
+- 错误处理正常工作（数据集不存在返回404错误）
+- 参数验证正常工作（无效的阈值值返回400错误）
+
+发现并解决的问题:
+修复了class_id_map的键问题：从{row[0]: {...}}改为{row[1]: {...}}，确保键是类别名称而不是ID
+修复了bbox查询问题：添加JOIN classes表以获取类别名称，避免使用class_id_map时的KeyError
+
+实现的功能:
+- 在app/loader.py中添加了recalculate_statistics()函数
+- 在run.py中添加了POST /api/statistics/recalculate API端点
+- 支持可选的iou_threshold和confidence_threshold参数
+- 实现了完整的重新计算逻辑：重置所有边界框分类，基于新阈值重新分类，重新计算所有指标
+- 更新数据集元数据中的阈值和最后更新时间
+- 支持按类别名称排序返回结果
+
+建议下一步:
+建议执行下一个任务: "Implement API endpoint GET /api/images/:dataset_id for paginated image list"，该任务需要实现获取分页图像列表的API端点。
+
+当前工程完成状态: 13个测试通过，共52个测试
+
+
 [2026-03-09] 完成了任务: Implement API endpoint GET /api/statistics/:dataset_id for retrieving per-class statistics
 
 完成的任务描述: 实现API端点GET /api/statistics/:dataset_id用于获取每个类别的统计信息

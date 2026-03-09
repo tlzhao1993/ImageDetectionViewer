@@ -4,7 +4,7 @@ import os
 import sys
 import flask
 from app.db import init_db, get_db
-from app.loader import load_dataset
+from app.loader import load_dataset, recalculate_statistics
 
 app = Flask(__name__, static_folder='app/static', template_folder='app/templates')
 CORS(app)
@@ -232,6 +232,125 @@ def get_statistics_endpoint(dataset_id):
                 'iou_threshold': dataset_row[4],
                 'confidence_threshold': dataset_row[5]
             }), 200
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/statistics/recalculate', methods=['POST'])
+def recalculate_statistics_endpoint():
+    """
+    API endpoint to recalculate statistics with new thresholds
+
+    Request body:
+        dataset_id (int): ID of the dataset to recalculate
+        iou_threshold (float, optional): New IoU threshold (default: keep current)
+        confidence_threshold (float, optional): New confidence threshold (default: keep current)
+
+    Returns:
+        JSON response with:
+            - success (bool): Whether recalculation was successful
+            - classes (list): Array of class statistics with updated metrics
+            - overall_metrics (dict): Overall metrics across all classes
+            - iou_threshold (float): Updated IoU threshold
+            - confidence_threshold (float): Updated confidence threshold
+            - errors (list): List of any errors encountered
+    """
+    try:
+        # Get request data
+        data = request.get_json()
+
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'No JSON data provided'
+            }), 400
+
+        dataset_id = data.get('dataset_id')
+        new_iou_threshold = data.get('iou_threshold')
+        new_confidence_threshold = data.get('confidence_threshold')
+
+        # Validate required parameters
+        if dataset_id is None:
+            return jsonify({
+                'success': False,
+                'error': 'dataset_id is required'
+            }), 400
+
+        try:
+            dataset_id = int(dataset_id)
+        except (ValueError, TypeError):
+            return jsonify({
+                'success': False,
+                'error': 'dataset_id must be a valid integer'
+            }), 400
+
+        # Validate thresholds if provided
+        if new_iou_threshold is not None:
+            try:
+                new_iou_threshold = float(new_iou_threshold)
+                if not (0.0 <= new_iou_threshold <= 1.0):
+                    return jsonify({
+                        'success': False,
+                        'error': 'iou_threshold must be between 0.0 and 1.0'
+                    }), 400
+            except (ValueError, TypeError):
+                return jsonify({
+                    'success': False,
+                    'error': 'iou_threshold must be a valid number'
+                }), 400
+
+        if new_confidence_threshold is not None:
+            try:
+                new_confidence_threshold = float(new_confidence_threshold)
+                if not (0.0 <= new_confidence_threshold <= 1.0):
+                    return jsonify({
+                        'success': False,
+                        'error': 'confidence_threshold must be between 0.0 and 1.0'
+                    }), 400
+            except (ValueError, TypeError):
+                return jsonify({
+                    'success': False,
+                    'error': 'confidence_threshold must be a valid number'
+                }), 400
+
+        # If thresholds not provided, get current thresholds from database
+        if new_iou_threshold is None or new_confidence_threshold is None:
+            with get_db() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                    SELECT iou_threshold, confidence_threshold
+                    FROM dataset_metadata
+                    WHERE id = ?
+                ''', (dataset_id,))
+
+                dataset_row = cursor.fetchone()
+
+                if dataset_row is None:
+                    return jsonify({
+                        'success': False,
+                        'error': f'Dataset with ID {dataset_id} not found'
+                    }), 404
+
+                if new_iou_threshold is None:
+                    new_iou_threshold = dataset_row[0]
+                if new_confidence_threshold is None:
+                    new_confidence_threshold = dataset_row[1]
+
+        # Recalculate statistics
+        result = recalculate_statistics(
+            dataset_id=dataset_id,
+            iou_threshold=new_iou_threshold,
+            confidence_threshold=new_confidence_threshold
+        )
+
+        if result['success']:
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 400
 
     except Exception as e:
         return jsonify({

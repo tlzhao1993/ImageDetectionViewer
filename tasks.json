@@ -1,16 +1,6 @@
 [
   {
     "category": "functional",
-    "description": "Implement API endpoint POST /api/statistics/recalculate for threshold adjustment",
-    "steps": [
-      "Step 1: Send POST request with new iou_threshold and confidence_threshold",
-      "Step 2: Verify response success: true and statistics are updated",
-      "Step 3: Verify database entries reflect of new threshold values"
-    ],
-    "passes": false
-  },
-  {
-    "category": "functional",
     "description": "Implement API endpoint GET /api/images/:dataset_id for paginated image list",
     "steps": [
       "Step 1: Call GET /api/images/:dataset_id with pagination parameters",
@@ -520,6 +510,16 @@
       "Step 1: Load a dataset and get the dataset_id",
       "Step 2: Call GET /api/statistics/:dataset_id endpoint",
       "Step 3: Verify response contains classes array with all metrics (recall, precision, fpr, f1_score)"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement API endpoint POST /api/statistics/recalculate for threshold adjustment",
+    "steps": [
+      "Step 1: Send POST request with new iou_threshold and confidence_threshold",
+      "Step 2: Verify response success: true and statistics are updated",
+      "Step 3: Verify database entries reflect of new threshold values"
     ],
     "passes": true
   }

@@ -415,6 +415,303 @@ def store_dataset_in_database(
     return dataset_id
 
 
+def recalculate_statistics(dataset_id: int, iou_threshold: float, confidence_threshold: float) -> Dict[str, Any]:
+    """
+    Recalculate statistics for a dataset with new thresholds
+
+    Args:
+        dataset_id: ID of the dataset to recalculate
+        iou_threshold: New IoU threshold for TP/FP classification
+        confidence_threshold: New confidence threshold for predictions
+
+    Returns:
+        Dictionary containing:
+            - success (bool): Whether recalculation was successful
+            - classes (list): Array of class statistics with updated metrics
+            - overall_metrics (dict): Overall metrics across all classes
+            - iou_threshold (float): Updated IoU threshold
+            - confidence_threshold (float): Updated confidence threshold
+            - errors (list): List of any errors encountered
+    """
+    errors = []
+
+    try:
+        with get_db() as conn:
+            cursor = conn.cursor()
+
+            # Check if dataset exists
+            cursor.execute('''
+                SELECT id, path
+                FROM dataset_metadata
+                WHERE id = ?
+            ''', (dataset_id,))
+
+            dataset_row = cursor.fetchone()
+
+            if dataset_row is None:
+                return {
+                    'success': False,
+                    'errors': [f'Dataset with ID {dataset_id} not found'],
+                    'iou_threshold': iou_threshold,
+                    'confidence_threshold': confidence_threshold
+                }
+
+            dataset_path = dataset_row[1]
+
+            # Get all images for this dataset
+            cursor.execute('''
+                SELECT id, filename
+                FROM image_metadata
+                WHERE dataset_id = ?
+                ORDER BY id
+            ''', (dataset_id,))
+
+            image_rows = cursor.fetchall()
+
+            # Get all classes for this dataset
+            cursor.execute('''
+                SELECT id, name
+                FROM classes
+                WHERE dataset_id = ?
+                ORDER BY name
+            ''', (dataset_id,))
+
+            class_rows = cursor.fetchall()
+            class_id_map = {row[1]: {'id': row[0], 'name': row[1]} for row in class_rows}
+
+            # Process each image
+            for image_id, filename in image_rows:
+                # Get all bounding boxes for this image
+                cursor.execute('''
+                    SELECT bb.id, bb.class_id, bb.type, bb.x1, bb.y1, bb.x2, bb.y2, bb.confidence, c.name
+                    FROM bounding_boxes bb
+                    JOIN classes c ON bb.class_id = c.id
+                    WHERE bb.image_id = ?
+                    ORDER BY bb.id
+                ''', (image_id,))
+
+                bbox_rows = cursor.fetchall()
+
+                # Separate GT and prediction boxes by class
+                gt_boxes_by_class = defaultdict(list)
+                pred_boxes_by_class = defaultdict(list)
+                bbox_ids_by_class = defaultdict(list)  # Store bbox IDs for updating
+
+                for bbox_id, class_id, bbox_type, x1, y1, x2, y2, confidence, class_name in bbox_rows:
+
+                    if bbox_type == 'ground_truth':
+                        gt_boxes_by_class[class_name].append((x1, y1, x2, y2))
+                        bbox_ids_by_class[class_name].append({'id': bbox_id, 'type': 'gt', 'coords': (x1, y1, x2, y2)})
+                    elif bbox_type == 'prediction':
+                        # Filter by confidence threshold
+                        if confidence is None or confidence >= confidence_threshold:
+                            pred_boxes_by_class[class_name].append((x1, y1, x2, y2))
+                            bbox_ids_by_class[class_name].append({'id': bbox_id, 'type': 'pred', 'coords': (x1, y1, x2, y2), 'confidence': confidence})
+
+                # Reset classification for all boxes
+                for bbox_info in [item for sublist in bbox_ids_by_class.values() for item in sublist]:
+                    cursor.execute('''
+                        UPDATE bounding_boxes
+                        SET classification = NULL, iou = NULL
+                        WHERE id = ?
+                    ''', (bbox_info['id'],))
+
+                # Recalculate classifications for each class
+                image_has_fp = False
+                image_has_fn = False
+
+                for class_name, class_info in class_id_map.items():
+                    gt_boxes = gt_boxes_by_class[class_name]
+                    pred_boxes = pred_boxes_by_class[class_name]
+                    class_id = class_info['id']
+
+                    # Classify boxes with new threshold
+                    classification = classify_bounding_boxes(gt_boxes, pred_boxes, iou_threshold)
+
+                    # Update bounding boxes with new classifications and IoU values
+                    # True Positives
+                    for gt_idx, pred_idx in classification['tp']:
+                        # Find corresponding bbox IDs and update them
+                        gt_coords = gt_boxes[gt_idx]
+                        pred_coords = pred_boxes[pred_idx]
+
+                        # Update GT box as TP
+                        cursor.execute('''
+                            UPDATE bounding_boxes
+                            SET classification = 'tp'
+                            WHERE image_id = ? AND class_id = ? AND type = 'ground_truth'
+                            AND x1 = ? AND y1 = ? AND x2 = ? AND y2 = ?
+                        ''', (image_id, class_id, gt_coords[0], gt_coords[1], gt_coords[2], gt_coords[3]))
+
+                        # Calculate and update prediction box with IoU
+                        iou = calculate_iou(gt_coords, pred_coords)
+                        cursor.execute('''
+                            UPDATE bounding_boxes
+                            SET classification = 'tp', iou = ?
+                            WHERE image_id = ? AND class_id = ? AND type = 'prediction'
+                            AND x1 = ? AND y1 = ? AND x2 = ? AND y2 = ?
+                        ''', (iou, image_id, class_id, pred_coords[0], pred_coords[1], pred_coords[2], pred_coords[3]))
+
+                    # False Positives
+                    for pred_idx in classification['fp']:
+                        image_has_fp = True
+                        pred_coords = pred_boxes[pred_idx]
+                        cursor.execute('''
+                            UPDATE bounding_boxes
+                            SET classification = 'fp'
+                            WHERE image_id = ? AND class_id = ? AND type = 'prediction'
+                            AND x1 = ? AND y1 = ? AND x2 = ? AND y2 = ?
+                        ''', (image_id, class_id, pred_coords[0], pred_coords[1], pred_coords[2], pred_coords[3]))
+
+                    # False Negatives
+                    for gt_idx in classification['fn']:
+                        image_has_fn = True
+                        gt_coords = gt_boxes[gt_idx]
+                        cursor.execute('''
+                            UPDATE bounding_boxes
+                            SET classification = 'fn'
+                            WHERE image_id = ? AND class_id = ? AND type = 'ground_truth'
+                            AND x1 = ? AND y1 = ? AND x2 = ? AND y2 = ?
+                        ''', (image_id, class_id, gt_coords[0], gt_coords[1], gt_coords[2], gt_coords[3]))
+
+            # Update dataset metadata with new thresholds
+            cursor.execute('''
+                UPDATE dataset_metadata
+                SET iou_threshold = ?, confidence_threshold = ?, last_updated = CURRENT_TIMESTAMP
+                WHERE id = ?
+            ''', (iou_threshold, confidence_threshold, dataset_id))
+
+            # Recalculate metrics for each class
+            classes_data = []
+            overall_tp = 0
+            overall_fp = 0
+            overall_fn = 0
+            total_gt = 0
+            total_pred = 0
+
+            for class_name, class_info in class_id_map.items():
+                class_id = class_info['id']
+
+                # Get all boxes for this class
+                cursor.execute('''
+                    SELECT type, classification
+                    FROM bounding_boxes
+                    WHERE class_id = ?
+                ''', (class_id,))
+
+                tp_count = 0
+                fp_count = 0
+                fn_count = 0
+                total_gt_count = 0
+                total_pred_count = 0
+
+                for row in cursor.fetchall():
+                    box_type = row[0]
+                    classification = row[1]
+
+                    if box_type == 'ground_truth':
+                        total_gt_count += 1
+                        if classification == 'fn':
+                            fn_count += 1
+                    elif box_type == 'prediction':
+                        total_pred_count += 1
+                        if classification == 'fp':
+                            fp_count += 1
+                        elif classification == 'tp':
+                            tp_count += 1
+
+                # Calculate metrics
+                metrics = calculate_class_metrics(tp_count, fp_count, fn_count)
+
+                # Update class metrics in database
+                cursor.execute('''
+                    UPDATE classes
+                    SET total_gt_count = ?, total_pred_count = ?,
+                        tp_count = ?, fp_count = ?, fn_count = ?,
+                        recall = ?, precision = ?, fpr = ?, f1_score = ?
+                    WHERE id = ?
+                ''', (
+                    total_gt_count, total_pred_count,
+                    tp_count, fp_count, fn_count,
+                    metrics['recall'], metrics['precision'], metrics['fpr'], metrics['f1_score'],
+                    class_id
+                ))
+
+                # Add to classes_data
+                classes_data.append({
+                    'id': class_id,
+                    'name': class_name,
+                    'total_gt_count': total_gt_count,
+                    'total_pred_count': total_pred_count,
+                    'tp_count': tp_count,
+                    'fp_count': fp_count,
+                    'fn_count': fn_count,
+                    'recall': metrics['recall'],
+                    'precision': metrics['precision'],
+                    'fpr': metrics['fpr'],
+                    'f1_score': metrics['f1_score']
+                })
+
+                # Accumulate for overall metrics
+                overall_tp += tp_count
+                overall_fp += fp_count
+                overall_fn += fn_count
+                total_gt += total_gt_count
+                total_pred += total_pred_count
+
+            # Calculate overall metrics
+            if (overall_tp + overall_fn) > 0:
+                overall_recall = overall_tp / (overall_tp + overall_fn)
+            else:
+                overall_recall = 0.0
+
+            if (overall_tp + overall_fp) > 0:
+                overall_precision = overall_tp / (overall_tp + overall_fp)
+            else:
+                overall_precision = 0.0
+
+            if (overall_precision + overall_recall) > 0:
+                overall_f1 = 2 * (overall_precision * overall_recall) / (overall_precision + overall_recall)
+            else:
+                overall_f1 = 0.0
+
+            if (overall_fp + overall_tp) > 0:
+                overall_fpr = overall_fp / (overall_fp + overall_tp)
+            else:
+                overall_fpr = 0.0
+
+            overall_metrics = {
+                'total_gt_boxes': total_gt,
+                'total_pred_boxes': total_pred,
+                'total_tp': overall_tp,
+                'total_fp': overall_fp,
+                'total_fn': overall_fn,
+                'recall': overall_recall,
+                'precision': overall_precision,
+                'fpr': overall_fpr,
+                'f1_score': overall_f1
+            }
+
+            conn.commit()
+
+            return {
+                'success': True,
+                'classes': classes_data,
+                'overall_metrics': overall_metrics,
+                'iou_threshold': iou_threshold,
+                'confidence_threshold': confidence_threshold,
+                'errors': errors
+            }
+
+    except Exception as e:
+        return {
+            'success': False,
+            'errors': [str(e)],
+            'iou_threshold': iou_threshold,
+            'confidence_threshold': confidence_threshold
+        }
+
+
 if __name__ == "__main__":
     # Test dataset loading
     import sys
