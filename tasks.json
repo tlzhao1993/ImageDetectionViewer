@@ -1,15 +1,5 @@
 [
   {
-    "category": "functional",
-    "description": "Implement per-image statistics table showing Class, GT, Pred, TP, FP, FN breakdown",
-    "steps": [
-      "Step 1: Select an image with detections",
-      "Step 2: Scroll to per-image statistics section",
-      "Step 3: Verify table shows correct counts for each class present in image"
-    ],
-    "passes": false
-  },
-  {
     "category": "style",
     "description": "Per-image statistics section styling with summary card and breakdown table",
     "steps": [
@@ -520,6 +510,16 @@
       "Step 2: Click zoom (-) button and verify image scales down",
       "Step 3: Click reset zoom button and verify image returns to default scale",
       "Step 4: Drag zoomed image and verify panning works"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement per-image statistics table showing Class, GT, Pred, TP, FP, FN breakdown",
+    "steps": [
+      "Step 1: Select an image with detections",
+      "Step 2: Scroll to per-image statistics section",
+      "Step 3: Verify table shows correct counts for each class present in image"
     ],
     "passes": true
   }

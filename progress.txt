@@ -1,3 +1,36 @@
+[2026-03-09] 完成了任务: Implement per-image statistics table showing Class, GT, Pred, TP, FP, FN breakdown
+
+完成的任务描述: 实现了每张图片的统计表格，显示每个类别的GT、Pred、TP、FP、FN数值
+
+测试结果:
+- Step 1: Select an image with detections - 通过
+  验证内容: 成功选择了带有检测框的图片（test_image_1.png）
+- Step 2: Scroll to per-image statistics section - 通过
+  验证内容: 成功滚动到每张图片统计部分，表格可见
+- Step 3: Verify table shows correct counts for each class present in image - 通过
+  验证内容: 表格正确显示每个类别的统计数据：person (GT=1, Pred=1, TP=1, FP=0, FN=0)
+  第二张图片测试：多个类别的统计正确显示：bicycle (GT=0, Pred=1, TP=0, FP=1, FN=0), car (GT=2, Pred=1, TP=1, FP=0, FN=1), person (GT=1, Pred=1, TP=1, FP=0, FN=0)
+  表头验证: ["Class", "GT", "Pred", "TP", "FP", "FN"] - 全部正确
+
+实现的功能:
+- app/templates/base.html中的image-statistics-section部分 (第413-438行):
+  * 包含summary card（文件名和尺寸）
+  * 包含per-image statistics表格，显示每个类别的统计
+  * 表格包含列：Class, GT, Pred, TP, FP, FN
+- app/static/js/app.js中的updateImageDetail方法 (第333-465行):
+  * 使用per_class_stats数据构建表格行
+  * 显示每个类别的gt_count、pred_count、tp、fp、fn统计
+  * 正确处理没有统计数据的情况（显示"No statistics available"）
+
+发现并解决的问题:
+无问题。该功能在之前的实现中已经完成，此次任务主要是验证和测试现有功能是否符合要求。所有测试步骤都完美通过。
+
+建议下一步:
+建议执行下一个任务: "Per-image statistics section styling with summary card and breakdown table"，该任务需要验证每张图片统计部分的样式。
+
+当前工程完成状态: 35个测试通过，共52个测试
+
+
 [2026-03-09] 完成了任务: Implement zoom/pan functionality for detailed image inspection
 
 完成的任务描述: 实现了图片缩放和平移功能，用于详细的图像检查
