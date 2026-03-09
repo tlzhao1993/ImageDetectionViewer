@@ -1,15 +1,5 @@
 [
   {
-    "category": "style",
-    "description": "Statistics Dashboard styling with proper layout hierarchy and card components",
-    "steps": [
-      "Step 1: Navigate to Statistics Dashboard",
-      "Step 2: Take screenshot and verify cards have 8px rounded corners and subtle shadow",
-      "Step 3: Verify proper spacing between sections and visual hierarchy (headings, body text)"
-    ],
-    "passes": false
-  },
-  {
     "category": "functional",
     "description": "Integrate Chart.js for per-class metrics visualization (recall, precision, FPR bar charts)",
     "steps": [
@@ -520,6 +510,16 @@
       "Step 1: Navigate to Statistics Dashboard page",
       "Step 2: Verify summary cards section exists with placeholders for metrics",
       "Step 3: Verify charts section containers and metrics table structure are present"
+    ],
+    "passes": true
+  },
+  {
+    "category": "style",
+    "description": "Statistics Dashboard styling with proper layout hierarchy and card components",
+    "steps": [
+      "Step 1: Navigate to Statistics Dashboard",
+      "Step 2: Take screenshot and verify cards have 8px rounded corners and subtle shadow",
+      "Step 3: Verify proper spacing between sections and visual hierarchy (headings, body text)"
     ],
     "passes": true
   }
