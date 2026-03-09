@@ -1,15 +1,5 @@
 [
   {
-    "category": "functional",
-    "description": "Implement loading overlay with spinner during data processing",
-    "steps": [
-      "Step 1: Trigger dataset loading by providing a dataset path",
-      "Step 2: Verify semi-transparent overlay appears with rotating spinner",
-      "Step 3: Verify overlay disappears after data processing completes"
-    ],
-    "passes": false
-  },
-  {
     "category": "style",
     "description": "Loading overlay styling with gradient border spinner and backdrop blur",
     "steps": [
@@ -520,6 +510,16 @@
       "Step 1: Select first image in list",
       "Step 2: Click 'Next' button and verify second image is loaded",
       "Step 3: Click 'Previous' button and verify first image is loaded again"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement loading overlay with spinner during data processing",
+    "steps": [
+      "Step 1: Trigger dataset loading by providing a dataset path",
+      "Step 2: Verify semi-transparent overlay appears with rotating spinner",
+      "Step 3: Verify overlay disappears after data processing completes"
     ],
     "passes": true
   }

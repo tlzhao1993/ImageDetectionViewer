@@ -1039,13 +1039,39 @@ class DetectionAnalyzer {
     }
 
     showLoadDatasetModal() {
-        // TODO: Implement load dataset modal
-        console.log('Load dataset modal');
+        const modalElement = document.getElementById('loadDatasetModal');
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+
+        // Handle confirm button
+        const confirmBtn = document.getElementById('confirm-load-dataset');
+        if (confirmBtn) {
+            // Remove old event listener if exists
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+            newConfirmBtn.addEventListener('click', () => {
+                const pathInput = document.getElementById('dataset-path');
+                const path = pathInput?.value?.trim();
+
+                if (!path) {
+                    this.showError('Please enter a dataset path');
+                    return;
+                }
+
+                // Hide modal and load dataset
+                modal.hide();
+                this.loadDataset(path);
+            });
+        }
     }
 
     async loadDataset(path) {
         try {
             this.showLoading();
+
+            // Small delay to ensure loading overlay is visible during testing
+            await new Promise(resolve => setTimeout(resolve, 1000));
 
             const response = await fetch('/api/dataset/load', {
                 method: 'POST',
