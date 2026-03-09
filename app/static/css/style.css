@@ -495,15 +495,48 @@ table.table tbody tr:hover,
     min-height: 300px;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .image-view-container {
-        flex-direction: column;
+/* Responsive Layouts for Image Comparison View */
+
+/* Mobile layout (<768px): single column - stack panels vertically */
+@media (max-width: 767px) {
+    /* Stack the row vertically */
+    #comparison-page .row {
+        flex-direction: column !important;
     }
 
-    .image-list-panel,
-    .image-detail-panel {
+    #comparison-page .image-list-panel,
+    #comparison-page .image-detail-panel {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
         height: auto;
         border-right: none;
     }
+
+    #comparison-page .image-detail-panel {
+        border-top: 1px solid var(--border-light);
+    }
 }
+
+/* Tablet layout (768px-1024px): 30% left panel, 70% right panel */
+@media (min-width: 768px) and (max-width: 1024px) {
+    /* Ensure horizontal layout - use higher specificity */
+    #comparison-page > .row.g-0 {
+        flex-direction: row !important;
+    }
+
+    /* Override Bootstrap col-md-4 (33.33%) and col-md-8 (66.67%) */
+    #comparison-page .image-list-panel {
+        width: 30% !important;
+        max-width: 30% !important;
+        flex: 0 0 30% !important;
+    }
+
+    #comparison-page .image-detail-panel {
+        width: 70% !important;
+        max-width: 70% !important;
+        flex: 0 0 70% !important;
+    }
+}
+
+/* Desktop layout (>1024px): 25% left panel, 75% right panel - Bootstrap default works */

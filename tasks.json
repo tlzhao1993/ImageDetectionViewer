@@ -1,15 +1,5 @@
 [
   {
-    "category": "style",
-    "description": "Responsive layout for Image Comparison View (single column on mobile, 30/70 on tablet, 25/75 on desktop)",
-    "steps": [
-      "Step 1: Navigate to Image Comparison View at desktop width (>1024px)",
-      "Step 2: Take screenshot and verify 25/75 column layout",
-      "Step 3: Resize to mobile (<768px) and take screenshot verifying single column layout"
-    ],
-    "passes": false
-  },
-  {
     "category": "functional",
     "description": "Implement image list with thumbnails, search, and class/status filters",
     "steps": [
@@ -251,6 +241,16 @@
       "Step 3: Verify chart has proper bin distribution and color gradient from low to high confidence"
     ],
     "passes": false
+  },
+  {
+    "category": "style",
+    "description": "Responsive layout for Image Comparison View (single column on mobile, 30/70 on tablet, 25/75 on desktop)",
+    "steps": [
+      "Step 1: Navigate to Image Comparison View at desktop width (>1024px)",
+      "Step 2: Take screenshot and verify 25/75 column layout",
+      "Step 3: Resize to mobile (<768px) and take screenshot verifying single column layout"
+    ],
+    "passes": true
   },
   {
     "category": "functional",
