@@ -1,16 +1,6 @@
 [
   {
     "category": "functional",
-    "description": "Create SQLite database schema with all required tables (dataset_metadata, image_metadata, classes, bounding_boxes)",
-    "steps": [
-      "Step 1: Initialize the application and trigger database creation",
-      "Step 2: Check that dataset_analysis.db file exists",
-      "Step 3: Verify all four tables exist with correct columns (use SQLite browser or sqlite3 command)"
-    ],
-    "passes": false
-  },
-  {
-    "category": "functional",
     "description": "Implement dataset validation function to check for required directories (images/, gt/, predictions/)",
     "steps": [
       "Step 1: Provide a valid dataset path to the validation function",
@@ -517,9 +507,19 @@
     "category": "functional",
     "description": "Configure Flask application with CORS support and static file serving",
     "steps": [
-      "Step 1: Start the Flask server with python app.py",
+      "Step 1: Start the Flask server with python run.py",
       "Step 2: Access /api/health endpoint and verify JSON response with status: 'healthy'",
       "Step 3: Verify static files are served correctly by accessing /static path"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Create SQLite database schema with all required tables (dataset_metadata, image_metadata, classes, bounding_boxes)",
+    "steps": [
+      "Step 1: Initialize the application and trigger database creation",
+      "Step 2: Check that dataset_analysis.db file exists",
+      "Step 3: Verify all four tables exist with correct columns (use SQLite browser or sqlite3 command)"
     ],
     "passes": true
   }
