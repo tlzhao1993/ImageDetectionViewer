@@ -1,16 +1,6 @@
 [
   {
     "category": "functional",
-    "description": "Implement API endpoint GET /api/statistics/:dataset_id for retrieving per-class statistics",
-    "steps": [
-      "Step 1: Load a dataset and get the dataset_id",
-      "Step 2: Call GET /api/statistics/:dataset_id endpoint",
-      "Step 3: Verify response contains classes array with all metrics (recall, precision, fpr, f1_score)"
-    ],
-    "passes": false
-  },
-  {
-    "category": "functional",
     "description": "Implement API endpoint POST /api/statistics/recalculate for threshold adjustment",
     "steps": [
       "Step 1: Send POST request with new iou_threshold and confidence_threshold",
@@ -520,6 +510,16 @@
       "Step 1: Send POST request with valid dataset_path and iou_threshold",
       "Step 2: Verify response includes success: true, dataset_id, total_images, total_classes",
       "Step 3: Verify database contains entries for all loaded images and classes"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement API endpoint GET /api/statistics/:dataset_id for retrieving per-class statistics",
+    "steps": [
+      "Step 1: Load a dataset and get the dataset_id",
+      "Step 2: Call GET /api/statistics/:dataset_id endpoint",
+      "Step 3: Verify response contains classes array with all metrics (recall, precision, fpr, f1_score)"
     ],
     "passes": true
   }

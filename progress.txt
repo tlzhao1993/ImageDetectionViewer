@@ -1,3 +1,38 @@
+[2026-03-09] 完成了任务: Implement API endpoint GET /api/statistics/:dataset_id for retrieving per-class statistics
+
+完成的任务描述: 实现API端点GET /api/statistics/:dataset_id用于获取每个类别的统计信息
+
+测试结果:
+- Step 1: Load a dataset and get the dataset_id - 通过
+  验证内容: 使用之前加载的数据集（dataset_id=1），该数据集包含4张图像和3个类别
+- Step 2: Call GET /api/statistics/:dataset_id endpoint - 通过
+  验证内容: 成功调用http://localhost:5000/api/statistics/1，返回JSON响应
+- Step 3: Verify response contains classes array with all metrics (recall, precision, fpr, f1_score) - 通过
+  验证内容: 响应包含classes数组，每个类别都有完整的指标信息，包括recall、precision、fpr、f1_score
+  额外验证: iou_threshold和confidence_threshold也正确返回
+
+额外测试通过:
+- API返回正确的整体指标（overall_metrics）
+- 类别按名称排序
+- 数据集不存在时返回404错误
+- 所有浮点数精度正确
+
+发现并解决的问题:
+修复了iou_threshold和confidence_threshold的索引错误（从dataset_row[3]/[4]改为dataset_row[4]/[5]）
+
+实现的功能:
+- 在run.py中添加了GET /api/statistics/:dataset_id API端点
+- 从数据库检索指定数据集的所有类别统计信息
+- 计算并返回整体指标（overall_metrics）
+- 实现了数据集存在性检查（返回404如果不存在）
+- 支持按类别名称排序返回结果
+
+建议下一步:
+建议执行下一个任务: "Implement API endpoint POST /api/statistics/recalculate for threshold adjustment"，该任务需要实现根据新阈值重新计算统计信息的API端点。
+
+当前工程完成状态: 12个测试通过，共52个测试
+
+
 [2026-03-09] 完成了任务: Implement API endpoint POST /api/dataset/load for dataset loading and parsing
 
 完成的任务描述: 实现API端点POST /api/dataset/load用于数据集加载和解析
