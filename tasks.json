@@ -1,16 +1,6 @@
 [
   {
     "category": "functional",
-    "description": "Implement IoU calculation function for bounding box matching",
-    "steps": [
-      "Step 1: Test with two perfectly overlapping boxes (IoU should be 1.0)",
-      "Step 2: Test with two non-overlapping boxes (IoU should be 0.0)",
-      "Step 3: Test with partially overlapping boxes and verify IoU value between 0.0 and 1.0"
-    ],
-    "passes": false
-  },
-  {
-    "category": "functional",
     "description": "Implement bounding box classification (TP/FP/FN) based on IoU threshold",
     "steps": [
       "Step 1: Provide ground truth and prediction boxes with IoU >= threshold (should be classified as TP)",
@@ -520,6 +510,16 @@
       "Step 1: Load a sample image through the thumbnail generation function",
       "Step 2: Verify thumbnail file is created in the thumbnails directory",
       "Step 3: Verify thumbnail dimensions are 150x150px with aspect ratio preserved"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement IoU calculation function for bounding box matching",
+    "steps": [
+      "Step 1: Test with two perfectly overlapping boxes (IoU should be 1.0)",
+      "Step 2: Test with two non-overlapping boxes (IoU should be 0.0)",
+      "Step 3: Test with partially overlapping boxes and verify IoU value between 0.0 and 1.0"
     ],
     "passes": true
   }
