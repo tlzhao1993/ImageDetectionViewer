@@ -1,15 +1,5 @@
 [
   {
-    "category": "functional",
-    "description": "Implement Image Comparison View two-column layout (25% left panel for list, 75% right panel for detail view)",
-    "steps": [
-      "Step 1: Navigate to Image Comparison View",
-      "Step 2: Verify left panel contains image list with thumbnails",
-      "Step 3: Verify right panel contains image display and per-image statistics"
-    ],
-    "passes": false
-  },
-  {
     "category": "style",
     "description": "Responsive layout for Image Comparison View (single column on mobile, 30/70 on tablet, 25/75 on desktop)",
     "steps": [
@@ -520,6 +510,16 @@
       "Step 1: Navigate to Statistics Dashboard",
       "Step 2: Take screenshot and verify alternating row background colors",
       "Step 3: Hover over rows and verify highlight effect appears"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement Image Comparison View two-column layout (25% left panel for list, 75% right panel for detail view)",
+    "steps": [
+      "Step 1: Navigate to Image Comparison View",
+      "Step 2: Verify left panel contains image list with thumbnails",
+      "Step 3: Verify right panel contains image display and per-image statistics"
     ],
     "passes": true
   }

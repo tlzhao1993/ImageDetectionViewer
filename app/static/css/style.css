@@ -138,6 +138,7 @@ body {
     height: calc(100vh - 56px);
     overflow-y: auto;
     border-right: 1px solid var(--border-light);
+    background-color: white;
 }
 
 .image-list-item {
@@ -145,6 +146,9 @@ body {
     border-bottom: 1px solid var(--border-light);
     cursor: pointer;
     transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .image-list-item:hover {
@@ -164,11 +168,30 @@ body {
     border-radius: 4px;
 }
 
+.image-list-item .image-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.image-list-item .filename {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+}
+
+.image-list-item .image-stats {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
 .status-dot {
     width: 10px;
     height: 10px;
     border-radius: 50%;
     display: inline-block;
+    flex-shrink: 0;
 }
 
 .status-perfect { background-color: var(--success-color); }
@@ -178,6 +201,31 @@ body {
 .image-detail-panel {
     height: calc(100vh - 56px);
     overflow-y: auto;
+    background-color: var(--bg-light);
+}
+
+/* Image detail sections */
+.image-header-section {
+    background-color: white;
+    padding: 16px;
+    border-bottom: 1px solid var(--border-light);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.image-display-section {
+    padding: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+}
+
+.image-statistics-section {
+    padding: 16px;
+    background-color: white;
+    border-top: 1px solid var(--border-light);
 }
 
 /* Canvas Overlay */

@@ -49,8 +49,7 @@ class DetectionAnalyzer {
         if (hash === '#dashboard') {
             this.showDashboard();
         } else if (hash === '#comparison') {
-            // TODO: Implement comparison view
-            console.log('Comparison view');
+            this.showComparisonView();
         }
     }
 
@@ -82,6 +81,231 @@ class DetectionAnalyzer {
         }
     }
 
+    showComparisonView() {
+        const comparisonPage = document.getElementById('comparison-page');
+        const emptyState = document.getElementById('comparison-empty-state');
+
+        if (comparisonPage && emptyState) {
+            if (this.datasetId) {
+                comparisonPage.style.display = 'block';
+                emptyState.style.display = 'none';
+                // Load images list
+                this.loadImagesList();
+            } else {
+                comparisonPage.style.display = 'none';
+                emptyState.style.display = 'block';
+            }
+        }
+    }
+
+    async loadImagesList() {
+        if (!this.datasetId) return;
+
+        try {
+            const response = await fetch(`/api/images/${this.datasetId}?per_page=50`);
+            const data = await response.json();
+
+            if (data.success) {
+                this.updateImagesList(data.images);
+            }
+        } catch (error) {
+            console.error('Error loading images list:', error);
+            const container = document.getElementById('image-list-container');
+            if (container) {
+                container.innerHTML = '<div class="text-center text-danger py-5">Failed to load images</div>';
+            }
+        }
+    }
+
+    updateImagesList(images) {
+        const container = document.getElementById('image-list-container');
+        if (!container) return;
+
+        if (!images || images.length === 0) {
+            container.innerHTML = '<div class="text-center text-muted py-5">No images found</div>';
+            return;
+        }
+
+        container.innerHTML = images.map(image => {
+            const statusClass = image.is_perfect ? 'status-perfect' : (image.has_fp || image.has_fn ? 'status-warning' : 'status-perfect');
+            return `
+                <div class="image-list-item" data-image-id="${image.id}">
+                    <img src="${image.thumbnail_path || ''}" alt="${this.escapeHtml(image.filename)}" class="thumbnail" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22%3E%3Crect fill=%22%23e2e8f0%22 width=%22100%25%22 height=%22100%25%22/%3E%3Ctext fill=%22%2394a3b8%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3E%3F%3C/text%3E%3C/svg%3E'">
+                    <div class="image-info">
+                        <div class="filename">${this.escapeHtml(image.filename)}</div>
+                        <div class="image-stats">
+                            GT: ${image.total_gt_boxes} | Pred: ${image.total_pred_boxes}
+                        </div>
+                    </div>
+                    <span class="status-dot ${statusClass}" title="${image.is_perfect ? 'Perfect' : (image.has_fp || image.has_fn ? 'Has errors' : 'Good')}"></span>
+                </div>
+            `;
+        }).join('');
+
+        // Add click event listeners to image list items
+        container.querySelectorAll('.image-list-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const imageId = parseInt(item.getAttribute('data-image-id'));
+                this.selectImage(imageId);
+            });
+        });
+    }
+
+    async selectImage(imageId) {
+        if (!this.datasetId) return;
+
+        this.currentImageId = imageId;
+
+        // Update active state in list
+        document.querySelectorAll('.image-list-item').forEach(item => {
+            item.classList.remove('active');
+            if (parseInt(item.getAttribute('data-image-id')) === imageId) {
+                item.classList.add('active');
+            }
+        });
+
+        // Load image details
+        await this.loadImageDetail(imageId);
+    }
+
+    async loadImageDetail(imageId) {
+        if (!this.datasetId) return;
+
+        const detailContent = document.getElementById('image-detail-content');
+        if (detailContent) {
+            detailContent.innerHTML = '<div class="text-center py-5"><i class="fas fa-spinner fa-spin fa-2x mb-3"></i><p>Loading image details...</p></div>';
+        }
+
+        try {
+            const response = await fetch(`/api/images/${this.datasetId}/${imageId}`);
+            const data = await response.json();
+
+            if (data.success) {
+                this.updateImageDetail(data);
+            }
+        } catch (error) {
+            console.error('Error loading image detail:', error);
+            if (detailContent) {
+                detailContent.innerHTML = '<div class="text-center text-danger py-5">Failed to load image details</div>';
+            }
+        }
+    }
+
+    updateImageDetail(data) {
+        const detailContent = document.getElementById('image-detail-content');
+        if (!detailContent) return;
+
+        // Calculate total boxes
+        const totalGT = data.ground_truth_boxes ? data.ground_truth_boxes.length : 0;
+        const totalPred = data.prediction_boxes ? data.prediction_boxes.length : 0;
+
+        // Build per-class stats table rows
+        const classStatsRows = Object.entries(data.per_class_stats || {}).map(([className, stats]) => `
+            <tr>
+                <td>${this.escapeHtml(className)}</td>
+                <td class="text-center">${stats.gt_count || 0}</td>
+                <td class="text-center">${stats.pred_count || 0}</td>
+                <td class="text-center">${stats.tp || 0}</td>
+                <td class="text-center">${stats.fp || 0}</td>
+                <td class="text-center">${stats.fn || 0}</td>
+            </tr>
+        `).join('');
+
+        detailContent.innerHTML = `
+            <div class="image-header-section">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="mb-1"><i class="fas fa-image me-2"></i>${this.escapeHtml(data.filename)}</h5>
+                        <p class="mb-0 text-muted">
+                            <small>${data.dimensions ? `${data.dimensions.width} x ${data.dimensions.height} pixels` : ''}</small>
+                        </p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary btn-sm" id="prev-image-btn">
+                            <i class="fas fa-chevron-left me-1"></i> Previous
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm" id="next-image-btn">
+                            Next <i class="fas fa-chevron-right ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="d-flex gap-3">
+                    <span class="badge bg-primary">GT: ${totalGT}</span>
+                    <span class="badge bg-info">Pred: ${totalPred}</span>
+                </div>
+            </div>
+
+            <div class="image-display-section">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="text-muted">
+                            <i class="fas fa-image fa-3x mb-3"></i>
+                            <p class="mb-0">Image display functionality will be implemented in next task</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-statistics-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Per-Image Statistics</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Class</th>
+                                        <th class="text-center">GT</th>
+                                        <th class="text-center">Pred</th>
+                                        <th class="text-center">TP</th>
+                                        <th class="text-center">FP</th>
+                                        <th class="text-center">FN</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${classStatsRows || '<tr><td colspan="6" class="text-center text-muted">No statistics available</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add event listeners for navigation buttons
+        const prevBtn = document.getElementById('prev-image-btn');
+        const nextBtn = document.getElementById('next-image-btn');
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => this.navigateImage(-1));
+        }
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => this.navigateImage(1));
+        }
+    }
+
+    navigateImage(direction) {
+        const items = document.querySelectorAll('.image-list-item');
+        if (items.length === 0) return;
+
+        let currentIndex = -1;
+        items.forEach((item, index) => {
+            if (item.classList.contains('active')) {
+                currentIndex = index;
+            }
+        });
+
+        if (currentIndex === -1) return;
+
+        let newIndex = currentIndex + direction;
+        if (newIndex < 0) newIndex = items.length - 1;
+        if (newIndex >= items.length) newIndex = 0;
+
+        const newImageId = parseInt(items[newIndex].getAttribute('data-image-id'));
+        this.selectImage(newImageId);
+    }
+
     setupEventListeners() {
         // Load dataset button (navbar)
         const loadDatasetBtn = document.getElementById('btn-load-dataset');
@@ -93,6 +317,12 @@ class DetectionAnalyzer {
         const emptyLoadDatasetBtn = document.getElementById('empty-load-dataset');
         if (emptyLoadDatasetBtn) {
             emptyLoadDatasetBtn.addEventListener('click', () => this.showLoadDatasetModal());
+        }
+
+        // Load dataset button (comparison view)
+        const comparisonLoadDatasetBtn = document.getElementById('comparison-load-dataset');
+        if (comparisonLoadDatasetBtn) {
+            comparisonLoadDatasetBtn.addEventListener('click', () => this.showLoadDatasetModal());
         }
 
         // IoU threshold slider

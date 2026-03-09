@@ -249,6 +249,54 @@
             </div>
         </div>
 
+        <!-- Image Comparison View Page Template -->
+        <div id="comparison-page" class="page" style="display: none;">
+            <div class="row g-0">
+                <!-- Left Panel - Image List (25%) -->
+                <div class="col-lg-3 col-md-4 image-list-panel bg-white">
+                    <div class="p-3 border-bottom bg-light">
+                        <h6 class="mb-0">
+                            <i class="fas fa-images me-2"></i>Image List
+                        </h6>
+                    </div>
+                    <div id="image-list-container" class="p-2">
+                        <!-- Image list items will be dynamically loaded here -->
+                        <div class="text-center text-muted py-5">
+                            <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
+                            <p>Loading images...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel - Image Detail View (75%) -->
+                <div class="col-lg-9 col-md-8 image-detail-panel bg-light">
+                    <div id="image-detail-content" class="h-100">
+                        <!-- Image detail content will be loaded here -->
+                        <div class="text-center text-muted py-5">
+                            <i class="fas fa-image fa-3x mb-3"></i>
+                            <p>Select an image to view details</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State for Comparison View (shown when no dataset is loaded) -->
+        <div id="comparison-empty-state" class="container-fluid py-4" style="display: none;">
+            <div class="row">
+                <div class="col-12">
+                    <div class="empty-state">
+                        <i class="fas fa-folder-open"></i>
+                        <h3>No Dataset Loaded</h3>
+                        <p>Load a dataset to compare ground truth and prediction images</p>
+                        <button class="btn btn-primary btn-lg" id="comparison-load-dataset">
+                            <i class="fas fa-folder-open me-2"></i> Load Dataset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Empty State for Dashboard (shown when no dataset is loaded) -->
         <div id="dashboard-empty-state" class="container-fluid py-4" style="display: none;">
             <div class="row">
