@@ -201,12 +201,63 @@ body {
     color: white;
 }
 
+.table thead th {
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s;
+}
+
+.table thead th:hover {
+    background-color: #1a365d;
+}
+
+.table tbody tr {
+    background-color: transparent;
+    transition: background-color 0.2s ease;
+}
+
 .table tbody tr:nth-child(even) {
     background-color: #f8fafc;
 }
 
-.table tbody tr:hover {
-    background-color: #f0f9ff;
+/* Override Bootstrap table-hover behavior with higher specificity */
+table.table tbody tr:hover,
+.table > tbody > tr:hover,
+.table.table-hover tbody tr:hover {
+    background-color: #f0f9ff !important;
+}
+
+/* Sort indicator styles */
+.sort-icon {
+    display: inline-block;
+    margin-left: 5px;
+    font-size: 0.75em;
+    color: rgba(255, 255, 255, 0.7);
+    transition: color 0.2s;
+}
+
+.sort-icon::before {
+    content: '\f0dc'; /* FontAwesome sort icon */
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+}
+
+.sort-icon:empty::before {
+    content: '\f0dc'; /* Default sort icon */
+}
+
+/* Sortable header active state */
+.table thead th.sortable[aria-sort="ascending"] .sort-icon::before,
+.table thead th.sortable .sort-icon[data-direction="asc"]::before {
+    content: '\f0de'; /* Sort ascending */
+    color: white;
+}
+
+.table thead th.sortable[aria-sort="descending"] .sort-icon::before,
+.table thead th.sortable .sort-icon[data-direction="desc"]::before {
+    content: '\f0dd'; /* Sort descending */
+    color: white;
 }
 
 /* Loading Overlay */

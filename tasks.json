@@ -1,14 +1,4 @@
 [
-    {
-    "category": "style",
-    "description": "Metrics table styling with zebra striping, hover states, and sortable indicators",
-    "steps": [
-      "Step 1: Navigate to Statistics Dashboard",
-      "Step 2: Take screenshot and verify alternating row background colors",
-      "Step 3: Hover over rows and verify highlight effect appears"
-    ],
-    "passes": false
-  },
   {
     "category": "functional",
     "description": "Implement Image Comparison View two-column layout (25% left panel for list, 75% right panel for detail view)",
@@ -520,6 +510,16 @@
       "Step 1: Navigate to Statistics Dashboard",
       "Step 2: Click table header to sort and verify rows reorder correctly",
       "Step 3: Use search box and verify table filters by class name"
+    ],
+    "passes": true
+  },
+  {
+    "category": "style",
+    "description": "Metrics table styling with zebra striping, hover states, and sortable indicators",
+    "steps": [
+      "Step 1: Navigate to Statistics Dashboard",
+      "Step 2: Take screenshot and verify alternating row background colors",
+      "Step 3: Hover over rows and verify highlight effect appears"
     ],
     "passes": true
   }
