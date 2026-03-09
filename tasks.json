@@ -1,15 +1,5 @@
 [
   {
-    "category": "functional",
-    "description": "Implement empty state handling when no dataset is loaded",
-    "steps": [
-      "Step 1: Navigate to Statistics Dashboard without loading dataset",
-      "Step 2: Verify empty state message is displayed",
-      "Step 3: Verify 'Load Dataset' button is available and functional"
-    ],
-    "passes": false
-  },
-  {
     "category": "style",
     "description": "Empty state design with helpful illustration and clear call-to-action",
     "steps": [
@@ -520,6 +510,16 @@
       "Step 1: Trigger an error condition",
       "Step 2: Take screenshot and verify modal has clear error title and message",
       "Step 3: Verify close button is prominently styled and easily clickable"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement empty state handling when no dataset is loaded",
+    "steps": [
+      "Step 1: Navigate to Statistics Dashboard without loading dataset",
+      "Step 2: Verify empty state message is displayed",
+      "Step 3: Verify 'Load Dataset' button is available and functional"
     ],
     "passes": true
   }

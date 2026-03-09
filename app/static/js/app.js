@@ -80,6 +80,7 @@ class DetectionAnalyzer {
     showDashboard() {
         const dashboardPage = document.getElementById('dashboard-page');
         const emptyState = document.getElementById('dashboard-empty-state');
+        const comparisonEmptyState = document.getElementById('comparison-empty-state');
 
         if (dashboardPage && emptyState) {
             if (this.datasetId) {
@@ -91,6 +92,11 @@ class DetectionAnalyzer {
             }
         }
 
+        // Hide comparison empty state
+        if (comparisonEmptyState) {
+            comparisonEmptyState.style.display = 'none';
+        }
+
         // Load statistics if dataset is loaded
         if (this.datasetId) {
             this.loadStatistics();
@@ -100,6 +106,7 @@ class DetectionAnalyzer {
     showComparisonView() {
         const comparisonPage = document.getElementById('comparison-page');
         const emptyState = document.getElementById('comparison-empty-state');
+        const dashboardEmptyState = document.getElementById('dashboard-empty-state');
 
         if (comparisonPage && emptyState) {
             if (this.datasetId) {
@@ -113,6 +120,11 @@ class DetectionAnalyzer {
                 comparisonPage.style.display = 'none';
                 emptyState.style.display = 'block';
             }
+        }
+
+        // Hide dashboard empty state
+        if (dashboardEmptyState) {
+            dashboardEmptyState.style.display = 'none';
         }
     }
 
