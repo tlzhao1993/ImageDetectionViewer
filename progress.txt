@@ -1,3 +1,28 @@
+[2026-03-09] 完成了任务: Implement metric calculation functions (recall, precision, FPR, F1 Score) per class
+
+完成的任务描述: 实现每类的指标计算函数（recall、precision、FPR、F1 Score）
+
+测试结果:
+- Step 1: Calculate recall for a class with known TP and FN values, verify formula TP/(TP+FN) - 通过
+  验证内容: TP=80, FN=15时，recall=0.842105（预期值完全匹配）；TP=50, FN=0时，recall=1.0000（perfect recall）；TP=0, FN=10时，recall=0.0000（no predictions）
+- Step 2: Calculate precision for a class with known TP and FP values, verify formula TP/(TP+FP) - 通过
+  验证内容: TP=80, FP=10时，precision=0.888889（预期值完全匹配）；TP=50, FP=50时，precision=0.500000（低precision情况）
+- Step 3: Calculate F1 Score using precision and recall, verify formula 2*(P*R)/(P+R) - 通过
+  验证内容: Precision=0.888889, Recall=0.842105时，F1=0.864865（预期值完全匹配）；Precision=0.5, Recall=1.0时，F1=0.666667（预期值完全匹配）
+
+额外测试通过:
+- FPR（False Positive Rate）计算测试成功（FP/(FP+TP)公式）
+- 验证了calculate_class_metrics函数能正确处理各种边界情况（零分母、零值等）
+
+发现并解决的问题:
+无问题，所有测试步骤都完美通过。功能实现在app/metrics.py中的calculate_class_metrics函数。
+
+建议下一步:
+建议执行下一个任务: "Implement API endpoint POST /api/dataset/load for dataset loading and parsing"，该任务需要实现数据集加载和解析的API端点。
+
+当前工程完成状态: 10个测试通过，共52个测试
+
+
 [2026-03-09] 完成了任务: Implement bounding box classification (TP/FP/FN) based on IoU threshold
 
 完成的任务描述: 实现基于IoU阈值的边界框分类功能，能够将预测框正确分类为真阳性(TP)、假阳性(FP)和假阴性(FN)

@@ -1,16 +1,6 @@
 [
   {
     "category": "functional",
-    "description": "Implement metric calculation functions (recall, precision, FPR, F1 Score) per class",
-    "steps": [
-      "Step 1: Calculate recall for a class with known TP and FN values, verify formula TP/(TP+FN)",
-      "Step 2: Calculate precision for a class with known TP and FP values, verify formula TP/(TP+FP)",
-      "Step 3: Calculate F1 Score using precision and recall, verify formula 2*(P*R)/(P+R)"
-    ],
-    "passes": false
-  },
-  {
-    "category": "functional",
     "description": "Implement API endpoint POST /api/dataset/load for dataset loading and parsing",
     "steps": [
       "Step 1: Send POST request with valid dataset_path and iou_threshold",
@@ -214,9 +204,9 @@
     "description": "Implement canvas overlay for bounding box rendering with TP (green), FP (red), FN (red) styling and icons",
     "steps": [
       "Step 1: Select an image with ground truth and prediction boxes",
-      "Step 2: Verify TP boxes have green border and checkmark (\u2713) indicator",
-      "Step 3: Verify FP boxes have red border and cross (\u2717) indicator",
-      "Step 4: Verify FN boxes have red border and dash (\u2014) indicator"
+      "Step 2: Verify TP boxes have green border and checkmark (✓) indicator",
+      "Step 3: Verify FP boxes have red border and cross (✗) indicator",
+      "Step 4: Verify FN boxes have red border and dash (—) indicator"
     ],
     "passes": false
   },
@@ -477,7 +467,7 @@
     "category": "functional",
     "description": "Implement dataset validation function to check for required directories (images/, gt/, predictions/)",
     "steps": [
-      "Step 1: Provide a valid dataset path to the validation function",
+      "Step 1: Provide a valid dataset path to validation function",
       "Step 2: Verify function returns success if all directories exist",
       "Step 3: Provide an invalid path and verify appropriate error message is returned"
     ],
@@ -497,8 +487,8 @@
     "category": "functional",
     "description": "Implement thumbnail generation using Pillow for all images (150x150px)",
     "steps": [
-      "Step 1: Load a sample image through the thumbnail generation function",
-      "Step 2: Verify thumbnail file is created in the thumbnails directory",
+      "Step 1: Load a sample image through thumbnail generation function",
+      "Step 2: Verify thumbnail file is created in thumbnails directory",
       "Step 3: Verify thumbnail dimensions are 150x150px with aspect ratio preserved"
     ],
     "passes": true
@@ -520,6 +510,16 @@
       "Step 1: Provide ground truth and prediction boxes with IoU >= threshold (should be classified as TP)",
       "Step 2: Provide prediction without matching GT (should be classified as FP)",
       "Step 3: Provide GT without matching prediction (should be classified as FN)"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement metric calculation functions (recall, precision, FPR, F1 Score) per class",
+    "steps": [
+      "Step 1: Calculate recall for a class with known TP and FN values, verify formula TP/(TP+FN)",
+      "Step 2: Calculate precision for a class with known TP and FP values, verify formula TP/(TP+FP)",
+      "Step 3: Calculate F1 Score using precision and recall, verify formula 2*(P*R)/(P+R)"
     ],
     "passes": true
   }
