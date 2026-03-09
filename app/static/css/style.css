@@ -178,10 +178,22 @@ body {
     background-color: var(--bg-light);
 }
 
+.image-list-item:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: -2px;
+    background-color: #f0f9ff;
+    z-index: 1;
+    position: relative;
+}
+
 .image-list-item.active {
     background-color: #f0f9ff;
     border-left: 4px solid var(--primary-color);
     font-weight: 600;
+}
+
+.image-list-item:focus.active {
+    background-color: #e0f2fe;
 }
 
 .image-list-item .thumbnail {

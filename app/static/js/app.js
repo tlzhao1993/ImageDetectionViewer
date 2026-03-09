@@ -222,7 +222,7 @@ class DetectionAnalyzer {
         container.innerHTML = images.map(image => {
             const statusClass = image.is_perfect ? 'status-perfect' : (image.has_fp || image.has_fn ? 'status-warning' : 'status-perfect');
             return `
-                <div class="image-list-item" data-image-id="${image.id}">
+                <div class="image-list-item" data-image-id="${image.id}" tabindex="0" role="button" aria-label="${this.escapeHtml(image.filename)}">
                     <img src="${image.thumbnail_path || ''}" alt="${this.escapeHtml(image.filename)}" class="thumbnail" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22%3E%3Crect fill=%22%23e2e8f0%22 width=%22100%25%22 height=%22100%25%22/%3E%3Ctext fill=%22%2394a3b8%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3E%3F%3C/text%3E%3C/svg%3E'">
                     <div class="image-info">
                         <div class="filename">${this.escapeHtml(image.filename)}</div>
@@ -235,11 +235,22 @@ class DetectionAnalyzer {
             `;
         }).join('');
 
-        // Add click event listeners to image list items
+        // Add event listeners to image list items
         container.querySelectorAll('.image-list-item').forEach(item => {
+            // Click event
             item.addEventListener('click', () => {
                 const imageId = parseInt(item.getAttribute('data-image-id'));
                 this.selectImage(imageId);
+            });
+
+            // Focus event - update active state
+            item.addEventListener('focus', () => {
+                this.updateActiveStateOnFocus(item);
+            });
+
+            // Keydown event for keyboard navigation
+            item.addEventListener('keydown', (e) => {
+                this.handleImageListKeydown(e, item);
             });
         });
     }
@@ -280,7 +291,7 @@ class DetectionAnalyzer {
         container.innerHTML = filteredImages.map(image => {
             const statusClass = image.is_perfect ? 'status-perfect' : (image.has_fp || image.has_fn ? 'status-warning' : 'status-perfect');
             return `
-                <div class="image-list-item" data-image-id="${image.id}">
+                <div class="image-list-item" data-image-id="${image.id}" tabindex="0" role="button" aria-label="${this.escapeHtml(image.filename)}">
                     <img src="${image.thumbnail_path || ''}" alt="${this.escapeHtml(image.filename)}" class="thumbnail" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22%3E%3Crect fill=%22%23e2e8f0%22 width=%22100%25%22 height=%22100%25%22/%3E%3Ctext fill=%22%2394a3b8%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3E%3F%3C/text%3E%3C/svg%3E'">
                     <div class="image-info">
                         <div class="filename">${this.escapeHtml(image.filename)}</div>
@@ -293,11 +304,22 @@ class DetectionAnalyzer {
             `;
         }).join('');
 
-        // Add click event listeners to image list items
+        // Add event listeners to image list items
         container.querySelectorAll('.image-list-item').forEach(item => {
+            // Click event
             item.addEventListener('click', () => {
                 const imageId = parseInt(item.getAttribute('data-image-id'));
                 this.selectImage(imageId);
+            });
+
+            // Focus event - update active state
+            item.addEventListener('focus', () => {
+                this.updateActiveStateOnFocus(item);
+            });
+
+            // Keydown event for keyboard navigation
+            item.addEventListener('keydown', (e) => {
+                this.handleImageListKeydown(e, item);
             });
         });
     }
@@ -317,6 +339,57 @@ class DetectionAnalyzer {
 
         // Load image details
         await this.loadImageDetail(imageId);
+    }
+
+    updateActiveStateOnFocus(item) {
+        // Remove active state from all items
+        document.querySelectorAll('.image-list-item').forEach(el => {
+            el.classList.remove('active');
+        });
+        // Add active state to focused item
+        item.classList.add('active');
+    }
+
+    handleImageListKeydown(e, currentItem) {
+        const items = Array.from(document.querySelectorAll('.image-list-item'));
+        const currentIndex = items.indexOf(currentItem);
+
+        switch (e.key) {
+            case 'Enter':
+            case ' ':
+                // Select the currently focused image
+                e.preventDefault();
+                const imageId = parseInt(currentItem.getAttribute('data-image-id'));
+                this.selectImage(imageId);
+                break;
+
+            case 'ArrowDown':
+                // Move to next item
+                e.preventDefault();
+                if (currentIndex < items.length - 1) {
+                    items[currentIndex + 1].focus();
+                }
+                break;
+
+            case 'ArrowUp':
+                // Move to previous item
+                e.preventDefault();
+                if (currentIndex > 0) {
+                    items[currentIndex - 1].focus();
+                }
+                break;
+
+            case 'ArrowRight':
+            case 'ArrowLeft':
+                // Allow arrow keys to navigate between images when image view is focused
+                // Only if image is already selected
+                if (this.currentImageId && currentIndex !== -1) {
+                    e.preventDefault();
+                    const direction = e.key === 'ArrowRight' ? 1 : -1;
+                    this.navigateImage(direction);
+                }
+                break;
+        }
     }
 
     async loadImageDetail(imageId) {

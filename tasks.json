@@ -1,16 +1,6 @@
 [
   {
     "category": "functional",
-    "description": "Implement keyboard navigation (Tab, Enter for list selection, arrow keys for image navigation)",
-    "steps": [
-      "Step 1: Navigate to Image Comparison View",
-      "Step 2: Use Tab key to focus on image list items and press Enter to select",
-      "Step 3: Use arrow keys to navigate between images when image view is focused"
-    ],
-    "passes": false
-  },
-  {
-    "category": "functional",
     "description": "Implement accessibility features (alt text for images, screen reader labels)",
     "steps": [
       "Step 1: Inspect HTML and verify all images have alt attributes",
@@ -520,6 +510,16 @@
       "Step 1: Navigate to pages without loaded dataset",
       "Step 2: Take screenshot and verify empty state has helpful message and icon/illustration",
       "Step 3: Verify call-to-action button is prominently displayed with primary styling"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement keyboard navigation (Tab, Enter for list selection, arrow keys for image navigation)",
+    "steps": [
+      "Step 1: Navigate to Image Comparison View",
+      "Step 2: Use Tab key to focus on image list items and press Enter to select",
+      "Step 3: Use arrow keys to navigate between images when image view is focused"
     ],
     "passes": true
   }
