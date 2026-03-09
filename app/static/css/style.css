@@ -269,6 +269,11 @@ body {
     background-color: var(--primary-color);
 }
 
+/* Chart containers */
+.card-body canvas {
+    min-height: 300px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .image-view-container {

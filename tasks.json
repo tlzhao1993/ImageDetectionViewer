@@ -1,15 +1,5 @@
 [
   {
-    "category": "style",
-    "description": "Chart styling with distinct colors for each class and interactive tooltips",
-    "steps": [
-      "Step 1: Navigate to Statistics Dashboard with loaded data",
-      "Step 2: Take screenshot and verify charts have distinct colors for each class bar",
-      "Step 3: Hover over chart bars and verify tooltips display exact metric values"
-    ],
-    "passes": false
-  },
-  {
     "category": "functional",
     "description": "Implement interactive sliders for IoU threshold (0.3-0.9) and confidence threshold (0.0-1.0) with real-time updates",
     "steps": [
@@ -520,6 +510,16 @@
       "Step 1: Load a dataset with multiple classes",
       "Step 2: Navigate to Statistics Dashboard",
       "Step 3: Verify bar charts render for recall, precision, and FPR with correct data"
+    ],
+    "passes": true
+  },
+  {
+    "category": "style",
+    "description": "Chart styling with distinct colors for each class and interactive tooltips",
+    "steps": [
+      "Step 1: Navigate to Statistics Dashboard with loaded data",
+      "Step 2: Take screenshot and verify charts have distinct colors for each class bar",
+      "Step 3: Hover over chart bars and verify tooltips display exact metric values"
     ],
     "passes": true
   }

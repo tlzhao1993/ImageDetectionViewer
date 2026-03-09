@@ -255,6 +255,10 @@ class DetectionAnalyzer {
         const canvas = document.getElementById(canvasId);
         if (!canvas) return;
 
+        // Set canvas height explicitly for Chart.js to render properly
+        canvas.style.height = '300px';
+        canvas.style.width = '100%';
+
         const ctx = canvas.getContext('2d');
 
         // Check if chart already exists and destroy it
@@ -262,7 +266,7 @@ class DetectionAnalyzer {
             canvas.chart.destroy();
         }
 
-        // Create new chart
+        // Create new chart with enhanced tooltip configuration
         canvas.chart = new Chart(ctx, {
             type: 'bar',
             data: {
@@ -272,7 +276,7 @@ class DetectionAnalyzer {
                     data: data,
                     backgroundColor: colors.map(c => c.background),
                     borderColor: colors.map(c => c.border),
-                    borderWidth: 1
+                    borderWidth: 2
                 }]
             },
             options: {
@@ -281,14 +285,36 @@ class DetectionAnalyzer {
                 scales: {
                     y: {
                         beginAtZero: true,
-                        max: 1
+                        max: 1,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
                     }
                 },
                 plugins: {
+                    legend: {
+                        display: false
+                    },
                     tooltip: {
+                        enabled: true,
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                        borderWidth: 1,
+                        padding: 12,
+                        cornerRadius: 6,
                         callbacks: {
                             label: function(context) {
                                 return `${context.dataset.label}: ${context.parsed.y.toFixed(3)}`;
+                            },
+                            title: function(context) {
+                                return context[0].label;
                             }
                         }
                     }
