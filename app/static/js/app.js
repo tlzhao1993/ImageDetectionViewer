@@ -19,6 +19,14 @@ class DetectionAnalyzer {
         this.showLabels = true;
         this.currentImageData = null; // Store current image data for re-rendering
 
+        // Zoom and pan state
+        this.zoomLevel = 1.0;
+        this.panX = 0;
+        this.panY = 0;
+        this.isDragging = false;
+        this.dragStartX = 0;
+        this.dragStartY = 0;
+
         this.init();
     }
 
@@ -377,6 +385,19 @@ class DetectionAnalyzer {
                         <i class="fas fa-tag me-1"></i> Labels
                     </button>
                 </div>
+
+                <!-- Zoom Controls -->
+                <div class="d-flex gap-2 mb-3">
+                    <button class="btn btn-sm zoom-btn" id="zoom-out" title="Zoom Out">
+                        <i class="fas fa-search-minus"></i>
+                    </button>
+                    <button class="btn btn-sm zoom-btn" id="zoom-reset" title="Reset Zoom">
+                        <span id="zoom-level-display">100%</span>
+                    </button>
+                    <button class="btn btn-sm zoom-btn" id="zoom-in" title="Zoom In">
+                        <i class="fas fa-search-plus"></i>
+                    </button>
+                </div>
             </div>
 
             <div class="image-display-section">
@@ -435,6 +456,12 @@ class DetectionAnalyzer {
 
         // Add event listeners for toggle buttons
         this.setupToggleButtons();
+
+        // Add event listeners for zoom controls
+        this.setupZoomControls();
+
+        // Add event listeners for pan/drag functionality
+        this.setupPanDrag();
     }
 
     renderImageWithBoundingBoxes(data) {
@@ -447,6 +474,14 @@ class DetectionAnalyzer {
         const height = data.dimensions?.height || 600;
         canvas.width = width;
         canvas.height = height;
+
+        // Clear canvas and apply zoom/pan transforms
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Apply zoom and pan transformations
+        ctx.translate(this.panX, this.panY);
+        ctx.scale(this.zoomLevel, this.zoomLevel);
 
         // Create a placeholder image (since we don't have actual image files)
         // In a real implementation, you would load the actual image file
@@ -655,6 +690,109 @@ class DetectionAnalyzer {
         // Re-render the current image with updated visibility settings
         if (this.currentImageData) {
             this.renderImageWithBoundingBoxes(this.currentImageData);
+        }
+    }
+
+    setupZoomControls() {
+        // Zoom in button
+        const zoomInBtn = document.getElementById('zoom-in');
+        if (zoomInBtn) {
+            zoomInBtn.addEventListener('click', () => {
+                this.zoomLevel = Math.min(this.zoomLevel + 0.25, 5.0); // Max zoom 5x
+                this.updateZoomLevelDisplay();
+                this.updateCanvasCursor();
+                this.reRenderCurrentImage();
+            });
+        }
+
+        // Zoom out button
+        const zoomOutBtn = document.getElementById('zoom-out');
+        if (zoomOutBtn) {
+            zoomOutBtn.addEventListener('click', () => {
+                this.zoomLevel = Math.max(this.zoomLevel - 0.25, 0.25); // Min zoom 0.25x
+                this.updateZoomLevelDisplay();
+                this.updateCanvasCursor();
+                this.reRenderCurrentImage();
+            });
+        }
+
+        // Reset zoom button
+        const zoomResetBtn = document.getElementById('zoom-reset');
+        if (zoomResetBtn) {
+            zoomResetBtn.addEventListener('click', () => {
+                this.zoomLevel = 1.0;
+                this.panX = 0;
+                this.panY = 0;
+                this.updateZoomLevelDisplay();
+                this.updateCanvasCursor();
+                this.reRenderCurrentImage();
+            });
+        }
+    }
+
+    updateZoomLevelDisplay() {
+        const zoomDisplay = document.getElementById('zoom-level-display');
+        if (zoomDisplay) {
+            zoomDisplay.textContent = `${Math.round(this.zoomLevel * 100)}%`;
+        }
+    }
+
+    setupPanDrag() {
+        const canvas = document.getElementById('image-canvas');
+        const container = document.getElementById('canvas-container');
+        if (!canvas || !container) return;
+
+        // Reset pan on new image load
+        this.panX = 0;
+        this.panY = 0;
+
+        // Update cursor style based on zoom level
+        this.updateCanvasCursor();
+
+        // Mouse down - start dragging
+        canvas.addEventListener('mousedown', (e) => {
+            if (this.zoomLevel === 1.0) return; // Only allow panning when zoomed
+
+            this.isDragging = true;
+            this.dragStartX = e.clientX;
+            this.dragStartY = e.clientY;
+        });
+
+        // Mouse move - update pan position
+        canvas.addEventListener('mousemove', (e) => {
+            if (!this.isDragging) return;
+
+            const dx = e.clientX - this.dragStartX;
+            const dy = e.clientY - this.dragStartY;
+
+            this.panX += dx;
+            this.panY += dy;
+
+            this.dragStartX = e.clientX;
+            this.dragStartY = e.clientY;
+
+            this.reRenderCurrentImage();
+        });
+
+        // Mouse up - stop dragging
+        canvas.addEventListener('mouseup', () => {
+            this.isDragging = false;
+        });
+
+        // Mouse leave - stop dragging
+        canvas.addEventListener('mouseleave', () => {
+            this.isDragging = false;
+        });
+    }
+
+    updateCanvasCursor() {
+        const canvas = document.getElementById('image-canvas');
+        if (!canvas) return;
+
+        if (this.zoomLevel === 1.0) {
+            canvas.classList.remove('zoomed');
+        } else {
+            canvas.classList.add('zoomed');
         }
     }
 

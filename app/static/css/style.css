@@ -683,3 +683,51 @@ table.table tbody tr:hover,
 .toggle-btn i {
     margin-right: 6px;
 }
+
+/* Zoom Buttons */
+.zoom-btn {
+    background-color: white;
+    border: 1px solid var(--border-light);
+    color: var(--text-light);
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 6px;
+    min-width: 60px;
+    transition: all 0.2s ease;
+}
+
+.zoom-btn:hover {
+    background-color: var(--bg-light);
+    border-color: var(--border-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.zoom-btn:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+#zoom-level-display {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+#zoom-level-display:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Canvas pan cursor styles */
+#image-canvas {
+    cursor: default;
+}
+
+#image-canvas.zoomed {
+    cursor: grab;
+}
+
+#image-canvas.zoomed:active {
+    cursor: grabbing;
+}

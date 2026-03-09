@@ -1,17 +1,6 @@
 [
   {
     "category": "functional",
-    "description": "Implement zoom/pan functionality for detailed image inspection",
-    "steps": [
-      "Step 1: Click zoom (+) button and verify image scales up",
-      "Step 2: Click zoom (-) button and verify image scales down",
-      "Step 3: Click reset zoom button and verify image returns to default scale",
-      "Step 4: Drag zoomed image and verify panning works"
-    ],
-    "passes": false
-  },
-  {
-    "category": "functional",
     "description": "Implement per-image statistics table showing Class, GT, Pred, TP, FP, FN breakdown",
     "steps": [
       "Step 1: Select an image with detections",
@@ -520,6 +509,17 @@
       "Step 1: Click 'Hide GT Boxes' toggle and verify ground truth boxes disappear",
       "Step 2: Click 'Hide Prediction Boxes' toggle and verify prediction boxes disappear",
       "Step 3: Click 'Hide Labels' toggle and verify labels disappear while boxes remain"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement zoom/pan functionality for detailed image inspection",
+    "steps": [
+      "Step 1: Click zoom (+) button and verify image scales up",
+      "Step 2: Click zoom (-) button and verify image scales down",
+      "Step 3: Click reset zoom button and verify image returns to default scale",
+      "Step 4: Drag zoomed image and verify panning works"
     ],
     "passes": true
   }
