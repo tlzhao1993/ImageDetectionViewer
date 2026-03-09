@@ -1,15 +1,5 @@
 [
   {
-    "category": "functional",
-    "description": "Implement image list with thumbnails, search, and class/status filters",
-    "steps": [
-      "Step 1: Navigate to Image Comparison View",
-      "Step 2: Use search box and verify list filters by filename",
-      "Step 3: Apply class filter and verify only images with specified class are shown"
-    ],
-    "passes": false
-  },
-  {
     "category": "style",
     "description": "Image list item styling with thumbnails, status indicators (color dots), and hover/active states",
     "steps": [
@@ -520,6 +510,16 @@
       "Step 1: Navigate to Image Comparison View",
       "Step 2: Verify left panel contains image list with thumbnails",
       "Step 3: Verify right panel contains image display and per-image statistics"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement image list with thumbnails, search, and class/status filters",
+    "steps": [
+      "Step 1: Navigate to Image Comparison View",
+      "Step 2: Use search box and verify list filters by filename",
+      "Step 3: Apply class filter and verify only images with specified class are shown"
     ],
     "passes": true
   }

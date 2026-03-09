@@ -7,9 +7,11 @@ class DetectionAnalyzer {
         this.iouThreshold = 0.5;
         this.confidenceThreshold = 0.5;
         this.filters = {
-            classes: [],
-            status: 'all'
+            search: '',
+            classFilter: '',
+            statusFilter: ''
         };
+        this.allClasses = [];
 
         this.init();
     }
@@ -89,6 +91,8 @@ class DetectionAnalyzer {
             if (this.datasetId) {
                 comparisonPage.style.display = 'block';
                 emptyState.style.display = 'none';
+                // Load classes for filter
+                this.loadClassesForFilter();
                 // Load images list
                 this.loadImagesList();
             } else {
@@ -98,15 +102,61 @@ class DetectionAnalyzer {
         }
     }
 
+    async loadClassesForFilter() {
+        if (!this.datasetId) return;
+
+        try {
+            const response = await fetch(`/api/statistics/${this.datasetId}`);
+            const data = await response.json();
+
+            if (data.success && data.classes) {
+                this.allClasses = data.classes;
+                this.updateClassFilterDropdown();
+            }
+        } catch (error) {
+            console.error('Error loading classes for filter:', error);
+        }
+    }
+
+    updateClassFilterDropdown() {
+        const classFilter = document.getElementById('class-filter');
+        if (!classFilter) return;
+
+        // Clear existing options except the first one
+        while (classFilter.options.length > 1) {
+            classFilter.remove(1);
+        }
+
+        // Add class options
+        this.allClasses.forEach(cls => {
+            const option = document.createElement('option');
+            option.value = cls.name;
+            option.textContent = cls.name;
+            classFilter.appendChild(option);
+        });
+    }
+
     async loadImagesList() {
         if (!this.datasetId) return;
 
         try {
-            const response = await fetch(`/api/images/${this.datasetId}?per_page=50`);
+            // Build URL with filter parameters (class and status filters are server-side)
+            let url = `/api/images/${this.datasetId}?per_page=50`;
+
+            if (this.filters.classFilter) {
+                url += `&class_filter=${encodeURIComponent(this.filters.classFilter)}`;
+            }
+
+            if (this.filters.statusFilter) {
+                url += `&status_filter=${encodeURIComponent(this.filters.statusFilter)}`;
+            }
+
+            const response = await fetch(url);
             const data = await response.json();
 
             if (data.success) {
-                this.updateImagesList(data.images);
+                this.allImages = data.images;
+                this.applyClientSideFilters();
             }
         } catch (error) {
             console.error('Error loading images list:', error);
@@ -115,6 +165,63 @@ class DetectionAnalyzer {
                 container.innerHTML = '<div class="text-center text-danger py-5">Failed to load images</div>';
             }
         }
+    }
+
+    applyClientSideFilters() {
+        if (!this.allImages) return;
+
+        let filteredImages = [...this.allImages];
+
+        // Apply search filter (client-side)
+        if (this.filters.search) {
+            const searchTerm = this.filters.search.toLowerCase();
+            filteredImages = filteredImages.filter(image =>
+                image.filename.toLowerCase().includes(searchTerm)
+            );
+        }
+
+        // Render filtered images
+        this.renderImagesList(filteredImages);
+    }
+
+    renderImagesList(images) {
+        const container = document.getElementById('image-list-container');
+        if (!container) return;
+
+        if (!images || images.length === 0) {
+            container.innerHTML = '<div class="text-center text-muted py-5">No images found</div>';
+            return;
+        }
+
+        container.innerHTML = images.map(image => {
+            const statusClass = image.is_perfect ? 'status-perfect' : (image.has_fp || image.has_fn ? 'status-warning' : 'status-perfect');
+            return `
+                <div class="image-list-item" data-image-id="${image.id}">
+                    <img src="${image.thumbnail_path || ''}" alt="${this.escapeHtml(image.filename)}" class="thumbnail" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22%3E%3Crect fill=%22%23e2e8f0%22 width=%22100%25%22 height=%22100%25%22/%3E%3Ctext fill=%22%2394a3b8%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3E%3F%3C/text%3E%3C/svg%3E'">
+                    <div class="image-info">
+                        <div class="filename">${this.escapeHtml(image.filename)}</div>
+                        <div class="image-stats">
+                            GT: ${image.total_gt_boxes} | Pred: ${image.total_pred_boxes}
+                        </div>
+                    </div>
+                    <span class="status-dot ${statusClass}" title="${image.is_perfect ? 'Perfect' : (image.has_fp || image.has_fn ? 'Has errors' : 'Good')}"></span>
+                </div>
+            `;
+        }).join('');
+
+        // Add click event listeners to image list items
+        container.querySelectorAll('.image-list-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const imageId = parseInt(item.getAttribute('data-image-id'));
+                this.selectImage(imageId);
+            });
+        });
+    }
+
+    updateImagesList(images) {
+        // Store images and apply client-side filters
+        this.allImages = images;
+        this.applyClientSideFilters();
     }
 
     updateImagesList(images) {
@@ -126,7 +233,25 @@ class DetectionAnalyzer {
             return;
         }
 
-        container.innerHTML = images.map(image => {
+        // Store all images for client-side filtering
+        this.allImages = images;
+
+        // Apply client-side search filter (if needed)
+        let filteredImages = images;
+        if (this.filters.search) {
+            const searchTerm = this.filters.search.toLowerCase();
+            filteredImages = images.filter(image =>
+                image.filename.toLowerCase().includes(searchTerm)
+            );
+        }
+
+        // Update container with filtered images
+        if (filteredImages.length === 0) {
+            container.innerHTML = '<div class="text-center text-muted py-5">No images match your search criteria</div>';
+            return;
+        }
+
+        container.innerHTML = filteredImages.map(image => {
             const statusClass = image.is_perfect ? 'status-perfect' : (image.has_fp || image.has_fn ? 'status-warning' : 'status-perfect');
             return `
                 <div class="image-list-item" data-image-id="${image.id}">
@@ -351,11 +476,41 @@ class DetectionAnalyzer {
             });
         }
 
-        // Class search input
+        // Class search input (for metrics table)
         const classSearch = document.getElementById('class-search');
         if (classSearch) {
             classSearch.addEventListener('input', (e) => {
                 this.filterMetricsTable(e.target.value);
+            });
+        }
+
+        // Image list search input
+        const imageSearch = document.getElementById('image-search');
+        if (imageSearch) {
+            imageSearch.addEventListener('input', (e) => {
+                this.filters.search = e.target.value;
+                // Apply client-side filtering for search
+                this.applyClientSideFilters();
+            });
+        }
+
+        // Class filter dropdown
+        const classFilter = document.getElementById('class-filter');
+        if (classFilter) {
+            classFilter.addEventListener('change', (e) => {
+                this.filters.classFilter = e.target.value;
+                // Reload images with new class filter
+                this.loadImagesList();
+            });
+        }
+
+        // Status filter dropdown
+        const statusFilter = document.getElementById('status-filter');
+        if (statusFilter) {
+            statusFilter.addEventListener('change', (e) => {
+                this.filters.statusFilter = e.target.value;
+                // Reload images with new status filter
+                this.loadImagesList();
             });
         }
 

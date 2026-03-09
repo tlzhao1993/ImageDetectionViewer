@@ -255,9 +255,35 @@
                 <!-- Left Panel - Image List (25%) -->
                 <div class="col-lg-3 col-md-4 image-list-panel bg-white">
                     <div class="p-3 border-bottom bg-light">
-                        <h6 class="mb-0">
+                        <h6 class="mb-3">
                             <i class="fas fa-images me-2"></i>Image List
                         </h6>
+                        <!-- Search Box -->
+                        <div class="mb-2">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="image-search" placeholder="Search by filename...">
+                            </div>
+                        </div>
+                        <!-- Filters -->
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <select class="form-select form-select-sm" id="class-filter">
+                                    <option value="">All Classes</option>
+                                    <!-- Class options will be populated dynamically -->
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <select class="form-select form-select-sm" id="status-filter">
+                                    <option value="">All Status</option>
+                                    <option value="perfect">Perfect</option>
+                                    <option value="fp">Has FP</option>
+                                    <option value="fn">Has FN</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                     <div id="image-list-container" class="p-2">
                         <!-- Image list items will be dynamically loaded here -->
