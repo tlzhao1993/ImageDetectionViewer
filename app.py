@@ -4,7 +4,7 @@ import os
 import sys
 import flask
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='app/static', template_folder='app/templates')
 CORS(app)
 
 # Configuration

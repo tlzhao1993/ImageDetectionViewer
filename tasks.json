@@ -1,16 +1,6 @@
 [
   {
     "category": "functional",
-    "description": "Configure Flask application with CORS support and static file serving",
-    "steps": [
-      "Step 1: Start the Flask server with python app.py",
-      "Step 2: Access /api/health endpoint and verify JSON response with status: 'healthy'",
-      "Step 3: Verify static files are served correctly by accessing /static path"
-    ],
-    "passes": false
-  },
-  {
-    "category": "functional",
     "description": "Create SQLite database schema with all required tables (dataset_metadata, image_metadata, classes, bounding_boxes)",
     "steps": [
       "Step 1: Initialize the application and trigger database creation",
@@ -115,7 +105,7 @@
     "steps": [
       "Step 1: Send POST request with new iou_threshold and confidence_threshold",
       "Step 2: Verify response success: true and statistics are updated",
-      "Step 3: Verify database entries reflect the new threshold values"
+      "Step 3: Verify database entries reflect of new threshold values"
     ],
     "passes": false
   },
@@ -153,7 +143,7 @@
     "category": "functional",
     "description": "Create base HTML template with navigation bar and client-side routing structure",
     "steps": [
-      "Step 1: Access the application in browser and verify navigation bar is visible at top",
+      "Step 1: Access application in browser and verify navigation bar is visible at top",
       "Step 2: Click navigation links and verify page transitions work via hash routing",
       "Step 3: Verify active page indicator shows correct page in navigation bar"
     ],
@@ -338,7 +328,7 @@
     "steps": [
       "Step 1: Select an image with detections",
       "Step 2: Scroll to per-image statistics section",
-      "Step 3: Verify table shows correct counts for each class present in the image"
+      "Step 3: Verify table shows correct counts for each class present in image"
     ],
     "passes": false
   },
@@ -356,7 +346,7 @@
     "category": "functional",
     "description": "Implement previous/next navigation buttons for sequential image viewing",
     "steps": [
-      "Step 1: Select the first image in the list",
+      "Step 1: Select first image in list",
       "Step 2: Click 'Next' button and verify second image is loaded",
       "Step 3: Click 'Previous' button and verify first image is loaded again"
     ],
@@ -516,10 +506,20 @@
     "category": "functional",
     "description": "Initialize Flask project structure with proper directory layout (app/, app/static/, app/templates/)",
     "steps": [
-      "Step 1: Check that app.py exists in the project root",
+      "Step 1: Check that app.py exists in project root",
       "Step 2: Verify static directory exists with subdirectories (css/, js/)",
       "Step 3: Verify templates directory exists with base.html",
       "Step 4: Verify requirements.txt includes all required dependencies (flask>=2.0.0, flask-cors>=3.0.10, pillow>=9.0.0, numpy>=1.21.0)"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Configure Flask application with CORS support and static file serving",
+    "steps": [
+      "Step 1: Start the Flask server with python app.py",
+      "Step 2: Access /api/health endpoint and verify JSON response with status: 'healthy'",
+      "Step 3: Verify static files are served correctly by accessing /static path"
     ],
     "passes": true
   }
