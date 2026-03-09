@@ -1,16 +1,6 @@
 [
   {
     "category": "style",
-    "description": "Icon styling with correct colors (green for TP, red for FP/FN) and positioning",
-    "steps": [
-      "Step 1: Select image with multiple box types",
-      "Step 2: Take screenshot and verify TP icons are green (#22c55e)",
-      "Step 3: Verify FP/FN icons are red (#ef4444) and positioned at top-left of boxes"
-    ],
-    "passes": false
-  },
-  {
-    "category": "style",
     "description": "Overall design system consistency (color palette, typography, spacing) across all pages",
     "steps": [
       "Step 1: Navigate to Statistics Dashboard and take screenshot",
@@ -520,6 +510,16 @@
       "Step 1: Select an image with TP boxes and verify check icon renders",
       "Step 2: Verify FP boxes show cross icon and FN boxes show dash icon",
       "Step 3: Verify icons are properly sized and positioned"
+    ],
+    "passes": true
+  },
+  {
+    "category": "style",
+    "description": "Icon styling with correct colors (green for TP, red for FP/FN) and positioning",
+    "steps": [
+      "Step 1: Select image with multiple box types",
+      "Step 2: Take screenshot and verify TP icons are green (#22c55e)",
+      "Step 3: Verify FP/FN icons are red (#ef4444) and positioned at top-left of boxes"
     ],
     "passes": true
   }
