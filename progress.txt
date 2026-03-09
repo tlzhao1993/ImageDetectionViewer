@@ -1,3 +1,38 @@
+[2026-03-09] 完成了任务: Implement API endpoint GET /api/images/:dataset_id/:image_id for detailed image data
+
+完成的任务描述: 实现API端点GET /api/images/:dataset_id/:image_id用于获取单张图像的详细数据
+
+测试结果:
+- Step 1: Call GET /api/images/:dataset_id/:image_id for a specific image - 通过
+  验证内容: 成功调用GET请求到http://localhost:5000/api/images/2/5，返回完整的图像详细数据
+- Step 2: Verify response contains filename, dimensions, ground_truth_boxes, prediction_boxes - 通过
+  验证内容: 响应包含filename (test_image_1.png), dimensions (width: 640, height: 480), ground_truth_boxes数组, prediction_boxes数组
+- Step 3: Verify per_class_stats includes counts and metrics for each class - 通过
+  验证内容: per_class_stats包含每个类别的统计信息（gt_count, pred_count, tp, fp, fn）
+
+额外测试通过:
+- 对包含FP/FN的图像（image_id=6）正确返回统计信息
+- 数据集不存在时返回404错误（错误消息: Dataset with ID 999 not found）
+- 图像不存在时返回404错误（错误消息: Image with ID 999 not found in dataset 2）
+- 边界框数据包含完整信息：id, class_name, bbox坐标, confidence（预测框）, iou（匹配框）, classification
+
+发现并解决的问题:
+无问题，所有测试步骤都完美通过。
+
+实现的功能:
+- GET /api/images/:dataset_id/:image_id API端点已在run.py中实现（第545-650行）
+- 返回图像元数据：filename, dimensions (width, height), thumbnail_path
+- 返回ground_truth_boxes数组：包含id, class_name, bbox坐标, iou, classification
+- 返回prediction_boxes数组：包含id, class_name, bbox坐标, confidence, iou, classification
+- 返回per_class_stats字典：每个类别包含gt_count, pred_count, tp, fp, fn统计
+- 实现了数据集和图像存在性检查（返回404如果不存在）
+
+建议下一步:
+建议执行下一个任务: "Implement API endpoint GET /api/statistics/export/:dataset_id for CSV/JSON export"，该任务需要实现统计信息的CSV/JSON导出功能。
+
+当前工程完成状态: 15个测试通过，共52个测试
+
+
 [2026-03-09] 完成了任务: Implement API endpoint GET /api/images/:dataset_id for paginated image list
 
 完成的任务描述: 实现API端点GET /api/images/:dataset_id用于获取分页图像列表

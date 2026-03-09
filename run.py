@@ -542,6 +542,160 @@ def get_images_endpoint(dataset_id):
         }), 500
 
 
+@app.route('/api/images/<int:dataset_id>/<int:image_id>')
+def get_image_detail_endpoint(dataset_id, image_id):
+    """
+    API endpoint to get detailed data for a single image
+
+    Args:
+        dataset_id: ID of dataset
+        image_id: ID of image to retrieve details for
+
+    Returns:
+        JSON response with:
+            - success (bool): Whether request was successful
+            - filename (str): Image filename
+            - dimensions (dict): Image width and height
+            - ground_truth_boxes (list): Array of ground truth bounding boxes
+            - prediction_boxes (list): Array of prediction bounding boxes
+            - per_class_stats (dict): Statistics breakdown by class
+            - thumbnail_path (str): Path to thumbnail
+
+    Each box in ground_truth_boxes and prediction_boxes contains:
+        - id (int): Box ID
+        - class_name (str): Class name
+        - bbox (list): [x1, y1, x2, y2] coordinates
+        - confidence (float): Confidence score (predictions only)
+        - iou (float): IoU value (for matched boxes only)
+        - classification (str): 'tp', 'fp', 'fn', or null
+
+    Each entry in per_class_stats contains:
+        - gt_count (int): Number of ground truth boxes
+        - pred_count (int): Number of prediction boxes
+        - tp (int): True positives
+        - fp (int): False positives
+        - fn (int): False negatives
+    """
+    try:
+        with get_db() as conn:
+            cursor = conn.cursor()
+
+            # Check if dataset exists
+            cursor.execute('''
+                SELECT id FROM dataset_metadata WHERE id = ?
+            ''', (dataset_id,))
+
+            if cursor.fetchone() is None:
+                return jsonify({
+                    'success': False,
+                    'error': f'Dataset with ID {dataset_id} not found'
+                }), 404
+
+            # Get image metadata
+            cursor.execute('''
+                SELECT id, filename, width, height, thumbnail_path,
+                       total_gt_boxes, total_pred_boxes
+                FROM image_metadata
+                WHERE id = ? AND dataset_id = ?
+            ''', (image_id, dataset_id))
+
+            image_row = cursor.fetchone()
+
+            if image_row is None:
+                return jsonify({
+                    'success': False,
+                    'error': f'Image with ID {image_id} not found in dataset {dataset_id}'
+                }), 404
+
+            # Get all bounding boxes for this image
+            cursor.execute('''
+                SELECT bb.id, bb.class_id, bb.type, bb.x1, bb.y1, bb.x2, bb.y2,
+                       bb.confidence, bb.iou, bb.classification, c.name
+                FROM bounding_boxes bb
+                JOIN classes c ON bb.class_id = c.id
+                WHERE bb.image_id = ?
+                ORDER BY bb.id
+            ''', (image_id,))
+
+            bbox_rows = cursor.fetchall()
+
+            # Separate ground truth and prediction boxes
+            ground_truth_boxes = []
+            prediction_boxes = []
+
+            for row in bbox_rows:
+                (bbox_id, class_id, bbox_type, x1, y1, x2, y2,
+                 confidence, iou, classification, class_name) = row
+
+                box_data = {
+                    'id': bbox_id,
+                    'class_name': class_name,
+                    'bbox': [x1, y1, x2, y2],
+                    'iou': iou,
+                    'classification': classification
+                }
+
+                if bbox_type == 'ground_truth':
+                    ground_truth_boxes.append(box_data)
+                elif bbox_type == 'prediction':
+                    box_data['confidence'] = confidence
+                    prediction_boxes.append(box_data)
+
+            # Calculate per-class statistics for this image
+            cursor.execute('''
+                SELECT c.name, bb.type, bb.classification
+                FROM bounding_boxes bb
+                JOIN classes c ON bb.class_id = c.id
+                WHERE bb.image_id = ?
+            ''', (image_id,))
+
+            class_rows = cursor.fetchall()
+
+            per_class_stats = {}
+
+            for class_name, bbox_type, classification in class_rows:
+                if class_name not in per_class_stats:
+                    per_class_stats[class_name] = {
+                        'gt_count': 0,
+                        'pred_count': 0,
+                        'tp': 0,
+                        'fp': 0,
+                        'fn': 0
+                    }
+
+                stats = per_class_stats[class_name]
+
+                if bbox_type == 'ground_truth':
+                    stats['gt_count'] += 1
+                    if classification == 'fn':
+                        stats['fn'] += 1
+                    elif classification == 'tp':
+                        stats['tp'] += 1
+                elif bbox_type == 'prediction':
+                    stats['pred_count'] += 1
+                    if classification == 'fp':
+                        stats['fp'] += 1
+
+            return jsonify({
+                'success': True,
+                'filename': image_row[1],
+                'dimensions': {
+                    'width': image_row[2],
+                    'height': image_row[3]
+                },
+                'ground_truth_boxes': ground_truth_boxes,
+                'prediction_boxes': prediction_boxes,
+                'per_class_stats': per_class_stats,
+                'thumbnail_path': image_row[4]
+            }), 200
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
 @app.route('/')
 def index():
     """Serve the main HTML page"""
