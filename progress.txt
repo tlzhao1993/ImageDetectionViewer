@@ -1,3 +1,51 @@
+[2026-03-09] 完成了任务: Integrate Chart.js for per-class metrics visualization (recall, precision, FPR bar charts)
+
+完成的任务描述: 集成Chart.js用于每类度量可视化（recall、precision、FPR条形图）
+
+测试结果:
+- Step 1: Load a dataset with multiple classes - 通过
+  验证内容: 成功加载包含3个类（bicycle, car, person）和4张图片的测试数据集，dataset_id=8
+- Step 2: Navigate to Statistics Dashboard - 通过
+  验证内容: 成功导航到统计仪表板页面，显示dashboard-page（display: block）而非空状态
+- Step 3: Verify bar charts render for recall, precision, and FPR with correct data - 通过
+  验证内容: 
+  * Recall图表: 标签=["bicycle", "car", "person"], 数据=[1, 1, 1]
+  * Precision图表: 标签=["bicycle", "car", "person"], 数据=[0.5, 1, 1]
+  * FPR图表: 标签=["bicycle", "car", "person"], 数据=[0.5, 0, 0]
+  * 所有三个图表都成功渲染
+
+发现并解决的问题:
+1. API返回的字段名与JavaScript代码中使用的字段名不匹配：
+   - API返回cls.name，代码使用cls.class_name
+   - API返回cls.total_gt_count，代码使用cls.gt_count
+   - API返回cls.total_pred_count，代码使用cls.pred_count
+   - API返回cls.tp_count，代码使用cls.tp
+   - API返回cls.fp_count，代码使用cls.fp
+   - API返回cls.fn_count，代码使用cls.fn
+   解决方法: 更新app/static/js/app.js中的updateDashboard、updateMetricsTable和updateCharts函数，使用正确的字段名
+
+2. overall_metrics中缺少total_images、avg_recall、avg_precision字段：
+   解决方法: 使用API实际返回的字段：total_gt_boxes、recall、precision
+
+3. 加载数据后仪表板显示状态未更新：
+   解决方法: 在loadStatistics函数中调用showDashboard()来更新显示状态
+
+4. 浏览器缓存旧的JavaScript文件：
+   解决方法: 使用带缓存破坏参数的URL重新加载页面
+
+实现的功能:
+- Chart.js成功集成并渲染三个条形图（Recall、Precision、FPR）
+- 图表使用正确的类标签（bicycle, car, person）而非null
+- 图表显示正确的数据值
+- 摘要卡片显示正确的总体指标（Total Images: 6, Total Classes: 3, Avg Recall: 1.000, Avg Precision: 0.833）
+- 指标表格显示正确的每个类别的详细数据
+
+建议下一步:
+建议执行下一个任务: "Chart styling with distinct colors for each class and interactive tooltips"，该任务需要验证图表的样式，包括每个类别条形的颜色区分和交互式工具提示。
+
+当前工程完成状态: 21个测试通过，共52个测试
+
+
 [2026-03-09] 完成了任务: Statistics Dashboard styling with proper layout hierarchy and card components
 
 完成的任务描述: 统计仪表板样式设计，包括布局层级和卡片组件

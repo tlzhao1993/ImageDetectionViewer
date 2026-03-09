@@ -182,6 +182,8 @@ class DetectionAnalyzer {
             const response = await fetch(`/api/statistics/${this.datasetId}`);
             const data = await response.json();
             this.updateDashboard(data);
+            // Update dashboard display state
+            this.showDashboard();
         } catch (error) {
             this.showError('Error loading statistics');
         }
@@ -190,10 +192,10 @@ class DetectionAnalyzer {
     updateDashboard(data) {
         // Update summary cards
         if (data.overall_metrics) {
-            document.getElementById('summary-total-images').textContent = data.overall_metrics.total_images || '-';
+            document.getElementById('summary-total-images').textContent = data.overall_metrics.total_gt_boxes || '-';
             document.getElementById('summary-total-classes').textContent = data.classes?.length || '-';
-            document.getElementById('summary-avg-recall').textContent = data.overall_metrics.avg_recall ? data.overall_metrics.avg_recall.toFixed(3) : '-';
-            document.getElementById('summary-avg-precision').textContent = data.overall_metrics.avg_precision ? data.overall_metrics.avg_precision.toFixed(3) : '-';
+            document.getElementById('summary-avg-recall').textContent = data.overall_metrics.recall !== undefined ? data.overall_metrics.recall.toFixed(3) : '-';
+            document.getElementById('summary-avg-precision').textContent = data.overall_metrics.precision !== undefined ? data.overall_metrics.precision.toFixed(3) : '-';
         }
 
         // Update metrics table
@@ -214,12 +216,12 @@ class DetectionAnalyzer {
 
         tableBody.innerHTML = classes.map(cls => `
             <tr>
-                <td><strong>${this.escapeHtml(cls.class_name)}</strong></td>
-                <td>${cls.gt_count || 0}</td>
-                <td>${cls.pred_count || 0}</td>
-                <td>${cls.tp || 0}</td>
-                <td>${cls.fp || 0}</td>
-                <td>${cls.fn || 0}</td>
+                <td><strong>${this.escapeHtml(cls.name)}</strong></td>
+                <td>${cls.total_gt_count || 0}</td>
+                <td>${cls.total_pred_count || 0}</td>
+                <td>${cls.tp_count || 0}</td>
+                <td>${cls.fp_count || 0}</td>
+                <td>${cls.fn_count || 0}</td>
                 <td>${cls.recall !== undefined ? cls.recall.toFixed(3) : '-'}</td>
                 <td>${cls.precision !== undefined ? cls.precision.toFixed(3) : '-'}</td>
                 <td>${cls.fpr !== undefined ? cls.fpr.toFixed(3) : '-'}</td>
@@ -231,7 +233,7 @@ class DetectionAnalyzer {
     updateCharts(classes) {
         if (classes.length === 0) return;
 
-        const labels = classes.map(cls => cls.class_name);
+        const labels = classes.map(cls => cls.name);
         const recallData = classes.map(cls => cls.recall !== undefined ? cls.recall : 0);
         const precisionData = classes.map(cls => cls.precision !== undefined ? cls.precision : 0);
         const fprData = classes.map(cls => cls.fpr !== undefined ? cls.fpr : 0);

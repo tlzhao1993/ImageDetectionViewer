@@ -1,15 +1,5 @@
 [
   {
-    "category": "functional",
-    "description": "Integrate Chart.js for per-class metrics visualization (recall, precision, FPR bar charts)",
-    "steps": [
-      "Step 1: Load a dataset with multiple classes",
-      "Step 2: Navigate to Statistics Dashboard",
-      "Step 3: Verify bar charts render for recall, precision, and FPR with correct data"
-    ],
-    "passes": false
-  },
-  {
     "category": "style",
     "description": "Chart styling with distinct colors for each class and interactive tooltips",
     "steps": [
@@ -520,6 +510,16 @@
       "Step 1: Navigate to Statistics Dashboard",
       "Step 2: Take screenshot and verify cards have 8px rounded corners and subtle shadow",
       "Step 3: Verify proper spacing between sections and visual hierarchy (headings, body text)"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Integrate Chart.js for per-class metrics visualization (recall, precision, FPR bar charts)",
+    "steps": [
+      "Step 1: Load a dataset with multiple classes",
+      "Step 2: Navigate to Statistics Dashboard",
+      "Step 3: Verify bar charts render for recall, precision, and FPR with correct data"
     ],
     "passes": true
   }
