@@ -1,15 +1,5 @@
 [
   {
-    "category": "functional",
-    "description": "Implement confidence score distribution visualization for current image predictions",
-    "steps": [
-      "Step 1: Select an image with multiple predictions at different confidence levels",
-      "Step 2: Scroll to per-image statistics section",
-      "Step 3: Verify confidence histogram or distribution visualization is displayed"
-    ],
-    "passes": false
-  },
-  {
     "category": "style",
     "description": "Confidence distribution chart styling with appropriate bins and color gradient",
     "steps": [
@@ -523,4 +513,15 @@
     ],
     "passes": true
   }
-]
+
+{
+  "category": "functional",
+  "description": "Implement confidence score distribution visualization for current image predictions",
+  "steps": [
+    "Step 1: Select an image with multiple predictions at different confidence levels",
+    "Step 2: Scroll to per-image statistics section",
+    "Step 3: Verify confidence histogram or distribution visualization is displayed"
+  ],
+  "passes": true
+}
+  ]

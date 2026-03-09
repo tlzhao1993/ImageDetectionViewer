@@ -526,6 +526,14 @@ class DetectionAnalyzer {
                                 </tbody>
                             </table>
                         </div>
+                        ${data.prediction_boxes && data.prediction_boxes.length > 0 ? `
+                        <div class="mt-4">
+                            <h6 class="mb-3"><i class="fas fa-chart-area me-2" aria-hidden="true"></i>Confidence Score Distribution</h6>
+                            <div style="height: 250px; position: relative;">
+                                <canvas id="confidence-distribution-chart"></canvas>
+                            </div>
+                        </div>
+                        ` : ''}
                     </div>
                 </div>
             </div>
@@ -555,6 +563,128 @@ class DetectionAnalyzer {
 
         // Add event listeners for pan/drag functionality
         this.setupPanDrag();
+
+        // Render confidence distribution chart if predictions exist
+        if (data.prediction_boxes && data.prediction_boxes.length > 0) {
+            this.renderConfidenceDistribution(data.prediction_boxes);
+        }
+    }
+
+    renderConfidenceDistribution(predictionBoxes) {
+        const canvas = document.getElementById('confidence-distribution-chart');
+        if (!canvas) return;
+
+        // Extract confidence scores from prediction boxes
+        const confidenceScores = predictionBoxes
+            .map(box => box.confidence)
+            .filter(score => score !== undefined && score !== null);
+
+        if (confidenceScores.length === 0) return;
+
+        // Set canvas dimensions
+        canvas.style.height = '250px';
+        canvas.style.width = '100%';
+
+        const ctx = canvas.getContext('2d');
+
+        // Destroy existing chart if present
+        if (canvas.chart) {
+            canvas.chart.destroy();
+        }
+
+        // Create histogram bins (10 bins from 0 to 1)
+        const binCount = 10;
+        const bins = new Array(binCount).fill(0);
+        const binLabels = [];
+
+        for (let i = 0; i < binCount; i++) {
+            const binStart = i / binCount;
+            const binEnd = (i + 1) / binCount;
+            binLabels.push(`${binStart.toFixed(1)}-${binEnd.toFixed(1)}`);
+        }
+
+        // Populate bins
+        confidenceScores.forEach(score => {
+            const binIndex = Math.min(Math.floor(score * binCount), binCount - 1);
+            bins[binIndex]++;
+        });
+
+        // Generate colors for bins based on confidence level
+        const backgroundColors = bins.map((_, i) => {
+            const hue = (i / binCount) * 120; // Red (0) to Green (120)
+            return `hsla(${hue}, 70%, 50%, 0.7)`;
+        });
+
+        const borderColors = bins.map((_, i) => {
+            const hue = (i / binCount) * 120;
+            return `hsla(${hue}, 70%, 40%, 1)`;
+        });
+
+        // Create the chart
+        canvas.chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: binLabels,
+                datasets: [{
+                    label: 'Number of Predictions',
+                    data: bins,
+                    backgroundColor: backgroundColors,
+                    borderColor: borderColors,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Count'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Confidence Score Range'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        enabled: true,
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                        borderWidth: 1,
+                        padding: 12,
+                        cornerRadius: 6,
+                        callbacks: {
+                            title: function(context) {
+                                return `Confidence: ${context[0].label}`;
+                            },
+                            label: function(context) {
+                                return `Predictions: ${context.parsed.y}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
     }
 
     renderImageWithBoundingBoxes(data) {
