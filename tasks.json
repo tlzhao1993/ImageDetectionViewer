@@ -1,15 +1,5 @@
 [
   {
-    "category": "style",
-    "description": "Navigation bar styling with primary color (#2c5282) and responsive design",
-    "steps": [
-      "Step 1: Navigate to application home page",
-      "Step 2: Take screenshot and verify navigation bar has primary color background",
-      "Step 3: Resize browser to mobile width (<768px) and verify collapsible menu works"
-    ],
-    "passes": false
-  },
-  {
     "category": "functional",
     "description": "Implement Statistics Dashboard HTML structure with summary cards, charts section, and metrics table",
     "steps": [
@@ -467,7 +457,7 @@
     "category": "functional",
     "description": "Implement API endpoint GET /api/statistics/:dataset_id for retrieving per-class statistics",
     "steps": [
-      "Step 1: Load a dataset and get the dataset_id",
+      "Step 1: Load a dataset and get dataset_id",
       "Step 2: Call GET /api/statistics/:dataset_id endpoint",
       "Step 3: Verify response contains classes array with all metrics (recall, precision, fpr, f1_score)"
     ],
@@ -520,6 +510,16 @@
       "Step 1: Access application in browser and verify navigation bar is visible at top",
       "Step 2: Click navigation links and verify page transitions work via hash routing",
       "Step 3: Verify active page indicator shows correct page in navigation bar"
+    ],
+    "passes": true
+  },
+  {
+    "category": "style",
+    "description": "Navigation bar styling with primary color (#2c5282) and responsive design",
+    "steps": [
+      "Step 1: Navigate to application home page",
+      "Step 2: Take screenshot and verify navigation bar has primary color background",
+      "Step 3: Resize browser to mobile width (<768px) and verify collapsible menu works"
     ],
     "passes": true
   }
