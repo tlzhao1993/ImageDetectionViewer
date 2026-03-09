@@ -1,0 +1,12 @@
+{
+  "filename": "test_image_2.png",
+  "width": 640,
+  "height": 480,
+  "predictions": [
+    {
+      "class": "bicycle",
+      "bbox": [195, 195, 305, 355],
+      "score": 0.78
+    }
+  ]
+}

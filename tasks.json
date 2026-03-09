@@ -1,16 +1,6 @@
 [
   {
     "category": "functional",
-    "description": "Implement API endpoint POST /api/dataset/load for dataset loading and parsing",
-    "steps": [
-      "Step 1: Send POST request with valid dataset_path and iou_threshold",
-      "Step 2: Verify response includes success: true, dataset_id, total_images, total_classes",
-      "Step 3: Verify database contains entries for all loaded images and classes"
-    ],
-    "passes": false
-  },
-  {
-    "category": "functional",
     "description": "Implement API endpoint GET /api/statistics/:dataset_id for retrieving per-class statistics",
     "steps": [
       "Step 1: Load a dataset and get the dataset_id",
@@ -204,9 +194,9 @@
     "description": "Implement canvas overlay for bounding box rendering with TP (green), FP (red), FN (red) styling and icons",
     "steps": [
       "Step 1: Select an image with ground truth and prediction boxes",
-      "Step 2: Verify TP boxes have green border and checkmark (✓) indicator",
-      "Step 3: Verify FP boxes have red border and cross (✗) indicator",
-      "Step 4: Verify FN boxes have red border and dash (—) indicator"
+      "Step 2: Verify TP boxes have green border and checkmark (\u2713) indicator",
+      "Step 3: Verify FP boxes have red border and cross (\u2717) indicator",
+      "Step 4: Verify FN boxes have red border and dash (\u2014) indicator"
     ],
     "passes": false
   },
@@ -520,6 +510,16 @@
       "Step 1: Calculate recall for a class with known TP and FN values, verify formula TP/(TP+FN)",
       "Step 2: Calculate precision for a class with known TP and FP values, verify formula TP/(TP+FP)",
       "Step 3: Calculate F1 Score using precision and recall, verify formula 2*(P*R)/(P+R)"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement API endpoint POST /api/dataset/load for dataset loading and parsing",
+    "steps": [
+      "Step 1: Send POST request with valid dataset_path and iou_threshold",
+      "Step 2: Verify response includes success: true, dataset_id, total_images, total_classes",
+      "Step 3: Verify database contains entries for all loaded images and classes"
     ],
     "passes": true
   }

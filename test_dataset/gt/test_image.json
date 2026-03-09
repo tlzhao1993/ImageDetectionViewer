@@ -1,0 +1,34 @@
+{
+  "filename": "test_image.jpg",
+  "width": 1920,
+  "height": 1080,
+  "annotations": [
+    {
+      "class": "car",
+      "bbox": [
+        100,
+        200,
+        300,
+        400
+      ]
+    },
+    {
+      "class": "person",
+      "bbox": [
+        500,
+        600,
+        700,
+        800
+      ]
+    },
+    {
+      "class": "car",
+      "bbox": [
+        1000,
+        100,
+        1200,
+        300
+      ]
+    }
+  ]
+}

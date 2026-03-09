@@ -1,0 +1,37 @@
+{
+  "filename": "test_image.jpg",
+  "width": 1920,
+  "height": 1080,
+  "predictions": [
+    {
+      "class": "car",
+      "bbox": [
+        95,
+        195,
+        305,
+        405
+      ],
+      "score": 0.95
+    },
+    {
+      "class": "person",
+      "bbox": [
+        495,
+        595,
+        705,
+        805
+      ],
+      "score": 0.88
+    },
+    {
+      "class": "bicycle",
+      "bbox": [
+        800,
+        900,
+        900,
+        1000
+      ],
+      "score": 0.72
+    }
+  ]
+}

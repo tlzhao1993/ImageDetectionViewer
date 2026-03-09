@@ -1,0 +1,11 @@
+{
+  "filename": "test_image_2.png",
+  "width": 640,
+  "height": 480,
+  "annotations": [
+    {
+      "class": "bicycle",
+      "bbox": [200, 200, 300, 350]
+    }
+  ]
+}

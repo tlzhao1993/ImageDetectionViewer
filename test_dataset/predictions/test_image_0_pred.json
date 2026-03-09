@@ -1,0 +1,12 @@
+{
+  "filename": "test_image_0.png",
+  "width": 640,
+  "height": 480,
+  "predictions": [
+    {
+      "class": "car",
+      "bbox": [95, 95, 205, 205],
+      "score": 0.92
+    }
+  ]
+}
