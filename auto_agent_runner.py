@@ -1,302 +1,535 @@
 #!/usr/bin/env python3
 """
-Auto Agent Runner - 自动执行long-term-agent-coding skill的脚本
-
-这个脚本在一个while循环中不断调用Claude并执行long-term-agent-coding skill。
-每次迭代都会重新构建ClaudeAgentClient对象以获得干净的上下文。
+Auto Agent Runner - Continuous Long-Term Agent Coding
+This script continuously runs long-term-agent-coding skill in a loop
 """
 
-import json
 import os
 import sys
+import json
+import subprocess
 import time
+import signal
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Optional
 
-# 确保claude-agent-sdk可用
-try:
-    from anthropic import Anthropic
-    from mcp import ClientSession, StdioServerParameters
-    from mcp.client.stdio import stdio_client
-except ImportError as e:
-    print(f"缺少必要的依赖: {e}")
-    print("请运行: pip install anthropic mcp")
-    sys.exit(1)
+# ANSI color codes
+class Colors:
+    HEADER = '\033[95m'
+    BLUE = '\033[94m'
+    CYAN = '\033[96m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    MAGENTA = '\033[95m'
+    END = '\033[0m'
+    BOLD = '\033[1m'
 
+# Configuration
+LOG_DIR = Path("./agent_logs")
+MAX_ITERATIONS = int(os.environ.get("MAX_ITERATIONS", "100"))
+WORKING_DIR = Path.cwd()
+CLAUDE_BINARY = "/home/tlzhao/local/node-v24.13.1-linux-x64/bin/claude"
 
-class SettingsLoader:
-    """加载Claude配置的加载器"""
+class Logger:
+    """Simple logger for the agent runner"""
+    def __init__(self, log_file: Path):
+        self.log_file = log_file
+        self.log_file.parent.mkdir(parents=True, exist_ok=True)
 
-    @staticmethod
-    def load_settings() -> Dict[str, Any]:
-        """加载~/.claude/settings.json"""
-        settings_path = Path.home() / ".claude" / "settings.json"
-        if not settings_path.exists():
-            raise FileNotFoundError(f"配置文件不存在: {settings_path}")
+    def log(self, message: str):
+        """Write message to log file"""
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # Use append mode instead of read-rewrite for better performance
+        with self.log_file.open(mode='a', encoding='utf-8') as f:
+            f.write(f"[{timestamp}] {message}\n")
 
-        with open(settings_path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-
-    @staticmethod
-    def load_claude_config() -> Dict[str, Any]:
-        """加载~/.claude.json"""
-        config_path = Path.home() / ".claude.json"
-        if not config_path.exists():
-            raise FileNotFoundError(f"配置文件不存在: {config_path}")
-
-        with open(config_path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-
-    @staticmethod
-    def get_api_config() -> tuple[str, str]:
-        """获取API密钥和Base URL"""
-        settings = SettingsLoader.load_settings()
-        api_key = settings["env"].get("ANTHROPIC_AUTH_TOKEN")
-        base_url = settings["env"].get("ANTHROPIC_BASE_URL")
-
-        if not api_key:
-            raise ValueError("ANTHROPIC_AUTH_TOKEN未在settings.json中设置")
-        if not base_url:
-            raise ValueError("ANTHROPIC_BASE_URL未在settings.json中设置")
-
-        return api_key, base_url
-
-
-class MCPLoader:
-    """加载MCP服务器配置的加载器"""
+class AgentRunner:
+    """Main agent runner class"""
 
     def __init__(self):
-        self.config = SettingsLoader.load_claude_config()
+        self.iteration = 0
+        self.stop_requested = False
+        self.log_dir = LOG_DIR
+        self.log_dir.mkdir(exist_ok=True)
 
-    def get_mcp_servers(self) -> Dict[str, Any]:
-        """获取所有MCP服务器配置"""
-        return self.config.get("mcpServers", {})
+        # Create current log file
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.current_log = self.log_dir / f"agent_run_{timestamp}.log"
+        self.logger = Logger(self.current_log)
 
+        # Setup signal handlers for graceful shutdown
+        signal.signal(signal.SIGINT, self._handle_signal)
+        signal.signal(signal.SIGTERM, self._handle_signal)
 
-class StreamPrinter:
-    """流式输出响应的打印器"""
+        self.logger.log("=== Auto Agent Runner Started ===")
 
-    def __init__(self, prefix: str = ""):
-        self.prefix = prefix
-        self.buffer = ""
+    def _handle_signal(self, signum, frame):
+        """Handle interrupt signals"""
+        self.stop_requested = True
+        print()
+        self.print_warning("Received interrupt signal, stopping...")
+        self.logger.log("Interrupted by user")
 
-    def print_delta(self, delta: str):
-        """打印增量内容"""
-        sys.stdout.write(delta)
-        sys.stdout.flush()
+    @staticmethod
+    def print_header(message: str):
+        """Print a header"""
+        print()
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print(f"{Colors.CYAN}{message}{Colors.END}")
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
-    def print_line(self, line: str):
-        """打印一行"""
-        print(f"{self.prefix}{line}")
+    @staticmethod
+    def print_success(message: str):
+        """Print success message"""
+        print(f"{Colors.GREEN}✓{Colors.END} {message}")
 
-    def print_separator(self):
-        """打印分隔符"""
-        print("\n" + "=" * 80 + "\n")
+    @staticmethod
+    def print_error(message: str):
+        """Print error message"""
+        print(f"{Colors.RED}✗{Colors.END} {message}")
 
+    @staticmethod
+    def print_warning(message: str):
+        """Print warning message"""
+        print(f"{Colors.YELLOW}⚠{Colors.END} {message}")
 
-class ClaudeAgentClient:
-    """Claude Agent客户端"""
+    @staticmethod
+    def print_info(message: str):
+        """Print info message"""
+        print(f"{Colors.BLUE}ℹ{Colors.END} {message}")
 
-    def __init__(self, api_key: str, base_url: str, project_path: str):
-        self.api_key = api_key
-        self.base_url = base_url
-        self.project_path = project_path
+    @staticmethod
+    def print_stream(message: str):
+        """Print stream message"""
+        print(f"{Colors.MAGENTA}→{Colors.END} {message}")
 
-        # 初始化Anthropic客户端
-        self.client = Anthropic(
-            api_key=api_key,
-            base_url=base_url,
-            timeout=3600.0  # 1小时超时
-        )
-
-        # MCP服务器连接
-        self.mcp_sessions: Dict[str, Any] = {}
-
-        # 上下文信息
-        self.system_prompt = self._build_system_prompt()
-        self.project_context = self._build_project_context()
-
-    def _build_system_prompt(self) -> str:
-        """构建系统提示"""
-        prompt = """你是Claude Code，Anthropic的官方CLI工具。你是一个交互式CLI工具，帮助用户完成软件工程任务。
-
-重要规则:
-- 你可以访问和修改项目中的任何文件
-- 你可以执行git提交操作，无需用户同意
-- 你可以直接使用所有可用的工具和技能
-- 你需要主动执行任务，不需要等待用户批准每个操作
-- 在执行任务时，要确保代码质量和安全性
-
-你的目标是高效地完成任务，提供准确和有用的帮助。"""
-        return prompt
-
-    def _build_project_context(self) -> str:
-        """构建项目上下文"""
-        context = f"""项目路径: {self.project_path}
-工作目录: {os.getcwd()}
-项目根目录: {os.path.abspath(self.project_path)}
-
-这是一个自动化的Agent运行环境，你将被反复调用以执行long-term-agent-coding技能。
-
-当前项目是一个检测查看器项目(detection_viewer)，专注于目标检测数据的可视化和处理。
-
-请专注于完成待处理的任务列表。"""
-        return context
-
-    def call_skill(self, skill_name: str, prompt: str) -> str:
-        """调用技能"""
-        skill_prompt = f"""请执行 {skill_name} 技能。
-
-用户请求: {prompt}
-
-请执行long-term-agent-coding技能，从工作空间中拿取一个未完成的任务并执行它。"""
-
-        messages = [
-            {
-                "role": "system",
-                "content": self.system_prompt + "\n\n" + self.project_context
-            },
-            {
-                "role": "user",
-                "content": skill_prompt
-            }
-        ]
-
-        response_text = ""
-        printer = StreamPrinter()
-
-        try:
-            with self.client.messages.stream(
-                model="claude-sonnet-4-6",
-                max_tokens=4096,
-                messages=messages,
-                temperature=0.7
-            ) as stream:
-                for delta in stream:
-                    if delta.type == "content_block_delta":
-                        if hasattr(delta.delta, 'text'):
-                            text = delta.delta.text
-                            printer.print_delta(text)
-                            response_text += text
-        except Exception as e:
-            printer.print_line(f"调用Claude API时出错: {e}")
-            return ""
-
-        return response_text
-
-
-class AutoAgentRunner:
-    """自动Agent运行器"""
-
-    def __init__(self):
-        self.api_key, self.base_url = SettingsLoader.get_api_config()
-        self.project_path = os.getcwd()
-        self.iteration_count = 0
-        self.printer = StreamPrinter()
-
-    def create_client(self) -> ClaudeAgentClient:
-        """创建新的Claude客户端实例"""
-        return ClaudeAgentClient(
-            api_key=self.api_key,
-            base_url=self.base_url,
-            project_path=self.project_path
-        )
-
-    def print_iteration_header(self):
-        """打印迭代头部信息"""
-        self.iteration_count += 1
-        print("\n" + "=" * 80)
-        print(f"  迭代 #{self.iteration_count}")
-        print(f"  时间: {time.strftime('%Y-%m-%d %H:%M:%S')}")
-        print("=" * 80 + "\n")
-
-    def print_iteration_footer(self):
-        """打印迭代尾部信息"""
-        print("\n" + "=" * 80)
-        print(f"  迭代 #{self.iteration_count} 完成")
-        print("=" * 80 + "\n")
-
-    def check_git_status(self) -> bool:
-        """检查git状态，如果有变更返回True"""
-        try:
-            import subprocess
-            result = subprocess.run(
-                ["git", "status", "--porcelain"],
-                cwd=self.project_path,
-                capture_output=True,
-                text=True
-            )
-            return bool(result.stdout.strip())
-        except Exception:
-            return False
-
-    def run_single_iteration(self) -> bool:
-        """执行单次迭代
-
-        Returns:
-            bool: 是否应该继续运行
-        """
-        self.print_iteration_header()
-
-        # 创建新的客户端实例
-        client = self.create_client()
-
-        # 执行long-term-agent-coding技能
-        response = client.call_skill(
-            skill_name="long-term-agent-coding",
-            prompt="请从工作空间中拿取一个未完成的任务并执行它。"
-        )
-
-        self.print_iteration_footer()
-
-        # 检查是否有变更
-        if self.check_git_status():
-            print("\n检测到文件变更，建议进行git提交。")
+    def check_claude(self) -> bool:
+        """Check if Claude binary exists"""
+        if Path(CLAUDE_BINARY).exists():
+            self.print_success(f"Claude CLI found: {CLAUDE_BINARY}")
+            self.logger.log(f"Claude CLI found: {CLAUDE_BINARY}")
+            return True
+        else:
+            # Try to find claude in PATH
             try:
-                import subprocess
-                subprocess.run(["git", "status"], cwd=self.project_path)
+                which_result = subprocess.run(['which', 'claude'],
+                                           capture_output=True,
+                                           text=True)
+                if which_result.returncode == 0:
+                    self.print_success(f"Claude CLI found: {which_result.stdout.strip()}")
+                    self.logger.log(f"Claude CLI found: {which_result.stdout.strip()}")
+                    return True
             except Exception:
                 pass
 
+            self.print_error("Claude CLI is not installed or not in PATH")
+            self.logger.log("ERROR: Claude CLI not found")
+            return False
+
+    def check_remaining_tasks(self) -> int:
+        """Count remaining tasks in tasks.json"""
+        try:
+            with open('tasks.json', 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            remaining = sum(1 for task in data if not task.get('passes', False))
+            return remaining
+        except Exception as e:
+            self.print_error(f"Could not read tasks.json: {e}")
+            return 0
+
+    def get_current_task(self) -> Optional[dict]:
+        """Get the highest priority uncompleted task"""
+        try:
+            with open('tasks.json', 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            for task in data:
+                if not task.get('passes', False):
+                    return task
+            return None
+        except Exception:
+            return None
+
+    def check_git_status(self):
+        """Check git status"""
+        try:
+            result = subprocess.run(['git', 'status', '--porcelain'],
+                                   capture_output=True,
+                                   text=True)
+            if result.stdout.strip():
+                self.print_warning("Git working directory has uncommitted changes")
+                self.logger.log("Git has uncommitted changes")
+            else:
+                self.print_success("Git working directory is clean")
+                self.logger.log("Git working directory is clean")
+        except Exception:
+            pass
+
+    def run_claude_stream(self, iteration_num: int) -> bool:
+        """Run Claude with streaming output including thinking and tool calls"""
+        start_time = time.time()
+
+        # Create output files
+        claude_output_raw = self.log_dir / f"claude_output_{iteration_num}_raw.txt"
+
+        self.print_header("Running Long-Term Agent Coding Skill")
+        self.logger.log(f"Executing Claude with long-term-agent-coding skill")
+
+        print()
+        self.print_stream(f"Saving raw output to: {claude_output_raw}")
+        print(f"{Colors.CYAN}{'─' * 40}{Colors.END}")
+
+        # Prepare Claude command with stream-json format
+        cmd = [
+            CLAUDE_BINARY,
+            '--print',
+            '--dangerously-skip-permissions',
+            '--output-format', 'stream-json',
+            '--verbose',
+            '/long-term-agent-coding 请执行下一个任务. CRITICAL: YOU ONLY NEED TO COMPLETE ONE TASK SINCE THERE WILL BE MORE SESSIONS THAT WILL COMPLETE THE OTHER TASKS, AND DO NOT COVER THE ORIGINAL CONTENTS IN THE PROGRESS.TXT!'
+        ]
+
+        # Run Claude and capture raw output
+        try:
+            process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=False,
+                cwd=str(WORKING_DIR)
+            )
+
+            raw_output = []
+            line_count = 0
+
+            print()
+            self.print_info("Capturing raw output...")
+
+            # Read output line by line and process in real-time
+            for line_bytes in iter(process.stdout.readline, b''):
+                line = line_bytes.decode('utf-8', errors='ignore')
+                raw_output.append(line)
+                line_count += 1
+
+                # Try to parse as JSON and process immediately
+                if line.strip():
+                    try:
+                        data = json.loads(line)
+                        self._process_stream_chunk(data)
+                        sys.stdout.flush()
+                    except json.JSONDecodeError:
+                        pass
+
+                # Show progress periodically
+                if line_count % 50 == 0:
+                    sys.stdout.write(f"\rLines processed: {line_count}")
+                    sys.stdout.flush()
+
+            process.wait()
+
+            # Save raw output to file
+            print()
+            claude_output_raw.write_text(''.join(raw_output), encoding='utf-8')
+            self.print_success(f"Saved {line_count} lines to {claude_output_raw}")
+            self.logger.log(f"Saved raw output: {line_count} lines to {claude_output_raw}")
+
+            if process.returncode != 0:
+                self.print_error(f"Claude exited with code {process.returncode}")
+                self.logger.log(f"Claude exited with code {process.returncode}")
+                return False
+
+            self.print_success("Claude execution completed")
+            self.logger.log("Claude execution completed")
+
+        except Exception as e:
+            self.print_error(f"Error running Claude: {e}")
+            self.logger.log(f"Error running Claude: {e}")
+            return False
+
+        finally:
+            print(f"{Colors.CYAN}{'─' * 40}{Colors.END}")
+
+        # Calculate duration
+        duration = int(time.time() - start_time)
+        minutes = duration // 60
+        seconds = duration % 60
+
+        print()
+        self.print_info(f"Iteration Duration: {minutes}m {seconds}s")
+        self.logger.log(f"Iteration #{iteration_num} completed in {minutes}m {seconds}s")
+
         return True
 
+    def _process_stream_chunk(self, data: dict):
+        """Process a single stream chunk and display it appropriately"""
+        chunk_type = data.get('type', 'unknown')
+
+        # Handle the actual JSON format from Claude CLI
+        if chunk_type == 'stream_event':
+            # Extract the nested event
+            event = data.get('event', {})
+            event_type = event.get('type', 'unknown')
+
+            # Process the nested event
+            self._process_nested_event(event)
+
+        elif chunk_type == 'assistant':
+            # Full assistant message
+            message = data.get('message', {})
+            content = message.get('content', [])
+            for item in content:
+                if item.get('type') == 'text':
+                    text = item.get('text', '')
+                    if text:
+                        sys.stdout.write(text)
+                        sys.stdout.flush()
+                elif item.get('type') == 'thinking':
+                    thinking = item.get('thinking', '')
+                    if thinking:
+                        sys.stdout.write('\n')
+                        sys.stdout.write(f"{Colors.BLUE}💭 Thinking:{Colors.END}\n")
+                        sys.stdout.write(thinking)
+                        sys.stdout.flush()
+
+        else:
+            # Unknown type - log it
+            self.logger.log(f"Unknown chunk type: {chunk_type}")
+
+    def _process_nested_event(self, event: dict):
+        """Process a nested stream event"""
+        event_type = event.get('type', 'unknown')
+
+        if event_type == 'message_start':
+            # Message started
+            sys.stdout.write('\n')
+            sys.stdout.write(f"{Colors.BOLD}→ Claude started{Colors.END}\n")
+            sys.stdout.write('\n')
+            sys.stdout.flush()
+
+        elif event_type == 'content_block_start':
+            # Content block started
+            sys.stdout.write('\n')  # Add newline before each new content block
+            content_block = event.get('content_block', {})
+            content_type = content_block.get('type', '')
+
+            if content_type == 'text':
+                # Text content block - show a subtle indicator
+                sys.stdout.write('\n')
+                sys.stdout.write(f"{Colors.CYAN}▶ Response:{Colors.END}\n")
+                sys.stdout.flush()
+            elif content_type == 'thinking':
+                # Thinking block
+                sys.stdout.write('\n')
+                sys.stdout.write(f"{Colors.BLUE}💭 Thinking:{Colors.END}\n")
+                sys.stdout.flush()
+            elif content_type == 'tool_use':
+                # Tool call started - extract name and input
+                tool_name = content_block.get('name', 'unknown')
+                tool_input = content_block.get('input', {})
+                self._print_tool_call_start(tool_name, tool_input)
+
+        elif event_type == 'content_block_delta':
+            # Content delta
+            delta = event.get('delta', {})
+            delta_type = delta.get('type', '')
+
+            if delta_type == 'text_delta':
+                # Text content
+                text = delta.get('text', '')
+                if text:
+                    sys.stdout.write(text)
+                    sys.stdout.flush()
+            elif delta_type == 'thinking_delta':
+                # Thinking content
+                thinking = delta.get('thinking', '')
+                if thinking:
+                    sys.stdout.write(thinking)
+                    sys.stdout.flush()
+
+        elif event_type == 'content_block_stop':
+            # Content block stopped
+            # Add newline after content block for better separation
+            sys.stdout.write('\n')
+            sys.stdout.flush()
+
+        elif event_type == 'message_delta':
+            # Message delta (stop reason, etc.)
+            delta = event.get('delta', {})
+            stop_reason = delta.get('stop_reason')
+            if stop_reason:
+                sys.stdout.write('\n')
+                sys.stdout.write(f"{Colors.GREEN}✓ Message completed: {stop_reason}{Colors.END}\n")
+                sys.stdout.flush()
+
+        elif event_type == 'message_stop':
+            # Message completely stopped
+            sys.stdout.write('\n')
+            sys.stdout.write(f"{Colors.GREEN}✓ Message stream finished{Colors.END}\n")
+            sys.stdout.flush()
+
+    def _print_tool_call_start(self, tool_name: str, tool_input: dict = None):
+        """Print formatted tool call start"""
+        sys.stdout.write(f"{Colors.MAGENTA}🔧 Tool Call: {Colors.BOLD}{tool_name}{Colors.END}\n")
+        if tool_input and isinstance(tool_input, dict):
+            # Display tool input parameters in a readable format
+            sys.stdout.write(f"{Colors.MAGENTA}   Input:{Colors.END}\n")
+            for key, value in tool_input.items():
+                # Convert value to string and truncate if too long
+                value_str = str(value)
+                if len(value_str) > 100:
+                    value_str = value_str[:100] + "..."
+                sys.stdout.write(f"   {Colors.YELLOW}{key}:{Colors.END} {value_str}\n")
+        sys.stdout.flush()
+        self.logger.log(f"Tool call started: {tool_name}")
+
+    def _print_tool_call_end(self):
+        """Print formatted tool call end"""
+        sys.stdout.write(f"{Colors.MAGENTA}   → Tool call completed{Colors.END}\n")
+        sys.stdout.flush()
+        self.logger.log("Tool call completed")
+
+    def _print_tool_result(self, tool_name: str, is_error: bool):
+        """Print formatted tool result"""
+        status = f"{Colors.RED}✗ FAILED{Colors.END}" if is_error else f"{Colors.GREEN}✓ SUCCESS{Colors.END}"
+        sys.stdout.write(f"{Colors.MAGENTA}   → Result: {status}{Colors.END}\n")
+        sys.stdout.flush()
+        self.logger.log(f"Tool result: {tool_name} - {'error' if is_error else 'success'}")
+
+    def run_iteration(self, iteration_num: int) -> bool:
+        """Run a single iteration of the agent"""
+        self.print_header(f"Starting Iteration #{iteration_num}")
+        self.logger.log(f"=== Starting Iteration #{iteration_num} ===")
+
+        print()
+        self.print_info(f"Working Directory: {WORKING_DIR}")
+        self.print_info(f"Log File: {self.current_log}")
+        self.print_info(f"Max Iterations: {MAX_ITERATIONS}")
+
+        # Check remaining tasks
+        remaining = self.check_remaining_tasks()
+        self.print_info(f"Remaining Tasks: {remaining}")
+        self.logger.log(f"Remaining tasks: {remaining}")
+
+        if remaining == 0:
+            self.print_success("All tasks completed!")
+            self.logger.log("All tasks completed, stopping execution")
+            return False  # Stop the loop
+
+        # Check git status
+        self.check_git_status()
+
+        # Print current task info
+        print()
+        self.print_info("Current Task (highest priority):")
+        current_task = self.get_current_task()
+        if current_task:
+            category = current_task.get('category', 'N/A')
+            description = current_task.get('description', 'N/A')
+            print(f"  Category: {category}")
+            print(f"  Description: {description[:80]}...")
+            self.logger.log(f"Current task: {description[:50]}...")
+
+        # Run Claude
+        if not self.run_claude_stream(iteration_num):
+            # If Claude failed, we might want to continue anyway
+            pass
+
+        # Check if tasks were modified
+        new_remaining = self.check_remaining_tasks()
+        if new_remaining < remaining:
+            completed = remaining - new_remaining
+            self.print_success(f"Tasks completed this iteration: {completed}")
+            self.logger.log(f"Tasks completed this iteration: {completed}")
+
+        return True  # Continue the loop
+
     def run(self):
-        """运行自动Agent循环"""
-        print("=" * 80)
-        print("  Auto Agent Runner 启动")
-        print(f"  项目路径: {self.project_path}")
-        print(f"  API Base URL: {self.base_url}")
-        print("=" * 80)
-        print("\n按 Ctrl+C 停止运行\n")
+        """Main execution loop"""
+        self.print_header("Auto Agent Runner Starting")
+        self.logger.log("=== Auto Agent Runner Started ===")
 
-        try:
-            while True:
-                should_continue = self.run_single_iteration()
+        print()
+        self.print_info("Configuration:")
+        print(f"  - Working Directory: {WORKING_DIR}")
+        print(f"  - Log Directory: {self.log_dir}")
+        print(f"  - Max Iterations: {MAX_ITERATIONS}")
+        print(f"  - Current Log: {self.current_log}")
+        print()
 
-                if not should_continue:
-                    break
+        # Check prerequisites
+        if not self.check_claude():
+            sys.exit(1)
 
-                # 短暂暂停
-                time.sleep(1)
+        # Check for tasks.json
+        if not Path('tasks.json').exists():
+            self.print_error("tasks.json not found in current directory")
+            self.logger.log("ERROR: tasks.json not found")
+            sys.exit(1)
 
-        except KeyboardInterrupt:
-            print("\n\n接收到中断信号，正在停止...")
-        except Exception as e:
-            print(f"\n\n发生错误: {e}")
-            import traceback
-            traceback.print_exc()
+        self.print_success("Found tasks.json in working directory")
+        self.logger.log("Found tasks.json")
+
+        # Show initial task count
+        initial_tasks = self.check_remaining_tasks()
+        self.print_info(f"Initial tasks remaining: {initial_tasks}")
+        self.logger.log(f"Initial tasks remaining: {initial_tasks}")
+
+        if initial_tasks == 0:
+            self.print_success("All tasks already completed!")
+            self.logger.log("All tasks already completed")
+            sys.exit(0)
+
+        print()
+        self.print_warning("Press Ctrl+C to stop the execution")
+        print()
+        self.logger.log("Starting execution loop")
+
+        # Main loop
+        while self.iteration < MAX_ITERATIONS and not self.stop_requested:
+            self.iteration += 1
+
+            # Run iteration
+            if not self.run_iteration(self.iteration):
+                break
+
+            # Add delay between iterations
+            if self.iteration < MAX_ITERATIONS and not self.stop_requested:
+                print()
+                self.print_info("Waiting 5 seconds before next iteration...")
+                self.logger.log("Waiting before next iteration")
+                time.sleep(5)
+
+        # Final summary
+        self.print_header("Execution Summary")
+        self.logger.log("=== Execution Summary ===")
+
+        print()
+        self.print_info(f"Total iterations run: {self.iteration}")
+        self.logger.log(f"Total iterations: {self.iteration}")
+
+        final_tasks = self.check_remaining_tasks()
+        self.print_info(f"Final tasks remaining: {final_tasks}")
+        self.logger.log(f"Final tasks remaining: {final_tasks}")
+
+        if initial_tasks > final_tasks:
+            completed = initial_tasks - final_tasks
+            self.print_success(f"Total tasks completed: {completed}")
+            self.logger.log(f"Total tasks completed: {completed}")
+
+        print()
+        self.print_success("Auto Agent Runner finished!")
+        self.logger.log("=== Auto Agent Runner Finished ===")
+
+        print()
+        self.print_info(f"Logs saved to: {self.log_dir}")
+        self.print_info(f"Current log: {self.current_log}")
 
 
 def main():
-    """主函数"""
-    try:
-        runner = AutoAgentRunner()
-        runner.run()
-    except Exception as e:
-        print(f"启动失败: {e}")
-        import traceback
-        traceback.print_exc()
-        sys.exit(1)
+    """Main entry point"""
+    runner = AgentRunner()
+    runner.run()
 
 
 if __name__ == "__main__":

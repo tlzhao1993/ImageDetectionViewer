@@ -1,16 +1,6 @@
 [
   {
     "category": "functional",
-    "description": "Implement API endpoint GET /api/statistics/export/:dataset_id for CSV/JSON export",
-    "steps": [
-      "Step 1: Call export endpoint with format='csv' parameter",
-      "Step 2: Verify response is valid CSV with header row containing metric columns",
-      "Step 3: Call export endpoint with format='json' and verify valid JSON structure"
-    ],
-    "passes": false
-  },
-  {
-    "category": "functional",
     "description": "Create base HTML template with navigation bar and client-side routing structure",
     "steps": [
       "Step 1: Access application in browser and verify navigation bar is visible at top",
@@ -520,6 +510,16 @@
       "Step 1: Call GET /api/images/:dataset_id/:image_id for a specific image",
       "Step 2: Verify response contains filename, dimensions, ground_truth_boxes, prediction_boxes",
       "Step 3: Verify per_class_stats includes counts and metrics for each class"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement API endpoint GET /api/statistics/export/:dataset_id for CSV/JSON export",
+    "steps": [
+      "Step 1: Call export endpoint with format='csv' parameter",
+      "Step 2: Verify response is valid CSV with header row containing metric columns",
+      "Step 3: Call export endpoint with format='json' and verify valid JSON structure"
     ],
     "passes": true
   }

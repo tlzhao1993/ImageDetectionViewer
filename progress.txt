@@ -1,3 +1,41 @@
+[2026-03-09] 完成了任务: Implement API endpoint GET /api/statistics/export/:dataset_id for CSV/JSON export
+
+完成的任务描述: 实现API端点GET /api/statistics/export/:dataset_id用于CSV/JSON格式的统计信息导出
+
+测试结果:
+- Step 1: Call export endpoint with format='csv' parameter - 通过
+  验证内容: 成功调用GET请求到http://localhost:5000/api/statistics/export/3?format=csv，返回有效的CSV格式数据
+- Step 2: Verify response is valid CSV with header row containing metric columns - 通过
+  验证内容: CSV响应包含标题行"Class,GT Count,Pred Count,TP,FP,FN,Recall,Precision,FPR,F1 Score"，所有必需的度量列都存在
+- Step 3: Call export endpoint with format='json' and verify valid JSON structure - 通过
+  验证内容: JSON响应包含classes数组、overall_metrics、iou_threshold和confidence_threshold，结构完整且有效
+
+额外测试通过:
+- CSV格式的Content-Type正确设置为text/csv
+- CSV格式的Content-Disposition正确设置，包含文件名statistics_dataset_3.csv
+- JSON格式的Content-Type正确设置为application/json
+- 无效的format参数返回400错误（错误消息: format must be either "csv" or "json"）
+- 不存在的dataset_id返回404错误（错误消息: Dataset with ID 999 not found）
+- 默认格式（不提供format参数）正确使用json格式
+- CSV包含每个类别的统计数据行和总体统计数据行（OVERALL）
+
+发现并解决的问题:
+无问题，所有测试步骤都完美通过。
+
+实现的功能:
+- GET /api/statistics/export/:dataset_id API端点已在run.py中实现（第240-420行）
+- 支持format查询参数：csv或json（默认为json）
+- CSV格式导出：返回包含标题行、类别数据行和总体统计行的CSV文件
+- JSON格式导出：返回包含classes数组、overall_metrics、iou_threshold和confidence_threshold的JSON
+- 参数验证和错误处理
+- 正确的Content-Type和Content-Disposition头设置
+
+建议下一步:
+建议执行下一个任务: "Create base HTML template with navigation bar and client-side routing structure"，该任务需要创建基础HTML模板和客户端路由结构。
+
+当前工程完成状态: 16个测试通过，共52个测试
+
+
 [2026-03-09] 完成了任务: Implement API endpoint GET /api/images/:dataset_id/:image_id for detailed image data
 
 完成的任务描述: 实现API端点GET /api/images/:dataset_id/:image_id用于获取单张图像的详细数据

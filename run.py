@@ -1,7 +1,9 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
 import os
 import sys
+import csv
+import io
 import flask
 from app.db import init_db, get_db
 from app.loader import load_dataset, recalculate_statistics
@@ -232,6 +234,192 @@ def get_statistics_endpoint(dataset_id):
                 'iou_threshold': dataset_row[4],
                 'confidence_threshold': dataset_row[5]
             }), 200
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/statistics/export/<int:dataset_id>')
+def export_statistics_endpoint(dataset_id):
+    """
+    API endpoint to export statistics in CSV or JSON format
+
+    Args:
+        dataset_id: ID of dataset to export statistics for
+
+    Query parameters:
+        format: Export format - 'csv' or 'json' (default: 'json')
+
+    Returns:
+        CSV format:
+            - Content-Type: text/csv
+            - CSV file with columns: Class, GT Count, Pred Count, TP, FP, FN, Recall, Precision, FPR, F1 Score
+        JSON format:
+            - Content-Type: application/json
+            - JSON with classes array and overall_metrics
+    """
+    try:
+        # Get format parameter (default to json)
+        export_format = request.args.get('format', 'json').lower()
+
+        # Validate format
+        if export_format not in ['csv', 'json']:
+            return jsonify({
+                'success': False,
+                'error': 'format must be either "csv" or "json"'
+            }), 400
+
+        with get_db() as conn:
+            cursor = conn.cursor()
+
+            # Check if dataset exists
+            cursor.execute('''
+                SELECT id, path, total_images, total_classes, iou_threshold, confidence_threshold
+                FROM dataset_metadata
+                WHERE id = ?
+            ''', (dataset_id,))
+
+            dataset_row = cursor.fetchone()
+
+            if dataset_row is None:
+                return jsonify({
+                    'success': False,
+                    'error': f'Dataset with ID {dataset_id} not found'
+                }), 404
+
+            # Get all classes for this dataset
+            cursor.execute('''
+                SELECT id, name, total_gt_count, total_pred_count,
+                       tp_count, fp_count, fn_count,
+                       recall, precision, fpr, f1_score
+                FROM classes
+                WHERE dataset_id = ?
+                ORDER BY name
+            ''', (dataset_id,))
+
+            classes = []
+            for row in cursor.fetchall():
+                classes.append({
+                    'id': row[0],
+                    'name': row[1],
+                    'total_gt_count': row[2],
+                    'total_pred_count': row[3],
+                    'tp_count': row[4],
+                    'fp_count': row[5],
+                    'fn_count': row[6],
+                    'recall': row[7],
+                    'precision': row[8],
+                    'fpr': row[9],
+                    'f1_score': row[10]
+                })
+
+            # Calculate overall metrics
+            total_tp = sum(c['tp_count'] for c in classes)
+            total_fp = sum(c['fp_count'] for c in classes)
+            total_fn = sum(c['fn_count'] for c in classes)
+            total_gt = sum(c['total_gt_count'] for c in classes)
+
+            # Overall recall
+            if (total_tp + total_fn) > 0:
+                overall_recall = total_tp / (total_tp + total_fn)
+            else:
+                overall_recall = 0.0
+
+            # Overall precision
+            if (total_tp + total_fp) > 0:
+                overall_precision = total_tp / (total_tp + total_fp)
+            else:
+                overall_precision = 0.0
+
+            # Overall F1 Score
+            if (overall_precision + overall_recall) > 0:
+                overall_f1 = 2 * (overall_precision * overall_recall) / (overall_precision + overall_recall)
+            else:
+                overall_f1 = 0.0
+
+            # Overall FPR
+            if (total_fp + total_tp) > 0:
+                overall_fpr = total_fp / (total_fp + total_tp)
+            else:
+                overall_fpr = 0.0
+
+            overall_metrics = {
+                'total_gt_boxes': total_gt,
+                'total_pred_boxes': sum(c['total_pred_count'] for c in classes),
+                'total_tp': total_tp,
+                'total_fp': total_fp,
+                'total_fn': total_fn,
+                'recall': overall_recall,
+                'precision': overall_precision,
+                'fpr': overall_fpr,
+                'f1_score': overall_f1
+            }
+
+            # Return based on format
+            if export_format == 'csv':
+                # Create CSV content
+                output = io.StringIO()
+                writer = csv.writer(output)
+
+                # Write header row
+                writer.writerow([
+                    'Class', 'GT Count', 'Pred Count', 'TP', 'FP', 'FN',
+                    'Recall', 'Precision', 'FPR', 'F1 Score'
+                ])
+
+                # Write data rows
+                for cls in classes:
+                    writer.writerow([
+                        cls['name'],
+                        cls['total_gt_count'],
+                        cls['total_pred_count'],
+                        cls['tp_count'],
+                        cls['fp_count'],
+                        cls['fn_count'],
+                        f"{cls['recall']:.6f}",
+                        f"{cls['precision']:.6f}",
+                        f"{cls['fpr']:.6f}",
+                        f"{cls['f1_score']:.6f}"
+                    ])
+
+                # Write overall metrics row
+                writer.writerow([
+                    'OVERALL',
+                    overall_metrics['total_gt_boxes'],
+                    overall_metrics['total_pred_boxes'],
+                    overall_metrics['total_tp'],
+                    overall_metrics['total_fp'],
+                    overall_metrics['total_fn'],
+                    f"{overall_metrics['recall']:.6f}",
+                    f"{overall_metrics['precision']:.6f}",
+                    f"{overall_metrics['fpr']:.6f}",
+                    f"{overall_metrics['f1_score']:.6f}"
+                ])
+
+                csv_content = output.getvalue()
+                output.close()
+
+                # Return CSV response
+                response = Response(
+                    csv_content,
+                    mimetype='text/csv',
+                    headers={
+                        'Content-Disposition': f'attachment; filename=statistics_dataset_{dataset_id}.csv'
+                    }
+                )
+                return response
+
+            else:  # json format
+                return jsonify({
+                    'success': True,
+                    'classes': classes,
+                    'overall_metrics': overall_metrics,
+                    'iou_threshold': dataset_row[4],
+                    'confidence_threshold': dataset_row[5]
+                }), 200
 
     except Exception as e:
         return jsonify({
