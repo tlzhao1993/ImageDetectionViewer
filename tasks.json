@@ -1,16 +1,6 @@
 [
   {
     "category": "functional",
-    "description": "Implement JSON parsing for prediction files with confidence scores",
-    "steps": [
-      "Step 1: Create a sample prediction JSON file with valid format including confidence scores",
-      "Step 2: Parse file and verify bbox coordinates and confidence scores are extracted correctly",
-      "Step 3: Parse file with multiple predictions and verify all data is captured"
-    ],
-    "passes": false
-  },
-  {
-    "category": "functional",
     "description": "Implement thumbnail generation using Pillow for all images (150x150px)",
     "steps": [
       "Step 1: Load a sample image through the thumbnail generation function",
@@ -471,6 +461,16 @@
       "Step 3: Verify chart has proper bin distribution and color gradient from low to high confidence"
     ],
     "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Implement JSON parsing for prediction files with confidence scores",
+    "steps": [
+      "Step 1: Create a sample prediction JSON file with valid format including confidence scores",
+      "Step 2: Parse file and verify bbox coordinates and confidence scores are extracted correctly",
+      "Step 3: Parse file with multiple predictions and verify all data is captured"
+    ],
+    "passes": true
   },
   {
     "category": "functional",
