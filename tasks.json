@@ -1,15 +1,5 @@
 [
   {
-    "category": "style",
-    "description": "Per-image statistics section styling with summary card and breakdown table",
-    "steps": [
-      "Step 1: Select an image",
-      "Step 2: Take screenshot and verify summary card with filename and dimensions",
-      "Step 3: Verify breakdown table has proper column alignment (center for numbers, left for text)"
-    ],
-    "passes": false
-  },
-  {
     "category": "functional",
     "description": "Implement previous/next navigation buttons for sequential image viewing",
     "steps": [
@@ -520,6 +510,16 @@
       "Step 1: Select an image with detections",
       "Step 2: Scroll to per-image statistics section",
       "Step 3: Verify table shows correct counts for each class present in image"
+    ],
+    "passes": true
+  },
+  {
+    "category": "style",
+    "description": "Per-image statistics section styling with summary card and breakdown table",
+    "steps": [
+      "Step 1: Select an image",
+      "Step 2: Take screenshot and verify summary card with filename and dimensions",
+      "Step 3: Verify breakdown table has proper column alignment (center for numbers, left for text)"
     ],
     "passes": true
   }

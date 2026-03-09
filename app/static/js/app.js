@@ -168,7 +168,7 @@ class DetectionAnalyzer {
             const response = await fetch(url);
             const data = await response.json();
 
-            if (data.success) {
+            if (data.images) {
                 this.allImages = data.images;
                 this.applyClientSideFilters();
             }

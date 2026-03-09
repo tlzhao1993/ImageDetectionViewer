@@ -1,3 +1,35 @@
+[2026-03-09] 完成了任务: Per-image statistics section styling with summary card and breakdown table
+
+完成的任务描述: 验证了每张图片统计部分的样式，包括摘要卡片和分类明细表
+
+测试结果:
+- Step 1: Select an image - 通过
+  验证内容: 成功选择图片 test_image_1.png，图片详情正确显示
+- Step 2: Take screenshot and verify summary card with filename and dimensions - 通过
+  验证内容: Filename (test_image_1.png) 正确显示在header section中，Dimensions (640 x 480 pixels) 正确显示，Total GT/Pred boxes作为badge显示在header中
+  截图保存在 verification/per_image_stats_styling/image_selected_with_stats.png
+- Step 3: Verify breakdown table has proper column alignment (center for numbers, left for text) - 通过
+  验证内容: Class列 (text-align: left), GT列 (text-align: center), Pred列 (text-align: center), TP列 (text-align: center), FP列 (text-align: center), FN列 (text-align: center)
+  所有列的对齐方式都正确符合要求
+
+实现的功能:
+- 修复了app/static/js/app.js中loadImagesList方法的条件检查问题
+  - 将 "if (data.success)" 改为 "if (data.images)" 以正确处理API返回的数据结构
+- 验证了per-image statistics section的样式
+  - Filename和dimensions正确显示
+  - Total GT/Pred boxes正确显示
+  - Breakdown table正确渲染
+  - 表格列对齐正确（Class左对齐，数字列居中）
+
+发现并解决的问题:
+1. API返回的数据结构是 { images: [...] } 而不是 { success: true, images: [...] }
+   解决方法: 更新loadImagesList方法中的条件检查，从检查 data.success 改为检查 data.images
+
+建议下一步:
+建议执行下一个任务: "Implement previous/next navigation buttons for sequential image viewing"，该任务需要实现前一张/后一张导航按钮用于顺序查看图片。
+
+当前工程完成状态: 36个测试通过，共52个测试
+
 [2026-03-09] 完成了任务: Implement per-image statistics table showing Class, GT, Pred, TP, FP, FN breakdown
 
 完成的任务描述: 实现了每张图片的统计表格，显示每个类别的GT、Pred、TP、FP、FN数值
