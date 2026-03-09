@@ -1,15 +1,5 @@
 [
   {
-    "category": "style",
-    "description": "Overall design system consistency (color palette, typography, spacing) across all pages",
-    "steps": [
-      "Step 1: Navigate to Statistics Dashboard and take screenshot",
-      "Step 2: Navigate to Image Comparison View and take screenshot",
-      "Step 3: Compare screenshots and verify consistent color palette, typography, and spacing"
-    ],
-    "passes": false
-  },
-  {
     "category": "functional",
     "description": "Implement dataset load modal with path input field and load button",
     "steps": [
@@ -520,6 +510,16 @@
       "Step 1: Select image with multiple box types",
       "Step 2: Take screenshot and verify TP icons are green (#22c55e)",
       "Step 3: Verify FP/FN icons are red (#ef4444) and positioned at top-left of boxes"
+    ],
+    "passes": true
+  },
+  {
+    "category": "style",
+    "description": "Overall design system consistency (color palette, typography, spacing) across all pages",
+    "steps": [
+      "Step 1: Navigate to Statistics Dashboard and take screenshot",
+      "Step 2: Navigate to Image Comparison View and take screenshot",
+      "Step 3: Compare screenshots and verify consistent color palette, typography, and spacing"
     ],
     "passes": true
   }
