@@ -1,15 +1,5 @@
 [
   {
-    "category": "style",
-    "description": "Error modal styling with clear title, descriptive message, and close button",
-    "steps": [
-      "Step 1: Trigger an error condition",
-      "Step 2: Take screenshot and verify modal has clear error title and message",
-      "Step 3: Verify close button is prominently styled and easily clickable"
-    ],
-    "passes": false
-  },
-  {
     "category": "functional",
     "description": "Implement empty state handling when no dataset is loaded",
     "steps": [
@@ -520,6 +510,16 @@
       "Step 1: Provide an invalid dataset path",
       "Step 2: Verify error modal appears with descriptive message",
       "Step 3: Click close button and verify modal dismisses"
+    ],
+    "passes": true
+  },
+  {
+    "category": "style",
+    "description": "Error modal styling with clear title, descriptive message, and close button",
+    "steps": [
+      "Step 1: Trigger an error condition",
+      "Step 2: Take screenshot and verify modal has clear error title and message",
+      "Step 3: Verify close button is prominently styled and easily clickable"
     ],
     "passes": true
   }
