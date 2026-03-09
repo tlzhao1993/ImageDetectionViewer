@@ -359,6 +359,189 @@ def recalculate_statistics_endpoint():
         }), 500
 
 
+@app.route('/api/images/<int:dataset_id>')
+def get_images_endpoint(dataset_id):
+    """
+    API endpoint to get paginated list of images for a dataset
+
+    Args:
+        dataset_id: ID of the dataset to retrieve images for
+        page (int, optional): Page number (default: 1)
+        per_page (int, optional): Number of images per page (default: 20)
+        class_filter (str, optional): Filter by class name
+        status_filter (str, optional): Filter by status (fp, fn, perfect)
+
+    Query parameters:
+        page: Page number (default: 1)
+        per_page: Items per page (default: 20, max: 100)
+        class_filter: Only show images containing this class
+        status_filter: Only show images with this status (fp, fn, perfect)
+
+    Returns:
+        JSON response with:
+            - success (bool): Whether request was successful
+            - images (list): Array of image entries
+            - total (int): Total number of images
+            - page (int): Current page number
+            - per_page (int): Items per page
+            - total_pages (int): Total number of pages
+
+    Each image entry contains:
+            - id (int): Image ID
+            - filename (str): Image filename
+            - width (int): Image width
+            - height (int): Image height
+            - thumbnail_path (str): Path to thumbnail
+            - total_gt_boxes (int): Number of GT boxes
+            - total_pred_boxes (int): Number of prediction boxes
+            - has_fp (bool): Has false positives
+            - has_fn (bool): Has false negatives
+            - is_perfect (bool): Perfect detection (no FP or FN)
+    """
+    try:
+        # Get query parameters
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 20, type=int)
+        class_filter = request.args.get('class_filter')
+        status_filter = request.args.get('status_filter')
+
+        # Validate parameters
+        if page < 1:
+            return jsonify({
+                'success': False,
+                'error': 'page must be a positive integer'
+            }), 400
+
+        if per_page < 1 or per_page > 100:
+            return jsonify({
+                'success': False,
+                'error': 'per_page must be between 1 and 100'
+            }), 400
+
+        # Validate status_filter
+        valid_status_filters = ['fp', 'fn', 'perfect']
+        if status_filter is not None and status_filter not in valid_status_filters:
+            return jsonify({
+                'success': False,
+                'error': f'status_filter must be one of: {", ".join(valid_status_filters)}'
+            }), 400
+
+        with get_db() as conn:
+            cursor = conn.cursor()
+
+            # Check if dataset exists
+            cursor.execute('''
+                SELECT id FROM dataset_metadata WHERE id = ?
+            ''', (dataset_id,))
+
+            if cursor.fetchone() is None:
+                return jsonify({
+                    'success': False,
+                    'error': f'Dataset with ID {dataset_id} not found'
+                }), 404
+
+            # Build base query with filters
+            base_query = '''
+                SELECT id, filename, width, height, thumbnail_path,
+                       total_gt_boxes, total_pred_boxes, has_fp, has_fn, is_perfect
+                FROM image_metadata
+                WHERE dataset_id = ?
+            '''
+            query_params = [dataset_id]
+
+            # Add class filter if provided
+            if class_filter:
+                base_query += '''
+                    AND id IN (
+                        SELECT im.id FROM image_metadata im
+                        JOIN bounding_boxes bb ON bb.image_id = im.id
+                        JOIN classes c ON bb.class_id = c.id
+                        WHERE im.dataset_id = ? AND c.name = ? AND bb.type = 'ground_truth'
+                    )
+                '''
+                query_params.append(dataset_id)
+                query_params.append(class_filter)
+
+            # Add status filter if provided
+            if status_filter == 'fp':
+                base_query += ' AND has_fp = 1'
+            elif status_filter == 'fn':
+                base_query += ' AND has_fn = 1'
+            elif status_filter == 'perfect':
+                base_query += ' AND is_perfect = 1'
+
+            # Add ordering and pagination
+            base_query += ' ORDER BY id'
+            base_query += ' LIMIT ? OFFSET ?'
+            offset = (page - 1) * per_page
+            query_params.extend([per_page, offset])
+
+            # Execute query to get images
+            cursor.execute(base_query, query_params)
+
+            # Fetch images before executing count query
+            images = []
+            for row in cursor.fetchall():
+                images.append({
+                    'id': row[0],
+                    'filename': row[1],
+                    'width': row[2],
+                    'height': row[3],
+                    'thumbnail_path': row[4],
+                    'total_gt_boxes': row[5],
+                    'total_pred_boxes': row[6],
+                    'has_fp': bool(row[7]),
+                    'has_fn': bool(row[8]),
+                    'is_perfect': bool(row[9])
+                })
+
+            # Get total count
+            count_query = '''
+                SELECT COUNT(*) FROM image_metadata WHERE dataset_id = ?
+            '''
+            count_params = [dataset_id]
+
+            if class_filter:
+                count_query += '''
+                    AND id IN (
+                        SELECT im.id FROM image_metadata im
+                        JOIN bounding_boxes bb ON bb.image_id = im.id
+                        JOIN classes c ON bb.class_id = c.id
+                        WHERE im.dataset_id = ? AND c.name = ? AND bb.type = 'ground_truth'
+                    )
+                '''
+                count_params.append(dataset_id)
+                count_params.append(class_filter)
+
+            if status_filter == 'fp':
+                count_query += ' AND has_fp = 1'
+            elif status_filter == 'fn':
+                count_query += ' AND has_fn = 1'
+            elif status_filter == 'perfect':
+                count_query += ' AND is_perfect = 1'
+
+            cursor.execute(count_query, count_params)
+            total_count = cursor.fetchone()[0]
+
+            # Calculate total pages
+            total_pages = (total_count + per_page - 1) // per_page if total_count > 0 else 1
+
+            return jsonify({
+                'success': True,
+                'images': images,
+                'total': total_count,
+                'page': page,
+                'per_page': per_page,
+                'total_pages': total_pages
+            }), 200
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
 @app.route('/')
 def index():
     """Serve the main HTML page"""
