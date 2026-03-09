@@ -17,6 +17,7 @@ class DetectionAnalyzer {
     init() {
         this.setupNavigation();
         this.setupEventListeners();
+        this.setupSliderTrackFill();
         this.handleHashChange();
         window.addEventListener('hashchange', () => this.handleHashChange());
     }
@@ -100,6 +101,7 @@ class DetectionAnalyzer {
             iouSlider.addEventListener('input', (e) => {
                 this.iouThreshold = parseFloat(e.target.value);
                 document.getElementById('iou-threshold-value').textContent = this.iouThreshold.toFixed(1);
+                this.updateSliderTrackFill(iouSlider);
             });
             iouSlider.addEventListener('change', () => {
                 this.recalculateStatistics();
@@ -112,6 +114,7 @@ class DetectionAnalyzer {
             confidenceSlider.addEventListener('input', (e) => {
                 this.confidenceThreshold = parseFloat(e.target.value);
                 document.getElementById('confidence-threshold-value').textContent = this.confidenceThreshold.toFixed(2);
+                this.updateSliderTrackFill(confidenceSlider);
             });
             confidenceSlider.addEventListener('change', () => {
                 this.recalculateStatistics();
@@ -139,6 +142,27 @@ class DetectionAnalyzer {
 
         // Save to window for global access
         window.app = this;
+    }
+
+    setupSliderTrackFill() {
+        // Initialize track fill for all sliders
+        const sliders = document.querySelectorAll('.form-range');
+        sliders.forEach(slider => {
+            this.updateSliderTrackFill(slider);
+        });
+    }
+
+    updateSliderTrackFill(slider) {
+        // Calculate the percentage of the slider value
+        const min = parseFloat(slider.min) || 0;
+        const max = parseFloat(slider.max) || 1;
+        const value = parseFloat(slider.value) || 0;
+        const percentage = ((value - min) / (max - min)) * 100;
+
+        // Update the background gradient for track fill effect
+        const primaryColor = '#2c5282';
+        const trackColor = '#e2e8f0';
+        slider.style.background = `linear-gradient(to right, ${primaryColor} 0%, ${primaryColor} ${percentage}%, ${trackColor} ${percentage}%, ${trackColor} 100%)`;
     }
 
     showLoadDatasetModal() {

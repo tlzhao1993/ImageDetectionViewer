@@ -1,15 +1,5 @@
 [
   {
-    "category": "style",
-    "description": "Slider styling with primary color track and custom thumb design",
-    "steps": [
-      "Step 1: Navigate to Statistics Dashboard",
-      "Step 2: Take screenshot of sliders in default state",
-      "Step 3: Take screenshot while dragging slider and verify visual feedback (thumb color, track fill)"
-    ],
-    "passes": false
-  },
-  {
     "category": "functional",
     "description": "Implement sortable metrics table with Class, GT Count, Pred Count, TP, FP, FN, Recall, Precision, FPR, F1 Score columns",
     "steps": [
@@ -520,6 +510,16 @@
       "Step 1: Navigate to Statistics Dashboard",
       "Step 2: Move IoU slider to different value and verify charts update",
       "Step 3: Move confidence slider and verify prediction data is filtered correctly"
+    ],
+    "passes": true
+  },
+  {
+    "category": "style",
+    "description": "Slider styling with primary color track and custom thumb design",
+    "steps": [
+      "Step 1: Navigate to Statistics Dashboard",
+      "Step 2: Take screenshot of sliders in default state",
+      "Step 3: Take screenshot while dragging slider and verify visual feedback (thumb color, track fill)"
     ],
     "passes": true
   }
