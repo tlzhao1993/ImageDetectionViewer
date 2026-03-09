@@ -1,16 +1,6 @@
 [
   {
     "category": "functional",
-    "description": "Implement JSON parsing for ground truth annotation files with bbox coordinates",
-    "steps": [
-      "Step 1: Create a sample ground truth JSON file with valid format",
-      "Step 2: Parse file and verify bbox coordinates are extracted correctly (x1, y1, x2, y2)",
-      "Step 3: Parse file with multiple annotations and verify all classes and boxes are captured"
-    ],
-    "passes": false
-  },
-  {
-    "category": "functional",
     "description": "Implement JSON parsing for prediction files with confidence scores",
     "steps": [
       "Step 1: Create a sample prediction JSON file with valid format including confidence scores",
@@ -520,6 +510,16 @@
       "Step 1: Provide a valid dataset path to the validation function",
       "Step 2: Verify function returns success if all directories exist",
       "Step 3: Provide an invalid path and verify appropriate error message is returned"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement JSON parsing for ground truth annotation files with bbox coordinates",
+    "steps": [
+      "Step 1: Create a sample ground truth JSON file with valid format",
+      "Step 2: Parse file and verify bbox coordinates are extracted correctly (x1, y1, x2, y2)",
+      "Step 3: Parse file with multiple annotations and verify all classes and boxes are captured"
     ],
     "passes": true
   }
