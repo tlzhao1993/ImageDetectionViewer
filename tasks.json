@@ -1,16 +1,6 @@
 [
   {
     "category": "functional",
-    "description": "Implement previous/next navigation buttons for sequential image viewing",
-    "steps": [
-      "Step 1: Select first image in list",
-      "Step 2: Click 'Next' button and verify second image is loaded",
-      "Step 3: Click 'Previous' button and verify first image is loaded again"
-    ],
-    "passes": false
-  },
-  {
-    "category": "functional",
     "description": "Implement loading overlay with spinner during data processing",
     "steps": [
       "Step 1: Trigger dataset loading by providing a dataset path",
@@ -520,6 +510,16 @@
       "Step 1: Select an image",
       "Step 2: Take screenshot and verify summary card with filename and dimensions",
       "Step 3: Verify breakdown table has proper column alignment (center for numbers, left for text)"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement previous/next navigation buttons for sequential image viewing",
+    "steps": [
+      "Step 1: Select first image in list",
+      "Step 2: Click 'Next' button and verify second image is loaded",
+      "Step 3: Click 'Previous' button and verify first image is loaded again"
     ],
     "passes": true
   }
