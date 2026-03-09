@@ -1,15 +1,5 @@
 [
   {
-    "category": "style",
-    "description": "Modal styling with centered positioning, backdrop, and proper input/button styling",
-    "steps": [
-      "Step 1: Open dataset load modal",
-      "Step 2: Take screenshot and verify modal is centered with backdrop blur",
-      "Step 3: Verify input field and load button follow design system (rounded corners, proper padding)"
-    ],
-    "passes": false
-  },
-  {
     "category": "functional",
     "description": "Implement confidence score distribution visualization for current image predictions",
     "steps": [
@@ -520,6 +510,16 @@
       "Step 1: Click 'Load Dataset' button",
       "Step 2: Verify modal opens with input field for dataset path",
       "Step 3: Enter valid path and click load, verify dataset loads successfully"
+    ],
+    "passes": true
+  },
+  {
+    "category": "style",
+    "description": "Modal styling with centered positioning, backdrop, and proper input/button styling",
+    "steps": [
+      "Step 1: Open dataset load modal",
+      "Step 2: Take screenshot and verify modal is centered with backdrop blur",
+      "Step 3: Verify input field and load button follow design system (rounded corners, proper padding)"
     ],
     "passes": true
   }

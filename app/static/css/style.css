@@ -823,3 +823,37 @@ table.table tbody tr:hover,
 .error-details li:last-child {
     padding-bottom: 0;
 }
+
+/* Modal Styles */
+.modal-backdrop {
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+/* Modal input field styling */
+#loadDatasetModal .form-control {
+    border-radius: 0 8px 8px 0;
+    padding: 8px 12px;
+}
+
+/* Modal button styling - Primary button */
+#loadDatasetModal .btn-primary {
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-weight: 500;
+}
+
+/* Modal button styling - Secondary button */
+#loadDatasetModal .btn-secondary {
+    border-radius: 8px;
+    padding: 8px 16px;
+}
+
+/* Modal input-group styling for proper rounded corners */
+#loadDatasetModal .input-group-text {
+    border-radius: 8px 0 0 8px;
+}
