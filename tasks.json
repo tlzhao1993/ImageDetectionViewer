@@ -1,16 +1,6 @@
 [
   {
     "category": "style",
-    "description": "Confidence distribution chart styling with appropriate bins and color gradient",
-    "steps": [
-      "Step 1: Select image with varied confidence predictions",
-      "Step 2: Take screenshot of confidence distribution chart",
-      "Step 3: Verify chart has proper bin distribution and color gradient from low to high confidence"
-    ],
-    "passes": false
-  },
-  {
-    "category": "style",
     "description": "Responsive layout for Image Comparison View (single column on mobile, 30/70 on tablet, 25/75 on desktop)",
     "steps": [
       "Step 1: Navigate to Image Comparison View at desktop width (>1024px)",
@@ -512,16 +502,25 @@
       "Step 3: Verify input field and load button follow design system (rounded corners, proper padding)"
     ],
     "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement confidence score distribution visualization for current image predictions",
+    "steps": [
+      "Step 1: Select an image with multiple predictions at different confidence levels",
+      "Step 2: Scroll to per-image statistics section",
+      "Step 3: Verify confidence histogram or distribution visualization is displayed"
+    ],
+    "passes": true
+  },
+  {
+    "category": "style",
+    "description": "Confidence distribution chart styling with appropriate bins and color gradient",
+    "steps": [
+      "Step 1: Select image with varied confidence predictions",
+      "Step 2: Take screenshot of confidence distribution chart",
+      "Step 3: Verify chart has proper bin distribution and color gradient from low to high confidence"
+    ],
+    "passes": true
   }
-
-{
-  "category": "functional",
-  "description": "Implement confidence score distribution visualization for current image predictions",
-  "steps": [
-    "Step 1: Select an image with multiple predictions at different confidence levels",
-    "Step 2: Scroll to per-image statistics section",
-    "Step 3: Verify confidence histogram or distribution visualization is displayed"
-  ],
-  "passes": true
-}
-  ]
+]
