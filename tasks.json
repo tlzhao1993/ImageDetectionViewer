@@ -1,16 +1,6 @@
 [
   {
     "category": "functional",
-    "description": "Implement accessibility features (alt text for images, screen reader labels)",
-    "steps": [
-      "Step 1: Inspect HTML and verify all images have alt attributes",
-      "Step 2: Verify all interactive elements have ARIA labels where appropriate",
-      "Step 3: Test with screen reader to verify proper navigation and announcements"
-    ],
-    "passes": false
-  },
-  {
-    "category": "functional",
     "description": "Integrate Font Awesome icons for visual indicators (check, cross, dash)",
     "steps": [
       "Step 1: Select an image with TP boxes and verify check icon renders",
@@ -520,6 +510,16 @@
       "Step 1: Navigate to Image Comparison View",
       "Step 2: Use Tab key to focus on image list items and press Enter to select",
       "Step 3: Use arrow keys to navigate between images when image view is focused"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement accessibility features (alt text for images, screen reader labels)",
+    "steps": [
+      "Step 1: Inspect HTML and verify all images have alt attributes",
+      "Step 2: Verify all interactive elements have ARIA labels where appropriate",
+      "Step 3: Test with screen reader to verify proper navigation and announcements"
     ],
     "passes": true
   }

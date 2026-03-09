@@ -54,11 +54,13 @@ class DetectionAnalyzer {
         // Update active nav link
         document.querySelectorAll('.nav-link').forEach(link => {
             link.classList.remove('active');
+            link.removeAttribute('aria-current');
         });
 
         const activeLink = document.querySelector(`.nav-link[href="${hash}"]`);
         if (activeLink) {
             activeLink.classList.add('active');
+            activeLink.setAttribute('aria-current', 'page');
         }
 
         // Show the appropriate page
@@ -397,7 +399,7 @@ class DetectionAnalyzer {
 
         const detailContent = document.getElementById('image-detail-content');
         if (detailContent) {
-            detailContent.innerHTML = '<div class="text-center py-5"><i class="fas fa-spinner fa-spin fa-2x mb-3"></i><p>Loading image details...</p></div>';
+            detailContent.innerHTML = '<div class="text-center py-5" role="status" aria-live="polite"><i class="fas fa-spinner fa-spin fa-2x mb-3" aria-hidden="true"></i><p>Loading image details...</p></div>';
         }
 
         try {
@@ -439,17 +441,17 @@ class DetectionAnalyzer {
             <div class="image-header-section">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
-                        <h5 class="mb-1"><i class="fas fa-image me-2"></i>${this.escapeHtml(data.filename)}</h5>
+                        <h5 class="mb-1"><i class="fas fa-image me-2" aria-hidden="true"></i>${this.escapeHtml(data.filename)}</h5>
                         <p class="mb-0 text-muted">
                             <small>${data.dimensions ? `${data.dimensions.width} x ${data.dimensions.height} pixels` : ''}</small>
                         </p>
                     </div>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-outline-primary btn-sm" id="prev-image-btn">
-                            <i class="fas fa-chevron-left me-1"></i> Previous
+                    <div class="d-flex gap-2" role="group" aria-label="Image navigation">
+                        <button class="btn btn-outline-primary btn-sm" id="prev-image-btn" aria-label="Previous image">
+                            <i class="fas fa-chevron-left me-1" aria-hidden="true"></i> Previous
                         </button>
-                        <button class="btn btn-outline-primary btn-sm" id="next-image-btn">
-                            Next <i class="fas fa-chevron-right ms-1"></i>
+                        <button class="btn btn-outline-primary btn-sm" id="next-image-btn" aria-label="Next image">
+                            Next <i class="fas fa-chevron-right ms-1" aria-hidden="true"></i>
                         </button>
                     </div>
                 </div>
@@ -460,27 +462,33 @@ class DetectionAnalyzer {
 
                 <!-- Box Visibility Toggles -->
                 <div class="d-flex gap-2 mb-3 mt-3">
-                    <button class="btn btn-sm toggle-btn active" id="toggle-gt-boxes" title="Show/Hide Ground Truth Boxes">
-                        <i class="fas fa-check-square me-1"></i> GT Boxes
+                    <button class="btn btn-sm toggle-btn active" id="toggle-gt-boxes" title="Show/Hide Ground Truth Boxes"
+                            aria-label="Toggle Ground Truth Boxes" aria-pressed="true">
+                        <i class="fas fa-check-square me-1" aria-hidden="true"></i> GT Boxes
                     </button>
-                    <button class="btn btn-sm toggle-btn active" id="toggle-pred-boxes" title="Show/Hide Prediction Boxes">
-                        <i class="fas fa-crosshairs me-1"></i> Pred Boxes
+                    <button class="btn btn-sm toggle-btn active" id="toggle-pred-boxes" title="Show/Hide Prediction Boxes"
+                            aria-label="Toggle Prediction Boxes" aria-pressed="true">
+                        <i class="fas fa-crosshairs me-1" aria-hidden="true"></i> Pred Boxes
                     </button>
-                    <button class="btn btn-sm toggle-btn active" id="toggle-labels" title="Show/Hide Labels">
-                        <i class="fas fa-tag me-1"></i> Labels
+                    <button class="btn btn-sm toggle-btn active" id="toggle-labels" title="Show/Hide Labels"
+                            aria-label="Toggle Labels" aria-pressed="true">
+                        <i class="fas fa-tag me-1" aria-hidden="true"></i> Labels
                     </button>
                 </div>
 
                 <!-- Zoom Controls -->
-                <div class="d-flex gap-2 mb-3">
-                    <button class="btn btn-sm zoom-btn" id="zoom-out" title="Zoom Out">
-                        <i class="fas fa-search-minus"></i>
+                <div class="d-flex gap-2 mb-3" role="group" aria-label="Zoom controls">
+                    <button class="btn btn-sm zoom-btn" id="zoom-out" title="Zoom Out"
+                            aria-label="Zoom out">
+                        <i class="fas fa-search-minus" aria-hidden="true"></i>
                     </button>
-                    <button class="btn btn-sm zoom-btn" id="zoom-reset" title="Reset Zoom">
+                    <button class="btn btn-sm zoom-btn" id="zoom-reset" title="Reset Zoom"
+                            aria-label="Reset zoom to 100%">
                         <span id="zoom-level-display">100%</span>
                     </button>
-                    <button class="btn btn-sm zoom-btn" id="zoom-in" title="Zoom In">
-                        <i class="fas fa-search-plus"></i>
+                    <button class="btn btn-sm zoom-btn" id="zoom-in" title="Zoom In"
+                            aria-label="Zoom in">
+                        <i class="fas fa-search-plus" aria-hidden="true"></i>
                     </button>
                 </div>
             </div>
@@ -498,7 +506,7 @@ class DetectionAnalyzer {
             <div class="image-statistics-section">
                 <div class="card">
                     <div class="card-header">
-                        <h6 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Per-Image Statistics</h6>
+                        <h6 class="mb-0"><i class="fas fa-chart-bar me-2" aria-hidden="true"></i>Per-Image Statistics</h6>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -746,6 +754,7 @@ class DetectionAnalyzer {
             gtToggle.addEventListener('click', () => {
                 this.showGTBoxes = !this.showGTBoxes;
                 gtToggle.classList.toggle('active');
+                gtToggle.setAttribute('aria-pressed', this.showGTBoxes);
                 this.reRenderCurrentImage();
             });
         }
@@ -756,6 +765,7 @@ class DetectionAnalyzer {
             predToggle.addEventListener('click', () => {
                 this.showPredBoxes = !this.showPredBoxes;
                 predToggle.classList.toggle('active');
+                predToggle.setAttribute('aria-pressed', this.showPredBoxes);
                 this.reRenderCurrentImage();
             });
         }
@@ -766,6 +776,7 @@ class DetectionAnalyzer {
             labelsToggle.addEventListener('click', () => {
                 this.showLabels = !this.showLabels;
                 labelsToggle.classList.toggle('active');
+                labelsToggle.setAttribute('aria-pressed', this.showLabels);
                 this.reRenderCurrentImage();
             });
         }
@@ -1405,7 +1416,7 @@ class DetectionAnalyzer {
                 // Show details if there are multiple errors
                 if (detailsElement && errorListElement && message.length > 1) {
                     errorListElement.innerHTML = message.slice(1).map(err =>
-                        `<li><i class="fas fa-exclamation-circle text-warning me-2"></i>${this.escapeHtml(err)}</li>`
+                        `<li><i class="fas fa-exclamation-circle text-warning me-2" aria-hidden="true"></i>${this.escapeHtml(err)}</li>`
                     ).join('');
                     detailsElement.style.display = 'block';
                 } else if (detailsElement) {
