@@ -1,15 +1,5 @@
 [
   {
-    "category": "functional",
-    "description": "Implement error modal with user-friendly messages for invalid dataset paths",
-    "steps": [
-      "Step 1: Provide an invalid dataset path",
-      "Step 2: Verify error modal appears with descriptive message",
-      "Step 3: Click close button and verify modal dismisses"
-    ],
-    "passes": false
-  },
-  {
     "category": "style",
     "description": "Error modal styling with clear title, descriptive message, and close button",
     "steps": [
@@ -520,6 +510,16 @@
       "Step 1: Trigger dataset loading",
       "Step 2: Take screenshot and verify overlay is semi-transparent with backdrop blur",
       "Step 3: Verify spinner has gradient border and smooth rotation animation"
+    ],
+    "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement error modal with user-friendly messages for invalid dataset paths",
+    "steps": [
+      "Step 1: Provide an invalid dataset path",
+      "Step 2: Verify error modal appears with descriptive message",
+      "Step 3: Click close button and verify modal dismisses"
     ],
     "passes": true
   }

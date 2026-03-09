@@ -752,3 +752,62 @@ table.table tbody tr:hover,
 #image-canvas.zoomed:active {
     cursor: grabbing;
 }
+
+/* Error Modal Styles */
+.error-modal-content {
+    border: 2px solid var(--error-color);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.error-modal-header {
+    background-color: var(--error-color);
+    color: white;
+    border-bottom: 2px solid var(--error-color);
+}
+
+.error-modal-header .modal-title {
+    color: white;
+    font-weight: 600;
+}
+
+.error-modal-header .btn-close {
+    color: white;
+    opacity: 0.8;
+}
+
+.error-modal-header .btn-close:hover {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.error-details {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.error-details h6 {
+    color: var(--error-color);
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.error-details ul {
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    padding: 12px 16px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.error-details li {
+    color: #7f1d1d;
+    padding: 4px 0;
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+.error-details li:last-child {
+    padding-bottom: 0;
+}

@@ -1091,7 +1091,14 @@ class DetectionAnalyzer {
                 window.location.hash = '#dashboard';
                 await this.loadStatistics();
             } else {
-                this.showError('Failed to load dataset');
+                // Handle error response with user-friendly message
+                const errors = data.errors || [];
+                if (errors.length > 0) {
+                    // Show the actual error messages from the backend
+                    this.showError(errors);
+                } else {
+                    this.showError('Failed to load dataset: Unknown error');
+                }
             }
         } catch (error) {
             this.showError('Error loading dataset: ' + error.message);
@@ -1291,7 +1298,44 @@ class DetectionAnalyzer {
     }
 
     showError(message) {
-        alert(message); // TODO: Implement proper error modal
+        const modalElement = document.getElementById('errorModal');
+        const modal = new bootstrap.Modal(modalElement);
+
+        // Set error message
+        const messageElement = document.getElementById('error-message');
+        const detailsElement = document.getElementById('error-details');
+        const errorListElement = document.getElementById('error-list');
+
+        if (messageElement) {
+            // Handle different message formats
+            if (typeof message === 'string') {
+                messageElement.textContent = message;
+                // Hide details for single message
+                if (detailsElement) {
+                    detailsElement.style.display = 'none';
+                }
+            } else if (Array.isArray(message) && message.length > 0) {
+                // Show first error as main message
+                messageElement.textContent = message[0];
+                // Show details if there are multiple errors
+                if (detailsElement && errorListElement && message.length > 1) {
+                    errorListElement.innerHTML = message.slice(1).map(err =>
+                        `<li><i class="fas fa-exclamation-circle text-warning me-2"></i>${this.escapeHtml(err)}</li>`
+                    ).join('');
+                    detailsElement.style.display = 'block';
+                } else if (detailsElement) {
+                    detailsElement.style.display = 'none';
+                }
+            } else if (message && message.error) {
+                // Handle API error response format
+                messageElement.textContent = message.error;
+                if (detailsElement) {
+                    detailsElement.style.display = 'none';
+                }
+            }
+        }
+
+        modal.show();
     }
 
     async recalculateStatistics() {
