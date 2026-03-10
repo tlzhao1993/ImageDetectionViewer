@@ -701,8 +701,8 @@ class DetectionAnalyzer {
         const imageHeight = data.dimensions?.height || 600;
 
         // Calculate scale to fit the container while maintaining aspect ratio
-        const scaleX = containerWidth / imageWidth;
-        const scaleY = containerHeight / imageHeight;
+        const scaleX = containerWidth / imageWidth * 0.98;
+        const scaleY = containerHeight / imageHeight * 0.98;
 
         // Use the smaller scale to ensure the entire image fits within the container
         const baseScale = Math.min(scaleX, scaleY);
