@@ -813,9 +813,6 @@ table.table tbody tr:hover,
 /* Canvas pan cursor styles */
 #image-canvas {
     cursor: default;
-    width: 100%;
-    height: 100%;
-    display: block;
 }
 
 #image-canvas.zoomed {

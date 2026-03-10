@@ -1,3 +1,36 @@
+[修复了Image Comparison页面图像宽高比异常缩放的bug] [2026-03-10]
+
+问题描述: 在Image Comparison页面右侧的图像显示区域中，图像的宽高比被异常缩放。用户希望在不改变图像原本宽高比的前提下尽可能使图像显示占满整个区域，且居中显示。
+
+修复内容:
+1. app/static/css/style.css - 删除了第二个#image-canvas定义中的width: 100%; height: 100%设置，这会导致canvas元素被强制拉伸到容器大小，破坏了图像的宽高比
+2. 保留了原有的#image-canvas定义(line 330-334)中的max-width: 100%; height: auto设置，这确保了canvas保持正确的宽高比
+3. 只保留了cursor相关的样式在第二个#image-canvas定义中
+
+测试步骤:
+1. 启动Flask服务器
+2. 打开浏览器访问http://localhost:5000/#comparison
+3. 点击test_image_1.png图像并验证显示效果
+4. 点击test_image.jpg图像并验证显示效果
+5. 点击test_image_2.png图像并验证显示效果
+6. 测试缩放功能(100% -> 125% -> 重置到100%)
+
+测试结果:
+- 图像宽高比正常，没有被拉伸或压缩
+- 图像居中显示在黑色背景区域
+- 不同尺寸的图像(640x480, 800x600)都能正确显示
+- 缩放功能正常工作，缩放后图像仍保持正确的宽高比
+- 截图验证通过(verification/image_aspect_ratio_before_fix.png, image_aspect_ratio_after_fix.png, test_image_jpg_display.png, test_image_1_after_fix.png, zoom_125_percent.png)
+- 控制台无相关错误
+
+问题原因分析:
+CSS文件中有两个#image-canvas的定义，第二个定义(line 814-819)设置了width: 100%; height: 100%，这会覆盖第一个定义(line 330-334)中的正确设置(max-width: 100%; height: auto)，导致canvas元素被强制拉伸到容器的宽高，破坏了图像的原始宽高比。
+
+建议下一步:
+- 测试响应式布局在不同屏幕尺寸下的表现
+- 考虑在CSS中使用更具体的类名来避免重复定义
+
+
 [进一步减少了Image Comparison页面右侧面板图像显示区域的留白] [2026-03-10]
 
 问题描述: Image Comparison页面右侧面板中,图像显示要覆盖整个区域,而在当前的版本中,图像显示区域周围有较大区域的留白。
