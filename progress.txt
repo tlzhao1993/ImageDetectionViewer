@@ -1,3 +1,41 @@
+[进一步减少了Image Comparison页面右侧面板图像显示区域的留白] [2026-03-10]
+
+问题描述: Image Comparison页面右侧面板中,图像显示要覆盖整个区域,而在当前的版本中,图像显示区域周围有较大区域的留白。
+
+修复内容:
+1. app/static/css/style.css - .image-display-section: 将padding从16px改为0,添加background-color: #1a1a1a
+2. app/static/css/style.css - .image-display-section .card: 移除border、box-shadow,设置background-color: transparent
+3. app/static/css/style.css - .image-display-section .card-body: 添加background-color: transparent
+4. app/static/css/style.css - .image-display-section .canvas-container: 设置width: 100%, height: 100%
+5. app/static/css/style.css - .canvas-container: 从inline-block改为flex布局,设置width: 100%, height: 100%
+6. app/static/css/style.css - #image-canvas: 设置width: 100%, height: 100%移除max-width和height: auto的限制
+7. app/static/js/app.js - renderImageWithBoundingBoxes(): 重写Canvas尺寸计算逻辑,根据容器大小设置Canvas尺寸并保持图像宽高比
+8. app/static/js/app.js - renderImageWithBoundingBoxes(): 添加baseScale变量存储基础缩放比例
+
+测试步骤:
+1. 启动Flask服务器
+2. 打开浏览器访问http://localhost:5000/
+3. 导航到Image Comparison页面
+4. 点击test_image_1.png图像
+5. 验证右侧面板中图像显示区域占用更多空间
+6. 验证图像居中显示,仅有少量留白
+7. 点击test_image.jpg验证不同尺寸图像的显示一致性
+8. 测试缩放功能(100% -> 125% -> 150% -> 重置到100%)
+9. 验证Per-Image Statistics表格正常显示
+
+测试结果:
+- 图像显示从初始的中心三分之一区域提升到了80-90%的显示空间
+- 缩放功能正常工作,百分比正确更新
+- 图像居中显示,周围仅有少量留白(约5-10%)
+- 布局在不同图像间保持一致性
+- Per-Image Statistics表格正常显示
+- 控制台无相关错误(仅有favicon.ico 404错误,与修改无关)
+- 截图验证通过(verification/image_comparison_current_state.png, image_comparison_after_fix.png, image_comparison_after_js_fix.png, image_comparison_after_canvas_css_fix.png, image_comparison_test_image_jpg.png, image_comparison_final_result.png)
+
+建议下一步:
+- 测试响应式布局在不同屏幕尺寸下的表现
+- 考虑在小屏幕设备上优化滚动体验
+
 [提高了Image Comparison页面右侧面板中图像显示区域的范围] [2026-03-10]
 
 问题描述: Image Comparison页面右侧面板中,图像显示区域和下侧表格区域需要占满网页剩余页面,提高图像显示区域的范围。
