@@ -540,14 +540,6 @@ class DetectionAnalyzer {
                                 </tbody>
                             </table>
                         </div>
-                        ${data.prediction_boxes && data.prediction_boxes.length > 0 ? `
-                        <div class="mt-4">
-                            <h6 class="mb-3"><i class="fas fa-chart-area me-2" aria-hidden="true"></i>Confidence Score Distribution</h6>
-                            <div style="height: 250px; position: relative;">
-                                <canvas id="confidence-distribution-chart"></canvas>
-                            </div>
-                        </div>
-                        ` : ''}
                     </div>
                 </div>
             </div>
@@ -577,11 +569,6 @@ class DetectionAnalyzer {
 
         // Add event listeners for pan/drag functionality
         this.setupPanDrag();
-
-        // Render confidence distribution chart if predictions exist
-        if (data.prediction_boxes && data.prediction_boxes.length > 0) {
-            this.renderConfidenceDistribution(data.prediction_boxes);
-        }
     }
 
     renderConfidenceDistribution(predictionBoxes) {

@@ -1,3 +1,46 @@
+[取消了Image Comparison页面的Confidence Score Distribution柱状图显示] [2026-03-10]
+
+问题描述：Image Comparison页面右侧面板中，在Per-Image Statistics表格下方显示了Confidence Score Distribution柱状图。用户希望取消此柱状图的显示，只保留Per-Image Statistics页面。
+
+修复内容：
+1. app/static/js/app.js - updateImageDetail()方法：删除了渲染Confidence Score Distribution柱状图的HTML模板代码（原第543-550行）
+2. app/static/js/app.js - updateImageDetail()方法：删除了调用renderConfidenceDistribution()方法的代码（原第581-584行）
+3. 保留了renderConfidenceDistribution()方法，以备将来需要时使用
+
+测试步骤：
+1. 启动Flask服务器
+2. 打开浏览器访问http://localhost:5000/
+3. 系统自动恢复了之前加载的数据集（dataset ID: 57）
+4. 导航到Image Comparison页面
+5. 点击test_image.jpg图像
+6. 验证右侧面板中只显示Per-Image Statistics表格
+7. 验证不再显示Confidence Score Distribution柱状图
+8. 滚动到页面底部确认没有遗漏的内容
+9. 使用JavaScript验证DOM元素
+
+测试结果：
+- 页面正常加载，数据集自动恢复
+- Image Comparison页面正常显示图像列表
+- 点击test_image.jpg后，右侧面板正确显示：
+  * 图像标题和尺寸信息（test_image.jpg, 800x600 pixels）
+  * 导航按钮（Previous/Next）
+  * GT/Pred数量标签（GT: 3, Pred: 3）
+  * 框可见性切换按钮（GT Boxes, Pred Boxes, Labels）
+  * 缩放控制按钮
+  * 图像画布显示（带边界框）
+  * Per-Image Statistics表格（显示bicycle, car, person三类别的统计数据）
+- 页面中没有"Confidence Score Distribution"标题
+- 页面中没有"confidence-distribution-chart"元素
+- Per-Image Statistics表格正常显示
+- 页面滚动到底部后，没有其他额外内容
+
+当前工程状态：
+修复成功，Image Comparison页面现在只显示Per-Image Statistics，Confidence Score Distribution柱状图已被取消显示。截图保存在verification/image_comparison_no_confidence_chart.png和verification/image_comparison_bottom_view.png
+
+下一步建议：
+当前需求已完成，可以继续处理其他功能需求或修复发现的bug。
+
+
 [修复了Image Comparison页面图像只显示在左上角的bug] [2026-03-10 08:52]
 
 问题描述：在Image Comparison页面中，点击test_image.jpg后，右侧图像显示面板中，图像只显示在左上角位置，其余区域为黑色背景。
