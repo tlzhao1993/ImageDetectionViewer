@@ -404,9 +404,9 @@ body {
     font-weight: bold;
 }
 
-/* FN (False Negative) - Red */
+/* FN (False Negative) - Orange-Yellow */
 .bbox-fn {
-    border: 2px solid var(--error-color);
+    border: 2px solid var(--warning-color);
     border-style: dashed;
 }
 
@@ -416,7 +416,7 @@ body {
     left: -2px;
     width: 20px;
     height: 20px;
-    background-color: var(--error-color);
+    background-color: var(--warning-color);
     border-radius: 4px;
     color: white;
     display: flex;

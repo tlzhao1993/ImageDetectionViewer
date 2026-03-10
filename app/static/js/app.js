@@ -817,7 +817,7 @@ class DetectionAnalyzer {
                 color = '#ef4444'; // red
                 break;
             case 'fn':
-                color = '#ef4444'; // red
+                color = '#eab308'; // orange-yellow
                 break;
             default:
                 return;

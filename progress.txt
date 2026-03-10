@@ -1,3 +1,11 @@
+[2026-03-10] 实现了FN框显示为橙黄色的功能
+
+- 将FN框的颜色从红色(#ef4444)改为橙黄色(#eab308)
+- 修改了app/static/js/app.js中的颜色设置
+- 修改了app/static/css/style.css中的CSS样式
+- 已通过浏览器测试验证功能正常
+
+
 [2026-03-10] 完成了BUG修复：根据图像分辨率动态调整Image Comparison页面中框的粗细和Label大小
 
 - 修改文件：app/static/js/app.js
