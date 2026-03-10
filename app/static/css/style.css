@@ -327,6 +327,16 @@ body {
     align-items: center;
 }
 
+/* Hide scrollbar while preserving scrolling functionality */
+.canvas-container.hide-scrollbar::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+}
+
+.canvas-container.hide-scrollbar {
+    scrollbar-width: none; /* Firefox */
+}
+
 #image-canvas {
     display: block;
     max-width: 100%;

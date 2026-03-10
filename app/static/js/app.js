@@ -19,6 +19,8 @@ class DetectionAnalyzer {
         this.showPredBoxes = true;
         this.showLabels = true;
         this.currentImageData = null; // Store current image data for re-rendering
+        this.cachedImage = null; // Cache the loaded Image object to avoid re-loading during drag
+        this.isImageLoaded = false; // Track if current image has been loaded
 
         // Zoom and pan state
         this.zoomLevel = 1.0;
@@ -557,6 +559,8 @@ class DetectionAnalyzer {
 
         // Store current image data for re-rendering
         this.currentImageData = data;
+        // Reset image loaded flag when loading a new image
+        this.isImageLoaded = false;
 
         // Render image with bounding boxes
         this.renderImageWithBoundingBoxes(data);
@@ -729,27 +733,49 @@ class DetectionAnalyzer {
         ctx.translate(offsetX + this.panX, offsetY + this.panY);
         ctx.scale(baseScale * this.zoomLevel, baseScale * this.zoomLevel);
 
+        // Function to draw the image and bounding boxes
+        const drawImageAndBoxes = (img) => {
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.translate(offsetX + this.panX, offsetY + this.panY);
+            ctx.scale(baseScale * this.zoomLevel, baseScale * this.zoomLevel);
+            ctx.drawImage(img, 0, 0);
+            this.drawBoundingBoxes(ctx, data);
+        };
+
         if (data.image_path) {
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            img.onload = () => {
-                ctx.setTransform(1, 0, 0, 1, 0, 0);
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.translate(offsetX + this.panX, offsetY + this.panY);
-                ctx.scale(baseScale * this.zoomLevel, baseScale * this.zoomLevel);
-                ctx.drawImage(img, 0, 0);
-                this.drawBoundingBoxes(ctx, data);
-            };
-            img.onerror = () => {
-                this.drawPlaceholderImage(ctx, scaledImageWidth / baseScale, scaledImageHeight / baseScale);
-                this.drawBoundingBoxes(ctx, data);
-            };
-            img.src = data.image_path;
+            // Check if we have a cached image for this path
+            if (this.cachedImage && this.cachedImage.src === data.image_path && this.isImageLoaded) {
+                // Use cached image directly for instant rendering
+                drawImageAndBoxes(this.cachedImage);
+            } else {
+                this.isImageLoaded = false; // Mark as not loaded yet
+                // Load new image and cache it
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => {
+                    // Cache the loaded image
+                    this.cachedImage = img;
+                    this.isImageLoaded = true;
+                    drawImageAndBoxes(img);
+                };
+                img.onerror = () => {
+                    this.isImageLoaded = false;
+                    ctx.setTransform(1, 0, 0, 1, 0, 0);
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    this.drawPlaceholderImage(ctx, scaledImageWidth / baseScale, scaledImageHeight / baseScale);
+                    this.drawBoundingBoxes(ctx, data);
+                };
+                img.src = data.image_path;
+            }
         } else {
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             this.drawPlaceholderImage(ctx, scaledImageWidth / baseScale, scaledImageHeight / baseScale);
             this.drawBoundingBoxes(ctx, data);
         }
     }
+
 
     drawBoundingBoxes(ctx, data) {
         const gtBoxes = data.ground_truth_boxes || [];
@@ -971,6 +997,16 @@ class DetectionAnalyzer {
 
         // Update cursor style based on zoom level
         this.updateCanvasCursor();
+
+        // Mouse enter - hide scrollbar
+        container.addEventListener('mouseenter', () => {
+            container.classList.add('hide-scrollbar');
+        });
+
+        // Mouse leave - show scrollbar
+        container.addEventListener('mouseleave', () => {
+            container.classList.remove('hide-scrollbar');
+        });
 
         // Mouse down - start dragging
         canvas.addEventListener('mousedown', (e) => {
