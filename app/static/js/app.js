@@ -693,16 +693,39 @@ class DetectionAnalyzer {
         const ctx = canvas.getContext('2d');
         if (!canvas || !ctx) return;
 
-        const width = data.dimensions?.width || 800;
-        const height = data.dimensions?.height || 600;
-        canvas.width = width;
-        canvas.height = height;
+        const container = canvas.parentElement;
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
+
+        const imageWidth = data.dimensions?.width || 800;
+        const imageHeight = data.dimensions?.height || 600;
+
+        // Calculate scale to fit the container while maintaining aspect ratio
+        const scaleX = containerWidth / imageWidth;
+        const scaleY = containerHeight / imageHeight;
+        const baseScale = Math.min(scaleX, scaleY) * 0.98; // 98% to leave a tiny margin
+
+        // Set canvas size to fill the container
+        canvas.width = containerWidth;
+        canvas.height = containerHeight;
+
+        // Store the base scale for zoom calculations
+        this.baseScale = baseScale;
+        this.currentImageWidth = imageWidth;
+        this.currentImageHeight = imageHeight;
 
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        ctx.translate(this.panX, this.panY);
-        ctx.scale(this.zoomLevel, this.zoomLevel);
+        // Calculate centered position
+        const scaledImageWidth = imageWidth * baseScale;
+        const scaledImageHeight = imageHeight * baseScale;
+        const offsetX = (containerWidth - scaledImageWidth) / 2;
+        const offsetY = (containerHeight - scaledImageHeight) / 2;
+
+        // Apply transformations
+        ctx.translate(offsetX + this.panX, offsetY + this.panY);
+        ctx.scale(baseScale * this.zoomLevel, baseScale * this.zoomLevel);
 
         if (data.image_path) {
             const img = new Image();
@@ -710,18 +733,18 @@ class DetectionAnalyzer {
             img.onload = () => {
                 ctx.setTransform(1, 0, 0, 1, 0, 0);
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.translate(this.panX, this.panY);
-                ctx.scale(this.zoomLevel, this.zoomLevel);
+                ctx.translate(offsetX + this.panX, offsetY + this.panY);
+                ctx.scale(baseScale * this.zoomLevel, baseScale * this.zoomLevel);
                 ctx.drawImage(img, 0, 0);
                 this.drawBoundingBoxes(ctx, data);
             };
             img.onerror = () => {
-                this.drawPlaceholderImage(ctx, width, height);
+                this.drawPlaceholderImage(ctx, scaledImageWidth / baseScale, scaledImageHeight / baseScale);
                 this.drawBoundingBoxes(ctx, data);
             };
             img.src = data.image_path;
         } else {
-            this.drawPlaceholderImage(ctx, width, height);
+            this.drawPlaceholderImage(ctx, scaledImageWidth / baseScale, scaledImageHeight / baseScale);
             this.drawBoundingBoxes(ctx, data);
         }
     }
