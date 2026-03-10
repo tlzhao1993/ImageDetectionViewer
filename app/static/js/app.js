@@ -12,6 +12,7 @@ class DetectionAnalyzer {
             statusFilter: ''
         };
         this.allClasses = [];
+        this.statisticsLoaded = false; // Track if statistics are already loaded
 
         // Box visibility toggles
         this.showGTBoxes = true;
@@ -35,7 +36,6 @@ class DetectionAnalyzer {
         this.setupEventListeners();
         this.setupSliderTrackFill();
         this.handleHashChange();
-        window.addEventListener('hashchange', () => this.handleHashChange());
     }
 
     setupNavigation() {
@@ -99,8 +99,8 @@ class DetectionAnalyzer {
             comparisonEmptyState.style.display = 'none';
         }
 
-        // Load statistics if dataset is loaded
-        if (this.datasetId) {
+        // Load statistics if dataset is loaded and not already loaded
+        if (this.datasetId && !this.statisticsLoaded) {
             this.loadStatistics();
         }
     }
@@ -1314,6 +1314,7 @@ class DetectionAnalyzer {
 
             if (data.success) {
                 this.datasetId = data.dataset_id;
+                this.statisticsLoaded = false; // Reset statistics loaded flag for new dataset
                 window.location.hash = '#dashboard';
                 await this.loadStatistics();
             } else {
@@ -1338,8 +1339,8 @@ class DetectionAnalyzer {
             const response = await fetch(`/api/statistics/${this.datasetId}`);
             const data = await response.json();
             this.updateDashboard(data);
-            // Update dashboard display state
-            this.showDashboard();
+            // Mark statistics as loaded
+            this.statisticsLoaded = true;
         } catch (error) {
             this.showError('Error loading statistics');
         }
@@ -1348,8 +1349,8 @@ class DetectionAnalyzer {
     updateDashboard(data) {
         // Update summary cards
         if (data.overall_metrics) {
-            document.getElementById('summary-total-images').textContent = data.overall_metrics.total_gt_boxes || '-';
-            document.getElementById('summary-total-classes').textContent = data.classes?.length || '-';
+            document.getElementById('summary-total-images').textContent = data.overall_metrics.total_images || '-';
+            document.getElementById('summary-total-classes').textContent = data.overall_metrics.total_classes !== undefined ? data.overall_metrics.total_classes : (data.classes?.length || '-');
             document.getElementById('summary-avg-recall').textContent = data.overall_metrics.recall !== undefined ? data.overall_metrics.recall.toFixed(3) : '-';
             document.getElementById('summary-avg-precision').textContent = data.overall_metrics.precision !== undefined ? data.overall_metrics.precision.toFixed(3) : '-';
         }
