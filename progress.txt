@@ -1,3 +1,50 @@
+[修复了Image Comparison页面图像只显示在左上角的bug] [2026-03-10 08:52]
+
+问题描述：在Image Comparison页面中，点击test_image.jpg后，右侧图像显示面板中，图像只显示在左上角位置，其余区域为黑色背景。
+
+根本原因：
+1. GT文件(test_image.json)中指定的图像尺寸是 width: 1920, height: 1080
+2. 实际图像文件test_image.jpg的尺寸是800x600
+3. 数据库中存储的是GT文件中的尺寸（1920x1080）
+4. Canvas被设置为1920x1080，但实际图像只有800x600
+5. 图像被绘制到左上角（从0,0开始），只填充了800x600的区域
+6. 其余约76%的区域保持黑色
+
+修复内容：
+1. run.py - get_image_detail_endpoint(): 在返回图像详情时，从实际图像文件读取正确的尺寸，而不是使用数据库中存储的尺寸
+2. 添加了PIL.Image.open()来读取实际图像的尺寸
+3. 如果读取失败，则回退到数据库中的值
+
+测试步骤：
+1. 启动Flask服务器
+2. 打开浏览器访问http://localhost:5000/
+3. 点击"Load dataset"按钮
+4. 输入数据集路径：/home/tlzhao/detection_viewer/test_dataset
+5. 点击"Load"按钮加载数据集
+6. 导航到Image Comparison页面
+7. 点击图像test_image.jpg
+8. 验证右侧面板中图像是否正确显示，没有黑色背景
+
+测试结果：
+- 修复前：
+  * Canvas尺寸：1920x1080
+  * 非黑色像素：23.31%
+  * 图像只显示在左上角
+  * 其余区域为黑色背景
+- 修复后：
+  * Canvas尺寸：800x600（与实际图像一致）
+  * 非黑色像素：100.00%
+  * 蓝色背景：78.95%
+  * 彩色内容：21.05%
+  * 图像完整填充整个canvas区域
+  * 无黑色背景
+
+当前工程状态：
+修复成功，test_image.jpg现在正确显示，没有黑色背景区域。截图保存在verification/image_comparison_fixed_test_image.jpg.png
+
+下一步建议：
+可以测试其他图像文件，确保所有图像都能正确显示。
+
 [修复了Image Comparison页面缩略图不显示的bug] [2026-03-10]
 
 问题描述：在Image Comparison页面中，左侧边栏的图像列表的缩略图不显示，只显示问号占位符。

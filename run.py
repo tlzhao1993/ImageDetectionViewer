@@ -918,12 +918,26 @@ def get_image_detail_endpoint(dataset_id, image_id):
             if thumbnail_path and thumbnail_path.startswith('app/static/'):
                 thumbnail_path = thumbnail_path.replace('app/static/', '/static/')
 
+            # Get actual image dimensions from the image file itself
+            # This ensures dimensions match the actual image, not potentially incorrect GT/pred file dimensions
+            image_path = image_row[5]
+            actual_width = image_row[2]
+            actual_height = image_row[3]
+
+            try:
+                from PIL import Image
+                with Image.open(image_path) as img:
+                    actual_width, actual_height = img.size
+            except Exception as e:
+                # If reading image dimensions fails, fall back to database values
+                pass
+
             return jsonify({
                 'success': True,
                 'filename': image_row[1],
                 'dimensions': {
-                    'width': image_row[2],
-                    'height': image_row[3]
+                    'width': actual_width,
+                    'height': actual_height
                 },
                 'ground_truth_boxes': ground_truth_boxes,
                 'prediction_boxes': prediction_boxes,
