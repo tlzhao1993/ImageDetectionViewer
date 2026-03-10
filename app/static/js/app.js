@@ -1321,12 +1321,18 @@ class DetectionAnalyzer {
 
         const rows = Array.from(tableBody.querySelectorAll('tr'));
 
+        // Separate Total row from class rows
+        const totalRow = rows.find(row => row.classList.contains('total-row'));
+        const classRows = rows.filter(row => !row.classList.contains('total-row'));
+
+        if (classRows.length === 0) return;
+
         // Get column index
         const headerIndex = this.getColumnIndex(column);
         if (headerIndex === -1) return;
 
-        // Sort rows
-        rows.sort((rowA, rowB) => {
+        // Sort class rows (exclude Total row from sorting)
+        classRows.sort((rowA, rowB) => {
             const cellA = rowA.cells[headerIndex];
             const cellB = rowB.cells[headerIndex];
 
@@ -1348,8 +1354,12 @@ class DetectionAnalyzer {
             return 0;
         });
 
-        // Reorder rows in the table
-        rows.forEach(row => {
+        // Clear table and re-add total row first, followed by sorted class rows
+        tableBody.innerHTML = '';
+        if (totalRow) {
+            tableBody.appendChild(totalRow);
+        }
+        classRows.forEach(row => {
             tableBody.appendChild(row);
         });
     }
@@ -1484,7 +1494,8 @@ class DetectionAnalyzer {
             return;
         }
 
-        tableBody.innerHTML = classes.map(cls => `
+        // Generate class rows
+        const classRows = classes.map(cls => `
             <tr>
                 <td><strong>${this.escapeHtml(cls.name)}</strong></td>
                 <td>${cls.total_gt_count || 0}</td>
@@ -1498,6 +1509,42 @@ class DetectionAnalyzer {
                 <td>${cls.f1_score !== undefined ? cls.f1_score.toFixed(3) : '-'}</td>
             </tr>
         `).join('');
+
+        // Calculate totals
+        const totalGT = classes.reduce((sum, cls) => sum + (cls.total_gt_count || 0), 0);
+        const totalPred = classes.reduce((sum, cls) => sum + (cls.total_pred_count || 0), 0);
+        const totalTP = classes.reduce((sum, cls) => sum + (cls.tp_count || 0), 0);
+        const totalFP = classes.reduce((sum, cls) => sum + (cls.fp_count || 0), 0);
+        const totalFN = classes.reduce((sum, cls) => sum + (cls.fn_count || 0), 0);
+
+        // Calculate metrics from totals
+        const recall = (totalTP + totalFN) > 0 ? totalTP / (totalTP + totalFN) : undefined;
+        const precision = (totalTP + totalFP) > 0 ? totalTP / (totalTP + totalFP) : undefined;
+        // For FPR: FP / (FP + TN). Since we don't have TN, use totalPred as FP + TP
+        // FPR = FP / (FP + (totalPred - FP - TP)) if we had TN, but we'll use a simplified approach
+        // Using overall FPR: FP / (FP + GT) where GT represents potential negatives
+        const fpr = (totalFP + totalGT) > 0 ? totalFP / (totalFP + totalGT) : undefined;
+        const f1 = (recall !== undefined && precision !== undefined && (recall + precision) > 0)
+            ? 2 * (precision * recall) / (precision + recall)
+            : undefined;
+
+        // Generate total row
+        const totalRow = `
+            <tr class="table-secondary total-row">
+                <td><strong>Total</strong></td>
+                <td><strong>${totalGT}</strong></td>
+                <td><strong>${totalPred}</strong></td>
+                <td><strong>${totalTP}</strong></td>
+                <td><strong>${totalFP}</strong></td>
+                <td><strong>${totalFN}</strong></td>
+                <td><strong>${recall !== undefined ? recall.toFixed(3) : '-'}</strong></td>
+                <td><strong>${precision !== undefined ? precision.toFixed(3) : '-'}</strong></td>
+                <td><strong>${fpr !== undefined ? fpr.toFixed(3) : '-'}</strong></td>
+                <td><strong>${f1 !== undefined ? f1.toFixed(3) : '-'}</strong></td>
+            </tr>
+        `;
+
+        tableBody.innerHTML = totalRow + classRows;
     }
 
     updateCharts(classes) {
@@ -1716,6 +1763,12 @@ class DetectionAnalyzer {
 
         const rows = tableBody.querySelectorAll('tr');
         rows.forEach(row => {
+            // Always show Total row
+            if (row.classList.contains('total-row')) {
+                row.style.display = '';
+                return;
+            }
+
             const classNameCell = row.querySelector('td:first-child');
             if (classNameCell) {
                 const className = classNameCell.textContent.toLowerCase();
