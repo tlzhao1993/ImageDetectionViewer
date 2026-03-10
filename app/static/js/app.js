@@ -19,8 +19,7 @@ class DetectionAnalyzer {
         this.showPredBoxes = true;
         this.showLabels = true;
         this.currentImageData = null; // Store current image data for re-rendering
-        this.cachedImage = null; // Cache the loaded Image object to avoid re-loading during drag
-        this.isImageLoaded = false; // Track if current image has been loaded
+        this.cachedImage = null; // Cache loaded Image object to avoid re-loading during drag
 
         // Zoom and pan state
         this.zoomLevel = 1.0;
@@ -559,8 +558,10 @@ class DetectionAnalyzer {
 
         // Store current image data for re-rendering
         this.currentImageData = data;
-        // Reset image loaded flag when loading a new image
-        this.isImageLoaded = false;
+        // Clear cached image when loading a new image (different path)
+        if (this.cachedImage && this.cachedImage.src !== data.image_path) {
+            this.cachedImage = null;
+        }
 
         // Render image with bounding boxes
         this.renderImageWithBoundingBoxes(data);
@@ -744,23 +745,19 @@ class DetectionAnalyzer {
         };
 
         if (data.image_path) {
-            // Check if we have a cached image for this path
-            if (this.cachedImage && this.cachedImage.src === data.image_path && this.isImageLoaded) {
-                // Use cached image directly for instant rendering
+            // Check if we have a cached and fully loaded image for this path
+            if (this.cachedImage && this.cachedImage.src === data.image_path && this.cachedImage.complete) {
+                // Use cached image directly for instant rendering (no async loading)
                 drawImageAndBoxes(this.cachedImage);
             } else {
-                this.isImageLoaded = false; // Mark as not loaded yet
-                // Load new image and cache it
                 const img = new Image();
                 img.crossOrigin = 'anonymous';
                 img.onload = () => {
                     // Cache the loaded image
                     this.cachedImage = img;
-                    this.isImageLoaded = true;
                     drawImageAndBoxes(img);
                 };
                 img.onerror = () => {
-                    this.isImageLoaded = false;
                     ctx.setTransform(1, 0, 0, 1, 0, 0);
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                     this.drawPlaceholderImage(ctx, scaledImageWidth / baseScale, scaledImageHeight / baseScale);
