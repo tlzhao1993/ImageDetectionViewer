@@ -703,7 +703,9 @@ class DetectionAnalyzer {
         // Calculate scale to fit the container while maintaining aspect ratio
         const scaleX = containerWidth / imageWidth;
         const scaleY = containerHeight / imageHeight;
-        const baseScale = Math.min(scaleX, scaleY) * 0.98; // 98% to leave a tiny margin
+
+        // Use the smaller scale to ensure the entire image fits within the container
+        const baseScale = Math.min(scaleX, scaleY);
 
         // Set canvas size to fill the container
         canvas.width = containerWidth;
