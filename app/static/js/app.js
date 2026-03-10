@@ -31,11 +31,25 @@ class DetectionAnalyzer {
         this.init();
     }
 
-    init() {
+    async init() {
         this.setupNavigation();
         this.setupEventListeners();
         this.setupSliderTrackFill();
+        await this.restoreCurrentDataset();
         this.handleHashChange();
+    }
+
+    async restoreCurrentDataset() {
+        try {
+            const response = await fetch('/api/dataset/current');
+            const data = await response.json();
+            if (data.dataset_id) {
+                this.datasetId = data.dataset_id;
+                console.log('Restored dataset ID:', this.datasetId);
+            }
+        } catch (error) {
+            console.error('Error restoring dataset ID:', error);
+        }
     }
 
     setupNavigation() {

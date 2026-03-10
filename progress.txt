@@ -1,3 +1,47 @@
+[修复了Image Comparison页面缩略图不显示的bug] [2026-03-10]
+
+问题描述：在Image Comparison页面中，左侧边栏的图像列表的缩略图不显示，只显示问号占位符。
+
+根本原因：
+1. 数据库中存储的缩略图路径是 "app/static/thumbnails/thumb_xxx.png"（相对路径）
+2. 后端 API 返回这个路径给前端时，浏览器请求的是 "/app/static/thumbnails/thumb_xxx.png"
+3. 但 Flask 的静态文件路由配置为 static_folder="app/static"，正确的 URL 应该是 "/static/thumbnails/thumb_xxx.png"
+4. 页面刷新后，前端丢失了 datasetId，导致显示 "No Dataset Loaded"
+
+修复内容：
+1. run.py - get_images_endpoint(): 添加了路径转换逻辑，将 "app/static/" 替换为 "/static/"
+2. run.py - get_image_detail_endpoint(): 添加了相同的路径转换逻辑
+3. run.py - 添加了新的 API 端点 /api/dataset/current，用于获取当前活动的数据集
+4. app/static/js/app.js: 修改了 init() 方法为 async，并添加了 restoreCurrentDataset() 方法
+5. restoreCurrentDataset() 在初始化时从 /api/dataset/current 获取并恢复 datasetId
+
+测试步骤：
+1. 启动Flask服务器
+2. 打开浏览器访问http://localhost:5000/
+3. 点击"Load dataset"按钮
+4. 输入数据集路径：/home/tlzhao/detection_viewer/test_dataset
+5. 点击"Load"按钮加载数据集
+6. 导航到Image Comparison页面
+7. 验证左侧图像列表中的缩略图是否正确显示
+8. 刷新页面验证缩略图仍然显示（验证数据集 ID 恢复功能）
+
+测试结果：
+- 修复前：
+  * 浏览器控制台显示 404 错误：Failed to load resource: 404 (NOT FOUND) @ http://localhost:5000/app/static/thumbnails/...
+  * 缩略图显示为问号占位符（onerror 回退）
+  * 页面刷新后显示 "No Dataset Loaded"
+- 修复后：
+  * API 返回正确的缩略图路径：/static/thumbnails/thumb_test_image_1.png
+  * 缩略图成功加载，naturalWidth: 150px，naturalHeight: 113px
+  * 页面刷新后数据集 ID 正确恢复："Restored dataset ID: 56"
+  * 所有缩略图正确显示在图像列表中
+
+当前工程状态：
+缩略图显示问题已修复，Image Comparison 功能完全正常。截图保存在 verification/thumbnail_bug_fixed.png
+
+下一步建议：
+可以继续处理其他功能改进或 bug 修复。
+
 [修复了Image Comparison界面bug: 点击文件名后右侧图像面板卡在"Loading image details..."的问题] [2026-03-10 08:30] 问题描述：在Image Comparison页面中点击图像文件名后，右侧图像面板一直显示"Loading image details..."，无法加载图像详情。
 
 根本原因：app.js文件中存在一段没有函数定义头的残留代码（第743-822行），这段代码直接引用了未定义的变量canvas和ctx，导致JavaScript语法错误，使整个JavaScript文件加载失败，从而阻止了loadImageDetail()方法的正常执行。

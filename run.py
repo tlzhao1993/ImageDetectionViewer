@@ -27,6 +27,49 @@ def health_check():
         'flask_version': flask.__version__
     })
 
+@app.route('/api/dataset/current')
+def get_current_dataset_endpoint():
+    """
+    API endpoint to get the most recently loaded dataset
+
+    Returns:
+        JSON response with:
+            - dataset_id (int): ID of most recent dataset, or null if no dataset loaded
+            - dataset_path (str): Path to most recent dataset
+    """
+    try:
+        with get_db() as conn:
+            cursor = conn.cursor()
+
+            # Get the most recent dataset
+            cursor.execute('''
+                SELECT id, path
+                FROM dataset_metadata
+                ORDER BY id DESC
+                LIMIT 1
+            ''')
+
+            row = cursor.fetchone()
+
+            if row is None:
+                return jsonify({
+                    'dataset_id': None,
+                    'dataset_path': None
+                }), 200
+
+            return jsonify({
+                'dataset_id': row[0],
+                'dataset_path': row[1]
+            }), 200
+
+    except Exception as e:
+        return jsonify({
+            'dataset_id': None,
+            'dataset_path': None,
+            'error': str(e)
+        }), 500
+
+
 @app.route('/api/dataset/load', methods=['POST'])
 def load_dataset_endpoint():
     """
@@ -672,12 +715,16 @@ def get_images_endpoint(dataset_id):
             # Fetch images before executing count query
             images = []
             for row in cursor.fetchall():
+                # Convert thumbnail_path from 'app/static/thumbnails/file.png' to '/static/thumbnails/file.png'
+                thumbnail_path = row[4]
+                if thumbnail_path and thumbnail_path.startswith('app/static/'):
+                    thumbnail_path = thumbnail_path.replace('app/static/', '/static/')
                 images.append({
                     'id': row[0],
                     'filename': row[1],
                     'width': row[2],
                     'height': row[3],
-                    'thumbnail_path': row[4],
+                    'thumbnail_path': thumbnail_path,
                     'total_gt_boxes': row[5],
                     'total_pred_boxes': row[6],
                     'has_fp': bool(row[7]),
@@ -866,6 +913,11 @@ def get_image_detail_endpoint(dataset_id, image_id):
                     if classification == 'fp':
                         stats['fp'] += 1
 
+            # Convert thumbnail_path from 'app/static/thumbnails/file.png' to '/static/thumbnails/file.png'
+            thumbnail_path = image_row[4]
+            if thumbnail_path and thumbnail_path.startswith('app/static/'):
+                thumbnail_path = thumbnail_path.replace('app/static/', '/static/')
+
             return jsonify({
                 'success': True,
                 'filename': image_row[1],
@@ -876,7 +928,7 @@ def get_image_detail_endpoint(dataset_id, image_id):
                 'ground_truth_boxes': ground_truth_boxes,
                 'prediction_boxes': prediction_boxes,
                 'per_class_stats': per_class_stats,
-                'thumbnail_path': image_row[4],
+                'thumbnail_path': thumbnail_path,
                 'image_path': f'/api/images/{dataset_id}/{image_id}/file'
             }), 200
 
