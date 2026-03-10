@@ -49,6 +49,7 @@ def init_db():
                 width INTEGER,
                 height INTEGER,
                 thumbnail_path TEXT,
+                image_path TEXT,
                 total_gt_boxes INTEGER DEFAULT 0,
                 total_pred_boxes INTEGER DEFAULT 0,
                 has_fp BOOLEAN DEFAULT 0,
@@ -101,6 +102,13 @@ def init_db():
         cursor.execute('''
             CREATE INDEX IF NOT EXISTS idx_image_filename ON image_metadata(filename)
         ''')
+
+        # Migration: Add image_path column if it doesn't exist
+        cursor.execute("PRAGMA table_info(image_metadata)")
+        columns = [col[1] for col in cursor.fetchall()]
+        if 'image_path' not in columns:
+            cursor.execute('ALTER TABLE image_metadata ADD COLUMN image_path TEXT')
+            print("Migrated: Added image_path column to image_metadata table")
         cursor.execute('''
             CREATE INDEX IF NOT EXISTS idx_class_name ON classes(name)
         ''')

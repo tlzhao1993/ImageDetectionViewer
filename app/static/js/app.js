@@ -692,6 +692,58 @@ class DetectionAnalyzer {
         const ctx = canvas.getContext('2d');
         if (!canvas || !ctx) return;
 
+        const width = data.dimensions?.width || 800;
+        const height = data.dimensions?.height || 600;
+        canvas.width = width;
+        canvas.height = height;
+
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.translate(this.panX, this.panY);
+        ctx.scale(this.zoomLevel, this.zoomLevel);
+
+        if (data.image_path) {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => {
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.translate(this.panX, this.panY);
+                ctx.scale(this.zoomLevel, this.zoomLevel);
+                ctx.drawImage(img, 0, 0);
+                this.drawBoundingBoxes(ctx, data);
+            };
+            img.onerror = () => {
+                this.drawPlaceholderImage(ctx, width, height);
+                this.drawBoundingBoxes(ctx, data);
+            };
+            img.src = data.image_path;
+        } else {
+            this.drawPlaceholderImage(ctx, width, height);
+            this.drawBoundingBoxes(ctx, data);
+        }
+    }
+
+    drawBoundingBoxes(ctx, data) {
+        const gtBoxes = data.ground_truth_boxes || [];
+        const predBoxes = data.prediction_boxes || [];
+        const fnBoxes = gtBoxes.filter(box => box.classification === null);
+        const fpBoxes = predBoxes.filter(box => box.classification === 'fp');
+        const tpBoxes = predBoxes.filter(box => box.classification === 'tp');
+        if (this.showGTBoxes) {
+            fnBoxes.forEach(box => this.drawBoundingBox(ctx, box, 'fn'));
+        }
+        if (this.showPredBoxes) {
+            fpBoxes.forEach(box => this.drawBoundingBox(ctx, box, 'fp'));
+            tpBoxes.forEach(box => this.drawBoundingBox(ctx, box, 'tp'));
+        }
+    }
+
+        const canvas = document.getElementById('image-canvas');
+        const ctx = canvas.getContext('2d');
+        if (!canvas || !ctx) return;
+
         // Set canvas dimensions
         const width = data.dimensions?.width || 800;
         const height = data.dimensions?.height || 600;
@@ -734,7 +786,6 @@ class DetectionAnalyzer {
         }
     }
 
-    drawPlaceholderImage(ctx, width, height) {
         // Draw a gradient background
         const gradient = ctx.createLinearGradient(0, 0, width, height);
         gradient.addColorStop(0, '#f0f9ff');

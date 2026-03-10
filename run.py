@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, Response
+from flask import Flask, jsonify, request, Response, send_file
 from flask_cors import CORS
 import os
 import sys
@@ -216,6 +216,8 @@ def get_statistics_endpoint(dataset_id):
                 overall_fpr = 0.0
 
             overall_metrics = {
+                'total_images': dataset_row[2],  # Total images in dataset
+                'total_classes': dataset_row[3],  # Total classes in dataset
                 'total_gt_boxes': total_gt,
                 'total_pred_boxes': sum(c['total_pred_count'] for c in classes),
                 'total_tp': total_tp,
@@ -781,7 +783,7 @@ def get_image_detail_endpoint(dataset_id, image_id):
 
             # Get image metadata
             cursor.execute('''
-                SELECT id, filename, width, height, thumbnail_path,
+                SELECT id, filename, width, height, thumbnail_path, image_path,
                        total_gt_boxes, total_pred_boxes
                 FROM image_metadata
                 WHERE id = ? AND dataset_id = ?
@@ -874,8 +876,69 @@ def get_image_detail_endpoint(dataset_id, image_id):
                 'ground_truth_boxes': ground_truth_boxes,
                 'prediction_boxes': prediction_boxes,
                 'per_class_stats': per_class_stats,
-                'thumbnail_path': image_row[4]
+                'thumbnail_path': image_row[4],
+                'image_path': f'/api/images/{dataset_id}/{image_id}/file'
             }), 200
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/images/<int:dataset_id>/<int:image_id>/file')
+def get_image_file_endpoint(dataset_id, image_id):
+    """
+    API endpoint to serve the actual image file
+
+    Args:
+        dataset_id: ID of the dataset
+        image_id: ID of the image to retrieve
+
+    Returns:
+        The image file
+    """
+    try:
+        with get_db() as conn:
+            cursor = conn.cursor()
+
+            # Check if dataset exists
+            cursor.execute('''
+                SELECT id FROM dataset_metadata WHERE id = ?
+            ''', (dataset_id,))
+
+            if cursor.fetchone() is None:
+                return jsonify({
+                    'success': False,
+                    'error': f'Dataset with ID {dataset_id} not found'
+                }), 404
+
+            # Get image metadata with image_path
+            cursor.execute('''
+                SELECT image_path
+                FROM image_metadata
+                WHERE id = ? AND dataset_id = ?
+            ''', (image_id, dataset_id))
+
+            image_row = cursor.fetchone()
+
+            if image_row is None:
+                return jsonify({
+                    'success': False,
+                    'error': f'Image with ID {image_id} not found in dataset {dataset_id}'
+                }), 404
+
+            image_path = image_row[0]
+
+            if not image_path or not os.path.exists(image_path):
+                return jsonify({
+                    'success': False,
+                    'error': f'Image file not found at {image_path}'
+                }), 404
+
+            # Serve the image file
+            return send_file(image_path)
 
     except Exception as e:
         return jsonify({

@@ -252,9 +252,9 @@ def store_dataset_in_database(
             # Insert image metadata
             cursor.execute('''
                 INSERT INTO image_metadata
-                (dataset_id, filename, width, height, thumbnail_path, total_gt_boxes, total_pred_boxes, has_fp, has_fn, is_perfect)
-                VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, 1)
-            ''', (dataset_id, entry['image_filename'], width, height, entry['thumbnail_path'], total_gt_boxes, total_pred_boxes))
+                (dataset_id, filename, width, height, thumbnail_path, image_path, total_gt_boxes, total_pred_boxes, has_fp, has_fn, is_perfect)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (dataset_id, entry['image_filename'], width, height, entry['thumbnail_path'], entry['image_path'], total_gt_boxes, total_pred_boxes, 0, 0, 1))
 
             image_id = cursor.lastrowid
 

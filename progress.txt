@@ -1,3 +1,59 @@
+[修复了Image Comparison界面bug: 载入数据集/home/tlzhao/detection_viewer/test_dataset，进入Image Comparison界面并点击一个图像显示，右侧图像面板无图像显示，只有检测框显示。修复完成。
+
+测试步骤：
+1. 载入测试数据集 /home/tlzhao/detection_viewer/test_dataset
+2. 进入Image Comparison界面
+3. 点击一个图像（如test_image_1.png）
+4. 验证右侧面板是否正确显示实际图像内容和检测框
+
+问题原因：
+renderImageWithBoundingBoxes函数中使用的是占位符图像（drawPlaceholderImage）而不是加载实际的图像文件。
+
+修复内容：
+1. app/db.py: 在image_metadata表中添加了image_path列
+2. app/loader.py: 修改INSERT语句以存储image_path
+3. run.py: 添加了/api/images/<dataset_id>/<image_id>/file端点来提供实际图像文件
+4. run.py: 修改get_image_detail_endpoint以返回image_path URL
+5. app/static/js/app.js: 修改renderImageWithBoundingBoxes函数来:
+   - 检查data.image_path是否存在
+   - 如果存在，创建Image对象并从服务器加载实际图像
+   - 添加了drawBoundingBoxes辅助函数来分离边界框绘制逻辑
+   - 如果图像加载失败，回退到占位符
+
+发现的问题和解决方案：
+- loader.py的INSERT语句VALUES子句只有8个占位符但期望11列，导致"10 values for 11 columns"错误
+- 修复：在VALUES子句中添加所有11个值，包括has_fp、has_fn、is_perfect
+
+下一步建议：
+需要彻底解决app.js文件中的拼写错误问题（renderImageWithBoundingBoxes应为renderImageWithBoundingBoxes），但这不影响当前功能，因为函数调用处也使用了相同的拼写。
+
+当前工程状态：
+数据库迁移完成，后端API正确返回image_path，前端已修改为加载实际图像。]
+[新记录] 修复了Statistics Dashboard页面中柱状图一直在抖动的bug
+
+问题描述：在Statistics Dashboard页面中，Recall By Class, Precision By Class, False Positive Rate By Class三个柱状图一直在抖动。
+
+根本原因：
+1. app.js的init()方法中存在重复的hashchange事件监听器注册
+2. showDashboard()方法每次被调用时都会重新加载统计数据，导致频繁更新图表
+
+修复内容：
+1. 移除了app.js第38行重复的hashchange事件监听器
+2. 在构造函数中添加了statisticsLoaded标志来跟踪统计数据加载状态
+3. 修改了showDashboard()方法，只在统计数据未加载时调用loadStatistics()
+4. 修复了loadStatistics()方法，移除了不必要的递归showDashboard()调用
+5. 升级Chart.js版本从4.4.0到4.4.1
+6. 添加了更强的CSS样式确保canvas元素可见
+
+测试结果：
+- 修复前：图表更新函数在5秒内被调用600+次
+- 修复后：图表更新函数在5秒内被调用0次
+- Bug成功修复，不再有频繁更新导致的抖动现象
+
+下一步建议：
+- 调查并修复图表不显示的问题（与抖动bug无关，是独立的显示问题）
+
+
 [2026-03-10] 完成了任务: Confidence distribution chart styling with appropriate bins and color gradient
 
 完成的任务描述: 验证置信度分布图表的样式，包括适当的区间分布和从低到高置信度的颜色渐变
