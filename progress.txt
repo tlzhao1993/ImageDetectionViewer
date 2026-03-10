@@ -1,3 +1,16 @@
+[2026-03-10] 在Statistics Dashboard的Detailed Metrics by Class表格中添加Total行
+
+- 修改了updateMetricsTable方法，计算所有类别的GT Count, Pred Count, TP, FP, FN总和
+- 基于总计值计算Recall, Precision, FPR, F1 Score
+- Total行显示为灰色背景(table-secondary)和粗体文字
+- 修改了sortMetricsTable方法，确保Total行不参与排序，始终在第一行
+- 修改了filterMetricsTable方法，确保Total行始终显示，不受搜索影响
+
+建议下一步：继续处理下一个任务
+
+当前工程状态：已完成Total行功能的实现和测试
+
+
 [2026-03-10] 实现了FN框显示为橙黄色的功能
 
 - 将FN框的颜色从红色(#ef4444)改为橙黄色(#eab308)
