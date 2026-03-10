@@ -29,6 +29,12 @@ class DetectionAnalyzer {
         this.dragStartX = 0;
         this.dragStartY = 0;
 
+        // Image list pagination state
+        this.currentPage = 1;
+        this.perPage = 50; // Images per page
+        this.totalImages = 0;
+        this.totalPages = 1;
+
         this.init();
     }
 
@@ -179,12 +185,17 @@ class DetectionAnalyzer {
         });
     }
 
-    async loadImagesList() {
+    async loadImagesList(resetPage = true) {
         if (!this.datasetId) return;
+
+        // Reset to page 1 if requested (e.g., when filters change)
+        if (resetPage) {
+            this.currentPage = 1;
+        }
 
         try {
             // Build URL with filter parameters (class and status filters are server-side)
-            let url = `/api/images/${this.datasetId}?per_page=50`;
+            let url = `/api/images/${this.datasetId}?page=${this.currentPage}&per_page=${this.perPage}`;
 
             if (this.filters.classFilter) {
                 url += `&class_filter=${encodeURIComponent(this.filters.classFilter)}`;
@@ -199,7 +210,10 @@ class DetectionAnalyzer {
 
             if (data.images) {
                 this.allImages = data.images;
+                this.totalImages = data.total;
+                this.totalPages = data.total_pages;
                 this.applyClientSideFilters();
+                this.updatePaginationControls();
             }
         } catch (error) {
             console.error('Error loading images list:', error);
@@ -233,6 +247,9 @@ class DetectionAnalyzer {
 
         if (!images || images.length === 0) {
             container.innerHTML = '<div class="text-center text-muted py-5">No images found</div>';
+            // Hide pagination controls
+            const pagination = document.getElementById('pagination-controls');
+            if (pagination) pagination.style.display = 'none';
             return;
         }
 
@@ -270,12 +287,73 @@ class DetectionAnalyzer {
                 this.handleImageListKeydown(e, item);
             });
         });
+
+        // Show pagination controls
+        const pagination = document.getElementById('pagination-controls');
+        if (pagination) pagination.style.display = 'flex';
     }
 
     updateImagesList(images) {
         // Store images and apply client-side filters
         this.allImages = images;
         this.applyClientSideFilters();
+    }
+
+    updatePaginationControls() {
+        const paginationContainer = document.getElementById('pagination-controls');
+        if (!paginationContainer) return;
+
+        const hasPrev = this.currentPage > 1;
+        const hasNext = this.currentPage < this.totalPages;
+
+        // Build pagination HTML
+        let html = `
+            <div class="pagination-info">
+                Showing ${((this.currentPage - 1) * this.perPage + 1)} - ${Math.min(this.currentPage * this.perPage, this.totalImages)} of ${this.totalImages} images
+                (Page ${this.currentPage} of ${this.totalPages})
+            </div>
+            <div class="pagination-buttons">
+                <button class="btn btn-sm ${hasPrev ? 'btn-primary' : 'btn-secondary'}"
+                        id="prev-page-btn"
+                        ${!hasPrev ? 'disabled' : ''}
+                        aria-label="Previous page">
+                    <i class="fas fa-chevron-left me-1" aria-hidden="true"></i>Previous
+                </button>
+                <button class="btn btn-sm ${hasNext ? 'btn-primary' : 'btn-secondary'}"
+                        id="next-page-btn"
+                        ${!hasNext ? 'disabled' : ''}
+                        aria-label="Next page">
+                    Next<i class="fas fa-chevron-right ms-1" aria-hidden="true"></i>
+                </button>
+            </div>
+        `;
+
+        paginationContainer.innerHTML = html;
+
+        // Add event listeners
+        const prevBtn = document.getElementById('prev-page-btn');
+        const nextBtn = document.getElementById('next-page-btn');
+
+        if (prevBtn && hasPrev) {
+            prevBtn.addEventListener('click', () => this.goToPreviousPage());
+        }
+        if (nextBtn && hasNext) {
+            nextBtn.addEventListener('click', () => this.goToNextPage());
+        }
+    }
+
+    goToPreviousPage() {
+        if (this.currentPage > 1) {
+            this.currentPage--;
+            this.loadImagesList(false);
+        }
+    }
+
+    goToNextPage() {
+        if (this.currentPage < this.totalPages) {
+            this.currentPage++;
+            this.loadImagesList(false);
+        }
     }
 
     updateImagesList(images) {

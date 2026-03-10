@@ -925,3 +925,43 @@ table.table tbody tr:hover,
 #loadDatasetModal .input-group-text {
     border-radius: 8px 0 0 8px;
 }
+
+/* Pagination Controls */
+.pagination-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.pagination-info {
+    font-size: 0.875rem;
+    color: #6b7280;
+    flex: 1;
+}
+
+.pagination-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.pagination-buttons .btn {
+    min-width: 100px;
+}
+
+/* Image List Panel Layout */
+.image-list-panel {
+    display: flex !important;
+    flex-direction: column;
+    height: calc(100vh - 80px); /* Subtract navbar height */
+    overflow: hidden;
+}
+
+.image-list-panel #image-list-container {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.image-list-panel #pagination-controls {
+    flex-shrink: 0;
+}
