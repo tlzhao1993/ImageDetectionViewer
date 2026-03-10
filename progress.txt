@@ -1,3 +1,48 @@
+[修复了Image Comparison界面bug: 点击文件名后右侧图像面板卡在"Loading image details..."的问题] [2026-03-10 08:30] 问题描述：在Image Comparison页面中点击图像文件名后，右侧图像面板一直显示"Loading image details..."，无法加载图像详情。
+
+根本原因：app.js文件中存在一段没有函数定义头的残留代码（第743-822行），这段代码直接引用了未定义的变量canvas和ctx，导致JavaScript语法错误，使整个JavaScript文件加载失败，从而阻止了loadImageDetail()方法的正常执行。
+
+修复内容：
+1. 使用sed命令删除了app.js中第743-822行的残留代码片段
+2. 该代码片段包含重复的canvas操作代码，但没有函数定义头
+
+测试步骤：
+1. 启动Flask服务器
+2. 打开浏览器访问http://localhost:5000/
+3. 点击"Load dataset"按钮
+4. 输入数据集路径：/home/tlzhao/detection_viewer/test_dataset
+5. 点击"Load"按钮加载数据集
+6. 导航到Image Comparison页面
+7. 点击第一个图像（test_image_1.png）
+8. 验证右侧面板是否正确显示图像详情、检测框和统计信息
+9. 点击第二个图像（test_image.jpg）进行二次验证
+
+测试结果：
+- 修复前：浏览器控制台显示"Unexpected identifier "错误，右侧面板卡在"Loading image details..."
+- 修复后：
+  * JavaScript无语法错误
+  * Load Dataset模态框正常弹出
+  * Image Comparison页面正常显示图像列表
+  * 点击任意图像后，右侧面板立即显示完整的图像详情，包括：
+    - 图像文件名和尺寸
+    - 导航按钮（Previous/Next）
+    - GT和Pred计数徽章
+    - 切换按钮（GT Boxes, Pred Boxes, Labels）
+    - 缩放控制按钮
+    - Canvas图像区域显示实际图像和检测框
+    - Per-Image Statistics表格
+    - Confidence Score Distribution图表
+
+发现的额外问题（不影响当前修复）：
+- 缩略图加载失败（404错误），但不影响主要功能
+
+当前工程状态：
+修复成功，Image Comparison功能完全正常。截图保存在verification/image_comparison_fixed.png和verification/image_comparison_test2.png
+
+下一步建议：
+可以修复缩略图加载问题（/app/static/thumbnails/路径错误），但这是一个独立的低优先级问题。
+
+
 [修复了Image Comparison界面bug: 载入数据集/home/tlzhao/detection_viewer/test_dataset，进入Image Comparison界面并点击一个图像显示，右侧图像面板无图像显示，只有检测框显示。修复完成。
 
 测试步骤：
