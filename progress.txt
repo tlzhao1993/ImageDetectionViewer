@@ -1,3 +1,39 @@
+[提高了Image Comparison页面右侧面板中图像显示区域的范围] [2026-03-10]
+
+问题描述: Image Comparison页面右侧面板中,图像显示区域和下侧表格区域需要占满网页剩余页面,提高图像显示区域的范围。
+
+修复内容:
+1. app/static/css/style.css - .image-detail-panel: 修改为flex容器,设置display: flex, flex-direction: column, overflow: hidden
+2. app/static/css/style.css - #image-detail-content: 添加flex: 1, flex-direction: column, overflow-y: auto让其填充可用空间并处理滚动
+3. app/static/css/style.css - .image-header-section: 添加flex-shrink: 0防止头部被压缩
+4. app/static/css/style.css - .image-display-section: 修改为flex: 1, min-height: 0, overflow: auto使其占用剩余可用空间
+5. app/static/css/style.css - .image-display-section .card: 添加flex布局样式使其填充显示区域
+6. app/static/css/style.css - .image-statistics-section: 添加flex-shrink: 0固定在底部
+
+测试步骤:
+1. 启动Flask服务器
+2. 打开浏览器访问http://localhost:5000/
+3. 导航到Image Comparison页面
+4. 点击test_image_1.png图像
+5. 验证右侧面板中图像显示区域占用大部分垂直空间
+6. 验证Per-Image Statistics表格位于底部
+7. 验证图像和表格共同占满剩余页面高度
+8. 点击test_image.jpg验证布局一致性
+9. 检查控制台确认无相关错误
+
+测试结果:
+- 右侧面板使用flex布局正确
+- 图像显示区域使用flex: 1占用大部分垂直空间
+- Per-Image Statistics表格固定在底部
+- 图像和表格共同占满网页剩余页面高度
+- 布局在不同图像间保持一致性
+- 控制台无相关错误(仅有favicon.ico 404错误,与修改无关)
+- 截图验证通过(verification/image_comparison_layout_after_fix.png, image_comparison_layout_second_image.png)
+
+建议下一步:
+- 测试响应式布局在不同屏幕尺寸下的表现
+- 考虑在小屏幕设备上优化滚动体验
+
 [取消了Image Comparison页面的Confidence Score Distribution柱状图显示] [2026-03-10]
 
 问题描述：Image Comparison页面右侧面板中，在Per-Image Statistics表格下方显示了Confidence Score Distribution柱状图。用户希望取消此柱状图的显示，只保留Per-Image Statistics页面。
