@@ -780,17 +780,23 @@ class DetectionAnalyzer {
         const fnBoxes = gtBoxes.filter(box => box.classification === 'fn');
         const fpBoxes = predBoxes.filter(box => box.classification === 'fp');
         const tpBoxes = predBoxes.filter(box => box.classification === 'tp');
+
+        // Calculate box style based on image resolution
+        const imageWidth = data.dimensions?.width || 1920;
+        const baseWidth = 1920; // Reference resolution (Full HD)
+        const scale = Math.max(0.5, Math.min(2.0, imageWidth / baseWidth)); // Limit scale between 0.5 and 2.0
+
         if (this.showGTBoxes) {
-            fnBoxes.forEach(box => this.drawBoundingBox(ctx, box, 'fn'));
+            fnBoxes.forEach(box => this.drawBoundingBox(ctx, box, 'fn', scale));
         }
         if (this.showPredBoxes) {
-            fpBoxes.forEach(box => this.drawBoundingBox(ctx, box, 'fp'));
-            tpBoxes.forEach(box => this.drawBoundingBox(ctx, box, 'tp'));
+            fpBoxes.forEach(box => this.drawBoundingBox(ctx, box, 'fp', scale));
+            tpBoxes.forEach(box => this.drawBoundingBox(ctx, box, 'tp', scale));
         }
     }
 
 
-    drawBoundingBox(ctx, box, type) {
+    drawBoundingBox(ctx, box, type, scale = 1.0) {
         const bbox = box.bbox;
         if (!bbox || bbox.length !== 4) return;
 
@@ -798,20 +804,28 @@ class DetectionAnalyzer {
         const width = x2 - x1;
         const height = y2 - y1;
 
+        // Calculate box style based on image resolution
+        const baseLineWidth = 2;
+        const baseFontSize = 11;
+        const baseIndicatorSize = 24;
+        const baseIconLineWidth = 2;
+
+        const lineWidth = Math.round(baseLineWidth * scale);
+        const fontSize = Math.round(baseFontSize * scale);
+        const indicatorSize = Math.round(baseIndicatorSize * scale);
+        const iconLineWidth = Math.max(1, Math.round(baseIconLineWidth * scale));
+
         // Set style based on type
-        let color, lineWidth;
+        let color;
         switch (type) {
             case 'tp':
                 color = '#22c55e'; // green
-                lineWidth = 2;
                 break;
             case 'fp':
                 color = '#ef4444'; // red
-                lineWidth = 2;
                 break;
             case 'fn':
                 color = '#ef4444'; // red
-                lineWidth = 2;
                 break;
             default:
                 return;
@@ -830,10 +844,9 @@ class DetectionAnalyzer {
         ctx.strokeRect(x1, y1, width, height);
         ctx.setLineDash([]); // Reset dash
 
-        // Draw corner indicator (24x24px square at top-left)
-        const indicatorSize = 24;
-        const indicatorX = x1 - 2;
-        const indicatorY = y1 - 12;
+        // Draw corner indicator (size based on image resolution)
+        const indicatorX = x1 - Math.round(2 * scale);
+        const indicatorY = y1 - Math.round(12 * scale);
         const centerX = indicatorX + indicatorSize / 2;
         const centerY = indicatorY + indicatorSize / 2;
 
@@ -843,28 +856,28 @@ class DetectionAnalyzer {
         // Draw icon in the corner indicator using canvas paths instead of text
         ctx.fillStyle = 'white';
         ctx.strokeStyle = 'white';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = iconLineWidth;
 
         if (type === 'tp') {
             // Draw checkmark (✓)
             ctx.beginPath();
-            ctx.moveTo(centerX - 4, centerY);
-            ctx.lineTo(centerX, centerY + 4);
-            ctx.lineTo(centerX + 6, centerY - 6);
+            ctx.moveTo(centerX - Math.round(4 * scale), centerY);
+            ctx.lineTo(centerX, centerY + Math.round(4 * scale));
+            ctx.lineTo(centerX + Math.round(6 * scale), centerY - Math.round(6 * scale));
             ctx.stroke();
         } else if (type === 'fp') {
             // Draw cross (✗)
             ctx.beginPath();
-            ctx.moveTo(centerX - 4, centerY - 4);
-            ctx.lineTo(centerX + 4, centerY + 4);
-            ctx.moveTo(centerX + 4, centerY - 4);
-            ctx.lineTo(centerX - 4, centerY + 4);
+            ctx.moveTo(centerX - Math.round(4 * scale), centerY - Math.round(4 * scale));
+            ctx.lineTo(centerX + Math.round(4 * scale), centerY + Math.round(4 * scale));
+            ctx.moveTo(centerX + Math.round(4 * scale), centerY - Math.round(4 * scale));
+            ctx.lineTo(centerX - Math.round(4 * scale), centerY + 4);
             ctx.stroke();
         } else if (type === 'fn') {
             // Draw dash (—)
             ctx.beginPath();
-            ctx.moveTo(centerX - 6, centerY);
-            ctx.lineTo(centerX + 6, centerY);
+            ctx.moveTo(centerX - Math.round(6 * scale), centerY);
+            ctx.lineTo(centerX + Math.round(6 * scale), centerY);
             ctx.stroke();
         }
 
@@ -879,20 +892,20 @@ class DetectionAnalyzer {
             }
 
             if (labelText) {
-                ctx.font = '11px Inter, sans-serif';
+                ctx.font = fontSize + 'px Inter, sans-serif';
                 const textMetrics = ctx.measureText(labelText);
-                const labelWidth = textMetrics.width + 12;
-                const labelHeight = 20;
+                const labelWidth = textMetrics.width + Math.round(12 * scale);
+                const labelHeight = Math.round(20 * scale);
 
                 // Draw label background (semi-transparent)
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-                ctx.fillRect(x1, y1 + 12, labelWidth, labelHeight);
+                ctx.fillRect(x1, y1 + Math.round(12 * scale), labelWidth, labelHeight);
 
                 // Draw label text
                 ctx.fillStyle = 'white';
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(labelText, x1 + 6, y1 + 22);
+                ctx.fillText(labelText, x1 + Math.round(6 * scale), y1 + Math.round(22 * scale));
             }
         }
     }

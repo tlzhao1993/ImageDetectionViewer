@@ -106,20 +106,12 @@ def validate_dataset(dataset_path: str) -> Dict[str, any]:
         }
 
         # Check for mismatched files
+        # Note: Missing GT or prediction files are not considered errors.
+        # - Missing GT file: means image has no ground truth targets
+        # - Missing prediction file: means no targets were detected in the image
+        # We only check for orphaned annotation files (no corresponding image)
         missing_gt = image_stems - gt_stems
         missing_pred = image_stems - pred_stems
-
-        if len(missing_gt) > 0:
-            errors.append(
-                f"Ground truth annotations missing for {len(missing_gt)} image(s): "
-                f"{', '.join(list(missing_gt)[:5])}{'...' if len(missing_gt) > 5 else ''}"
-            )
-
-        if len(missing_pred) > 0:
-            errors.append(
-                f"Prediction files missing for {len(missing_pred)} image(s): "
-                f"{', '.join(list(missing_pred)[:5])}{'...' if len(missing_pred) > 5 else ''}"
-            )
 
         # Check for orphaned annotation files (no corresponding image)
         orphaned_gt = gt_stems - image_stems

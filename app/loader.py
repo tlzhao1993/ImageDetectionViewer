@@ -73,6 +73,13 @@ def load_dataset(dataset_path: str, iou_threshold: float = 0.5, confidence_thres
     gt_files = {f.stem.replace('_gt', '').replace('_pred', ''): f for f in gt_dir.iterdir() if f.is_file() and f.suffix.lower() == '.json'}
     pred_files = {f.stem.replace('_gt', '').replace('_pred', ''): f for f in predictions_dir.iterdir() if f.is_file() and f.suffix.lower() == '.json'}
 
+    # Debug: Print file counts
+    print(f"[DEBUG] Found {len(image_files)} images, {len(gt_files)} GT files, {len(pred_files)} prediction files")
+    if len(pred_files) > 0:
+        print(f"[DEBUG] First 5 prediction stems: {list(pred_files.keys())[:5]}")
+    if len(image_files) > 0:
+        print(f"[DEBUG] First 5 image stems: {list(image_map.keys())[:5]}")
+
     # Parse all data
     parsed_data = []
     errors = []
@@ -108,8 +115,12 @@ def load_dataset(dataset_path: str, iou_threshold: float = 0.5, confidence_thres
                 try:
                     pred_data = parse_prediction_file(str(pred_file))
                     data_entry['pred_data'] = pred_data
+                    print(f"[DEBUG] Successfully parsed prediction file: {pred_file.name}")
                 except Exception as e:
                     errors.append(f"Error parsing prediction file {pred_file.name}: {e}")
+                    print(f"[DEBUG] Failed to parse prediction file {pred_file.name}: {e}")
+            else:
+                print(f"[DEBUG] No prediction file found for image: {image_file.name}")
 
             # Only include if we have at least one annotation file
             if data_entry['gt_data'] is not None or data_entry['pred_data'] is not None:
