@@ -777,7 +777,7 @@ class DetectionAnalyzer {
     drawBoundingBoxes(ctx, data) {
         const gtBoxes = data.ground_truth_boxes || [];
         const predBoxes = data.prediction_boxes || [];
-        const fnBoxes = gtBoxes.filter(box => box.classification === null);
+        const fnBoxes = gtBoxes.filter(box => box.classification === 'fn');
         const fpBoxes = predBoxes.filter(box => box.classification === 'fp');
         const tpBoxes = predBoxes.filter(box => box.classification === 'tp');
         if (this.showGTBoxes) {
