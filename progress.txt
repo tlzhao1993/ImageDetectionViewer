@@ -1,3 +1,20 @@
+[2026-03-11] 实现了在Image Comparison页面将Label字体的FontScale扩大1.5倍的功能
+
+**修改内容:**
+- 修改了app/static/js/app.js中fontSize的计算公式
+- 将 fontSize = Math.max(Math.ceil(imageHeight / 80), 8) 改为
+  fontSize = Math.max(Math.ceil(imageHeight / 80 * 1.5), 8)
+- Label字体现在比原来大了1.5倍，更容易阅读
+
+**测试结果:**
+- 用户确认修改正确
+
+**建议下一步:**
+用户可继续提出新的需求。
+
+当前工程状态：已完成Label字体放大功能的实现
+
+
 [2026-03-10] 在Statistics Dashboard的Detailed Metrics by Class表格中添加Total行
 
 - 修改了updateMetricsTable方法，计算所有类别的GT Count, Pred Count, TP, FP, FN总和
