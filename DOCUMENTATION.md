@@ -42,6 +42,44 @@ python run.py
 
 应用将在 `http://localhost:5000` 启动。
 
+### DATASET_ROOT 配置
+
+`DATASET_ROOT` 是一个环境变量，用于指定数据集根目录的路径。应用会在该目录下搜索可用的数据集。
+
+**配置方式**：
+
+1. **通过环境变量设置**（推荐）：
+```bash
+export DATASET_ROOT=/path/to/datasets
+python run.py
+```
+
+2. **使用默认值**：
+如果没有设置 `DATASET_ROOT`，默认使用 `./datasets` 目录。
+
+**目录结构**：
+```
+DATASET_ROOT/
+├── dataset1/
+│   ├── images/
+│   ├── gt/
+│   └── predictions/
+├── dataset2/
+│   ├── images/
+│   ├── gt/
+│   └── predictions/
+└── dataset3/
+    ├── images/
+    ├── gt/
+    └── predictions/
+```
+
+**功能说明**：
+- 应用启动时会扫描 `DATASET_ROOT` 下的所有子目录
+- 自动验证每个子目录是否包含必需的数据集结构（`images/`, `gt/`, `predictions/`）
+- 在"Load Dataset"模态框中显示所有有效的数据集列表
+- 用户可以直接点击数据集名称快速加载数据集
+
 ### 数据集结构要求
 
 数据集目录需要包含以下子目录：
@@ -177,6 +215,7 @@ classDiagram
 | 端点 | 方法 | 说明 |
 |------|------|------|
 | `/api/health` | GET | 健康检查 |
+| `/api/datasets/list` | GET | 获取 DATASET_ROOT 下的可用数据集列表 |
 | `/api/dataset/current` | GET | 获取当前加载的数据集 |
 | `/api/dataset/load` | POST | 加载数据集 |
 | `/api/statistics/<dataset_id>` | GET | 获取统计数据 |
@@ -445,11 +484,25 @@ flowchart TD
    - 缩放/平移功能
    - 前一张/后一张导航
 
+**Load Dataset 模态框**：
+- 显示 DATASET_ROOT 路径
+- 列出 DATASET_ROOT 下所有可用的数据集
+- 每个数据集显示：
+  - 数据集名称
+  - 验证状态徽章（Valid/Invalid）
+  - 目录结构验证结果
+- 支持手动输入数据集路径
+- 点击数据集项自动填充路径输入框
+
 **前端技术栈**：
 - Bootstrap 5：响应式布局和 UI 组件
 - Chart.js：统计图表可视化
 - Font Awesome：图标
 - Canvas API：边界框渲染
+
+**数据集加载相关 JavaScript 函数**：
+- `loadAvailableDatasets()`: 从 `/api/datasets/list` 获取可用数据集列表并渲染
+- `renderDatasetItem(dataset)`: 渲染单个数据集项，包括验证状态和目录结构信息
 
 ### 3.7 边界框可视化规则
 
@@ -459,13 +512,100 @@ flowchart TD
 | False Positive (FP) | 红色 (#ef4444) | ✗ | 误检 |
 | False Negative (FN) | 红色 (#ef4444) | — | 漏检 |
 
-### 3.8 响应式设计
+### 3.8 数据集列表和加载流程
+
+#### Load Dataset 模态框交互流程
+
+```mermaid
+sequenceDiagram
+    participant User as 用户
+    participant Frontend as 前端
+    participant Flask as Flask API
+    participant FS as 文件系统
+
+    User->>Frontend: 点击"Load Dataset"按钮
+    Frontend->>Frontend: 打开模态框
+    Frontend->>Flask: GET /api/datasets/list
+    Flask->>FS: 读取 DATASET_ROOT 目录
+    FS-->>Flask: 目录内容
+    Flask->>Flask: 验证每个数据集结构
+    Flask-->>Frontend: 数据集列表 + 验证状态
+    Frontend->>Frontend: 渲染数据集列表
+
+    User->>Frontend: 选择数据集
+    Frontend->>Frontend: 自动填充路径输入框
+    User->>Frontend: 点击"Load Dataset"
+    Frontend->>Flask: POST /api/dataset/load
+    Flask->>Flask: 验证数据集结构
+    Flask->>Flask: 解析 GT 和预测文件
+    Flask->>Flask: 计算指标
+    Flask-->>Frontend: 加载成功响应
+    Frontend->>Frontend: 更新 UI 显示数据
+```
+
+#### 数据集验证规则
+
+`/api/datasets/list` 端点验证每个数据集是否满足以下要求：
+
+| 子目录 | 说明 | 必需 |
+|--------|------|------|
+| `images/` | 图像文件目录 | 是 |
+| `gt/` | 真实标注 JSON 文件目录 | 是 |
+| `predictions/` | 模型预测 JSON 文件目录 | 是 |
+
+只有包含所有三个必需子目录的数据集才会被标记为 `valid: true` 并显示在列表中。
+
+### 3.9 响应式设计
 
 - **桌面端 (>1024px)**：25% / 75% 分栏布局
 - **平板端 (768-1024px)**：30% / 70% 分栏布局
 - **移动端 (<768px)**：单列堆叠布局
 
 ## 4. API 响应格式示例
+
+### 数据集列表响应
+
+```json
+{
+  "success": true,
+  "datasets": [
+    {
+      "name": "dataset1",
+      "path": "/path/to/datasets/dataset1",
+      "valid": true,
+      "has_images": true,
+      "has_gt": true,
+      "has_predictions": true
+    },
+    {
+      "name": "dataset2",
+      "path": "/path/to/datasets/dataset2",
+      "valid": true,
+      "has_images": true,
+      "has_gt": true,
+      "has_predictions": true
+    },
+    {
+      "name": "incomplete_dataset",
+      "path": "/path/to/datasets/incomplete_dataset",
+      "valid": false,
+      "has_images": true,
+      "has_gt": false,
+      "has_predictions": false
+    }
+  ],
+  "dataset_root": "/path/to/datasets"
+}
+```
+
+**字段说明**：
+- `name`: 数据集目录名称
+- `path`: 数据集的完整路径
+- `valid`: 数据集是否有效（包含所有必需子目录）
+- `has_images`: 是否包含 `images/` 子目录
+- `has_gt`: 是否包含 `gt/` 子目录
+- `has_predictions`: 是否包含 `predictions/` 子目录
+- `dataset_root`: DATASET_ROOT 的路径
 
 ### 加载数据集响应
 

@@ -1463,10 +1463,10 @@ class DetectionAnalyzer {
                 return;
             }
 
-            // Render datasets list
+            // Render datasets list (only show valid datasets)
             container.innerHTML = `
                 <div class="list-group">
-                    ${data.datasets.map(dataset => this.renderDatasetItem(dataset)).join('')}
+                    ${data.datasets.filter(dataset => dataset.valid).map(dataset => this.renderDatasetItem(dataset)).join('')}
                 </div>
             `;
 
