@@ -16,7 +16,7 @@ Image Detection Result Analyzer 是一个用于分析目标检测模型性能的
     <source src="videos/Image Detection Viewer.mp4" type="video/mp4">
 </video>
 
-[演示视频](https://github.com/tlzhao1993/ImageDetectionViewer/blob/master/videos/Image%20Detection%20Viewer.mp4)
+![演示视频](https://github.com/tlzhao1993/ImageDetectionViewer/blob/master/videos/Image%20Detection%20Viewer.mp4)
 
 ## 2. 如何编译和运行
 
