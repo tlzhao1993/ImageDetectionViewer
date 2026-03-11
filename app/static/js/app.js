@@ -863,7 +863,7 @@ class DetectionAnalyzer {
         const imageHeight = data.dimensions?.height || 1080;
         const scale = imageHeight / 1000;
         const lineWidth = Math.max(Math.ceil(imageHeight / 500), 1);
-        const fontSize = Math.max(Math.ceil(imageHeight / 80), 8);
+        const fontSize = Math.max(Math.ceil(imageHeight / 80 * 1.5), 8);
         const indicatorSize = Math.max(Math.ceil(imageHeight / 40), 16);
         const iconLineWidth = Math.max(1, lineWidth);
 
@@ -914,9 +914,11 @@ class DetectionAnalyzer {
         ctx.strokeRect(x1, y1, width, height);
         ctx.setLineDash([]); // Reset dash
 
-        // Draw corner indicator (size based on image resolution)
-        const indicatorX = x1 - Math.round(indicatorSize / 12);
-        const indicatorY = y1 - Math.round(indicatorSize / 2);
+        // Draw corner indicator above the bounding box
+        // Indicator's bottom boundary aligns with box's top (y1)
+        // Indicator's left boundary aligns with box's left (x1)
+        const indicatorX = x1;
+        const indicatorY = y1 - indicatorSize;
         const centerX = indicatorX + indicatorSize / 2;
         const centerY = indicatorY + indicatorSize / 2;
 
@@ -951,7 +953,9 @@ class DetectionAnalyzer {
             ctx.stroke();
         }
 
-        // Draw label (class name and confidence for predictions)
+        // Draw label to the right of indicator
+        // Label's bottom boundary aligns with box's top (y1)
+        // Label's left boundary aligns with indicator's right (x1 + indicatorSize)
         if (this.showLabels) {
             let labelText = '';
             if (box.class_name) {
@@ -965,17 +969,23 @@ class DetectionAnalyzer {
                 ctx.font = fontSize + 'px Inter, sans-serif';
                 const textMetrics = ctx.measureText(labelText);
                 const labelWidth = textMetrics.width + Math.round(indicatorSize / 4);
-                const labelHeight = Math.round(indicatorSize * 0.83);
+                const labelHeight = indicatorSize;
+
+                // Label is positioned to the right of the indicator
+                // Left boundary aligns with indicator's right (x1 + indicatorSize)
+                // Bottom boundary aligns with box's top (y1)
+                const labelX = x1 + indicatorSize;
+                const labelY = y1 - labelHeight;
 
                 // Draw label background (semi-transparent)
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-                ctx.fillRect(x1, y1 + Math.round(indicatorSize / 2), labelWidth, labelHeight);
+                ctx.fillRect(labelX, labelY, labelWidth, labelHeight);
 
                 // Draw label text
                 ctx.fillStyle = 'white';
                 ctx.textAlign = 'left';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(labelText, x1 + Math.round(indicatorSize / 4), y1 + Math.round(indicatorSize * 0.92));
+                ctx.textBaseline = 'bottom';
+                ctx.fillText(labelText, labelX + Math.round(indicatorSize / 8), y1);
             }
         }
     }
