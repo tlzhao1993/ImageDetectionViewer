@@ -36,7 +36,11 @@ cat $PROJECT_ROOT/requirements.json
 
 ```bash
 ls -la $PROJECT_ROOT/src
+
+# 对于Web应用，你可以查看下面的路径中的源码
+ls -la $PROJECT_ROOT/app
 ```
+
 
 在必要的情况下，你可以使用`ReadFile`工具对源码进行查看。
 
