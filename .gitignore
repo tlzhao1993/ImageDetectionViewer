@@ -49,3 +49,6 @@ logs/
 
 # Playwright MCP
 .playwright-mcp/
+
+verification
+agent_logs
