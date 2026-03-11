@@ -13,6 +13,7 @@ CORS(app)
 
 # Configuration
 app.config['DATASET_PATH'] = os.environ.get('DATASET_PATH', './dataset')
+app.config['DATASET_ROOT'] = os.environ.get('DATASET_ROOT', './datasets')
 app.config['DATABASE_PATH'] = os.path.join('app', 'data', 'dataset_analysis.db')
 app.config['THUMBNAIL_SIZE'] = (150, 150)
 
@@ -26,6 +27,87 @@ def health_check():
         'python_version': f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
         'flask_version': flask.__version__
     })
+
+@app.route('/api/datasets/list')
+def get_datasets_list_endpoint():
+    """
+    API endpoint to get list of available datasets from DATASET_ROOT
+
+    Returns:
+        JSON response with:
+            - success (bool): Whether request was successful
+            - datasets (list): Array of available datasets
+            - dataset_root (str): Path to dataset root directory
+
+    Each dataset entry contains:
+        - name (str): Dataset directory name
+        - path (str): Full path to dataset
+        - valid (bool): Whether dataset has required subdirectories (images/, gt/, predictions/)
+    """
+    try:
+        dataset_root = app.config['DATASET_ROOT']
+
+        # Check if dataset root exists
+        if not os.path.exists(dataset_root):
+            return jsonify({
+                'success': False,
+                'datasets': [],
+                'dataset_root': dataset_root,
+                'error': f'DATASET_ROOT directory does not exist: {dataset_root}'
+            }), 200
+
+        if not os.path.isdir(dataset_root):
+            return jsonify({
+                'success': False,
+                'datasets': [],
+                'dataset_root': dataset_root,
+                'error': f'DATASET_ROOT is not a directory: {dataset_root}'
+            }), 200
+
+        # Required subdirectories for a valid dataset
+        required_subdirs = ['images', 'gt', 'predictions']
+
+        # Get all directories in dataset root
+        datasets = []
+        for item in os.listdir(dataset_root):
+            item_path = os.path.join(dataset_root, item)
+
+            # Only process directories
+            if not os.path.isdir(item_path):
+                continue
+
+            # Check if directory has required subdirectories
+            subdirs_exist = [
+                os.path.isdir(os.path.join(item_path, subdir))
+                for subdir in required_subdirs
+            ]
+
+            datasets.append({
+                'name': item,
+                'path': item_path,
+                'valid': all(subdirs_exist),
+                'has_images': subdirs_exist[0],
+                'has_gt': subdirs_exist[1],
+                'has_predictions': subdirs_exist[2]
+            })
+
+        # Sort datasets by name
+        datasets.sort(key=lambda x: x['name'])
+
+        return jsonify({
+            'success': True,
+            'datasets': datasets,
+            'dataset_root': dataset_root
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'datasets': [],
+            'dataset_root': dataset_root if 'dataset_root' in locals() else None,
+            'error': str(e)
+        }), 500
+
 
 @app.route('/api/dataset/current')
 def get_current_dataset_endpoint():

@@ -1,0 +1,13 @@
+root
+  |__ dataset1
+    |__ gt
+    |__ images
+    |__ predictions
+  |__ dataset2
+    |__ gt
+    |__ images
+    |__ predictions
+  |__ dataset3
+    |__ gt
+    |__ images
+    |__ predictions

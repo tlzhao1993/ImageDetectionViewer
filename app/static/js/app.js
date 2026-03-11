@@ -1402,6 +1402,9 @@ class DetectionAnalyzer {
         const modal = new bootstrap.Modal(modalElement);
         modal.show();
 
+        // Load available datasets when modal opens
+        this.loadAvailableDatasets();
+
         // Handle confirm button
         const confirmBtn = document.getElementById('confirm-load-dataset');
         if (confirmBtn) {
@@ -1423,6 +1426,109 @@ class DetectionAnalyzer {
                 this.loadDataset(path);
             });
         }
+    }
+
+    async loadAvailableDatasets() {
+        const container = document.getElementById('datasets-list-container');
+        const rootPathElement = document.getElementById('dataset-root-path');
+
+        if (!container) return;
+
+        try {
+            const response = await fetch('/api/datasets/list');
+            const data = await response.json();
+
+            // Show dataset root path
+            if (data.dataset_root && rootPathElement) {
+                rootPathElement.textContent = `(DATASET_ROOT: ${this.escapeHtml(data.dataset_root)})`;
+            }
+
+            if (!data.success) {
+                container.innerHTML = `
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2" aria-hidden="true"></i>
+                        ${this.escapeHtml(data.error || 'Failed to load datasets list')}
+                    </div>
+                `;
+                return;
+            }
+
+            if (!data.datasets || data.datasets.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-folder-open fa-2x mb-3" aria-hidden="true"></i>
+                        <p>No datasets found in DATASET_ROOT</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Render datasets list
+            container.innerHTML = `
+                <div class="list-group">
+                    ${data.datasets.map(dataset => this.renderDatasetItem(dataset)).join('')}
+                </div>
+            `;
+
+            // Add click listeners to dataset items
+            container.querySelectorAll('.dataset-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const path = item.getAttribute('data-path');
+                    const pathInput = document.getElementById('dataset-path');
+                    if (pathInput) {
+                        pathInput.value = path;
+                        pathInput.focus();
+                    }
+                });
+            });
+
+        } catch (error) {
+            console.error('Error loading datasets list:', error);
+            container.innerHTML = `
+                <div class="alert alert-danger" role="alert">
+                    <i class="fas fa-exclamation-circle me-2" aria-hidden="true"></i>
+                    Error loading datasets list: ${this.escapeHtml(error.message)}
+                </div>
+            `;
+        }
+    }
+
+    renderDatasetItem(dataset) {
+        const validClass = dataset.valid ? 'dataset-valid' : 'dataset-invalid';
+        const validityBadge = dataset.valid
+            ? '<span class="badge bg-success"><i class="fas fa-check me-1" aria-hidden="true"></i>Valid</span>'
+            : '<span class="badge bg-warning"><i class="fas fa-exclamation-triangle me-1" aria-hidden="true"></i>Invalid</span>';
+
+        const structureInfo = `
+            <small class="text-muted ms-2">
+                <i class="fas ${dataset.has_images ? 'fa-check text-success' : 'fa-times text-muted'} me-1" aria-hidden="true"></i>images/
+                <i class="fas ${dataset.has_gt ? 'fa-check text-success' : 'fa-times text-muted'} me-1" aria-hidden="true"></i>gt/
+                <i class="fas ${dataset.has_predictions ? 'fa-check text-success' : 'fa-times text-muted'} me-1" aria-hidden="true"></i>predictions/
+            </small>
+        `;
+
+        return `
+            <button class="list-group-item list-group-item-action dataset-item ${validClass}"
+                    data-path="${this.escapeHtml(dataset.path)}"
+                    aria-label="Select dataset ${this.escapeHtml(dataset.name)}">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="d-flex align-items-center">
+                            <strong class="me-2">
+                                <i class="fas fa-folder text-primary me-2" aria-hidden="true"></i>
+                                ${this.escapeHtml(dataset.name)}
+                            </strong>
+                            ${validityBadge}
+                        </div>
+                        <div class="text-muted small mt-1">
+                            ${this.escapeHtml(dataset.path)}
+                        </div>
+                        ${structureInfo}
+                    </div>
+                    <i class="fas fa-chevron-right text-muted" aria-hidden="true"></i>
+                </div>
+            </button>
+        `;
     }
 
     async loadDataset(path) {

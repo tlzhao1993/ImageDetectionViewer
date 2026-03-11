@@ -362,7 +362,7 @@
 
     <!-- Dataset Load Modal -->
     <div class="modal fade" id="loadDatasetModal" tabindex="-1" aria-labelledby="loadDatasetModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="loadDatasetModalLabel">
@@ -371,22 +371,42 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="load-dataset-form">
-                        <div class="mb-3">
-                            <label for="dataset-path" class="form-label">Dataset Path</label>
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="fas fa-folder" aria-hidden="true"></i>
-                                </span>
-                                <input type="text" class="form-control" id="dataset-path"
-                                       placeholder="/path/to/dataset" required
-                                       aria-label="Dataset path">
-                            </div>
-                            <div class="form-text">
-                                The dataset should contain three subdirectories: images/, gt/, and predictions/
+                    <!-- Available Datasets Section -->
+                    <div class="mb-4">
+                        <h6 class="mb-3">
+                            <i class="fas fa-database me-2" aria-hidden="true"></i>Available Datasets
+                            <small class="text-muted ms-2" id="dataset-root-path"></small>
+                        </h6>
+                        <div id="datasets-list-container">
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
+                                <span class="ms-2">Loading datasets...</span>
                             </div>
                         </div>
-                    </form>
+                    </div>
+
+                    <!-- Manual Path Input Section -->
+                    <div class="mb-3">
+                        <h6 class="mb-3">
+                            <i class="fas fa-edit me-2" aria-hidden="true"></i>Or Enter Path Manually
+                        </h6>
+                        <form id="load-dataset-form">
+                            <div class="mb-3">
+                                <label for="dataset-path" class="form-label">Dataset Path</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-folder" aria-hidden="true"></i>
+                                    </span>
+                                    <input type="text" class="form-control" id="dataset-path"
+                                           placeholder="/path/to/dataset" required
+                                           aria-label="Dataset path">
+                                </div>
+                                <div class="form-text">
+                                    The dataset should contain three subdirectories: images/, gt/, and predictions/
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Cancel">Cancel</button>
