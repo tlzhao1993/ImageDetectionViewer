@@ -152,6 +152,11 @@
             - False Negative (FN): Red border (2px), red horizontal dash (—) at top-left corner
           - Bounding box labels (class name + confidence score for predictions)
           - Zoom/pan functionality for detailed inspection
+            - Zoom via mouse wheel (scroll up to zoom in, scroll down to zoom out)
+            - Zoom center is at mouse cursor position
+            - Zoom via +/- buttons with 25% increments
+            - Pan via mouse drag when zoomed
+            - Zoom level range: 25% to 500%
           - Toggle visibility of ground truth/prediction boxes
           - Toggle visibility of box labels/indicators
         </image_display>

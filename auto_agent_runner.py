@@ -187,7 +187,7 @@ class AgentRunner:
             '--dangerously-skip-permissions',
             '--output-format', 'stream-json',
             '--verbose',
-            '/long-term-agent-coding 请执行下一个任务. CRITICAL: YOU ONLY NEED TO COMPLETE ONE TASK SINCE THERE WILL BE MORE SESSIONS THAT WILL COMPLETE THE OTHER TASKS, AND DO NOT COVER THE ORIGINAL CONTENTS IN THE PROGRESS.TXT!'
+            '/long-term-agent-coding 请执行下一个任务. CRITICAL: YOU ONLY NEED TO COMPLETE ONE TASK SINCE THERE ARE MORE SESSIONS THAT WILL COMPLETE THE OTHER TASKS, AND DO NOT COVER THE ORIGINAL CONTENTS IN THE PROGRESS.TXT!'
         ]
 
         # Run Claude and capture raw output

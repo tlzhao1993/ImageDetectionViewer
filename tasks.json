@@ -522,5 +522,17 @@
       "Step 3: Verify chart has proper bin distribution and color gradient from low to high confidence"
     ],
     "passes": true
+  },
+  {
+    "category": "functional",
+    "description": "Implement mouse wheel zoom with mouse position as center point in Image Comparison View",
+    "steps": [
+      "Step 1: Navigate to Image Comparison View and select an image",
+      "Step 2: Scroll mouse wheel over the image and verify zoom in/out works",
+      "Step 3: Verify zoom center is at mouse cursor position (the point under cursor stays stationary)",
+      "Step 4: Test zoom at different positions on the image",
+      "Step 5: Verify zoom level limits (25% to 500%) are respected"
+    ],
+    "passes": true
   }
 ]

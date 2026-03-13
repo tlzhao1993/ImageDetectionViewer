@@ -1098,6 +1098,54 @@ class DetectionAnalyzer {
             container.classList.remove('hide-scrollbar');
         });
 
+        // Mouse wheel zoom
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+
+            // Get mouse position relative to canvas
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            // Get container dimensions
+            const containerWidth = container.clientWidth;
+            const containerHeight = container.clientHeight;
+
+            // Calculate centered position
+            const scaledImageWidth = this.currentImageWidth * this.baseScale;
+            const scaledImageHeight = this.currentImageHeight * this.baseScale;
+            const offsetX = (containerWidth - scaledImageWidth) / 2;
+            const offsetY = (containerHeight - scaledImageHeight) / 2;
+
+            // Calculate current image coordinates under mouse
+            const currentScale = this.baseScale * this.zoomLevel;
+            const imageX = (mouseX - offsetX - this.panX) / currentScale;
+            const imageY = (mouseY - offsetY - this.panY) / currentScale;
+
+            // Determine zoom direction and amount
+            const zoomFactor = 0.25; // 25% zoom increment
+            const delta = e.deltaY > 0 ? -zoomFactor : zoomFactor;
+
+            // Update zoom level with limits
+            const newZoomLevel = Math.max(0.25, Math.min(5.0, this.zoomLevel + delta));
+
+            // Calculate new scale
+            const newScale = this.baseScale * newZoomLevel;
+
+            // Adjust pan to keep mouse position stationary
+            // The point under the mouse should remain at the same screen coordinates
+            this.panX = mouseX - offsetX - imageX * newScale;
+            this.panY = mouseY - offsetY - imageY * newScale;
+
+            // Update zoom level
+            this.zoomLevel = newZoomLevel;
+
+            // Update UI
+            this.updateZoomLevelDisplay();
+            this.updateCanvasCursor();
+            this.reRenderCurrentImage();
+        }, { passive: false });
+
         // Mouse down - start dragging
         canvas.addEventListener('mousedown', (e) => {
             if (this.zoomLevel === 1.0) return; // Only allow panning when zoomed
