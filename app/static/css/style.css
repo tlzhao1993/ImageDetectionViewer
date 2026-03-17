@@ -311,6 +311,53 @@ body {
     background-color: white;
     border-top: 1px solid var(--border-light);
     flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+/* Collapsed state for statistics section */
+.image-statistics-section.collapsed {
+    padding: 0;
+    border-top: none;
+    flex-shrink: 0;
+}
+
+.image-statistics-section.collapsed .card {
+    display: none;
+}
+
+/* Toggle button for statistics section */
+.statistics-toggle-btn {
+    width: 100%;
+    padding: 8px 16px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--primary-color);
+    transition: all 0.2s ease;
+}
+
+.statistics-toggle-btn:hover {
+    background-color: var(--bg-light);
+}
+
+.statistics-toggle-btn i {
+    transition: transform 0.3s ease;
+}
+
+.statistics-toggle-btn.collapsed i {
+    transform: rotate(180deg);
+}
+
+/* When statistics is hidden, expand display section */
+.image-statistics-section.collapsed + .image-display-section,
+.image-detail-content:has(.image-statistics-section.collapsed) .image-display-section {
+    flex: 1;
 }
 
 /* Canvas Overlay */

@@ -35,6 +35,9 @@ class DetectionAnalyzer {
         this.totalImages = 0;
         this.totalPages = 1;
 
+        // Per-image statistics visibility state (default: hidden)
+        this.showStatistics = false;
+
         this.init();
     }
 
@@ -596,7 +599,12 @@ class DetectionAnalyzer {
                 </div>
             </div>
 
-            <div class="image-statistics-section">
+            <div class="image-statistics-section ${this.showStatistics ? '' : 'collapsed'}">
+                <button class="statistics-toggle-btn ${this.showStatistics ? '' : 'collapsed'}" id="toggle-statistics"
+                        aria-label="Toggle statistics table" aria-expanded="${this.showStatistics}">
+                    <i class="fas fa-chevron-up" aria-hidden="true"></i>
+                    <span>${this.showStatistics ? 'Hide' : 'Show'} Per-Image Statistics</span>
+                </button>
                 <div class="card">
                     <div class="card-header">
                         <h6 class="mb-0"><i class="fas fa-chart-bar me-2" aria-hidden="true"></i>Per-Image Statistics</h6>
@@ -1021,6 +1029,23 @@ class DetectionAnalyzer {
                 labelsToggle.classList.toggle('active');
                 labelsToggle.setAttribute('aria-pressed', this.showLabels);
                 this.reRenderCurrentImage();
+            });
+        }
+
+        // Statistics toggle
+        const statisticsToggle = document.getElementById('toggle-statistics');
+        const statisticsSection = document.querySelector('.image-statistics-section');
+        if (statisticsToggle && statisticsSection) {
+            statisticsToggle.addEventListener('click', () => {
+                this.showStatistics = !this.showStatistics;
+                statisticsToggle.classList.toggle('collapsed');
+                statisticsSection.classList.toggle('collapsed');
+                statisticsToggle.setAttribute('aria-expanded', this.showStatistics);
+                // Update button text
+                const buttonText = statisticsToggle.querySelector('span');
+                if (buttonText) {
+                    buttonText.textContent = this.showStatistics ? 'Hide Per-Image Statistics' : 'Show Per-Image Statistics';
+                }
             });
         }
     }
